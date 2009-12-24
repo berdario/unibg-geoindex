@@ -6,6 +6,8 @@
 package geotag.analysis;
 
 import geotag.DatabaseGazetteerConnection;
+import geotag.GeoApplication;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -43,6 +45,7 @@ import geotag.words.Word;
  */
 public class GeoCandidateIdentification {
     private static DatabaseGazetteerConnection dbConnection = null;
+    RecordManager mydbinter = null, mydbgaz = null;
     
     Vector<Word> filterWordVector = new Vector<Word>(); 
     Vector<Word> allWordVector = new Vector<Word>(); 
@@ -53,12 +56,22 @@ public class GeoCandidateIdentification {
     int newPos = 0; //Nuova posizione di ricerca (usata per saltare termini formati da piÃ¹ parole)
     boolean isMultiWord = false;    
     boolean englishLanguage = false;
-    String path="./";
+    String path,dbpath,slash;
     
     /**
      * Costruttore della classe
      */
     public GeoCandidateIdentification(){
+    	this.path=GeoApplication.getPath();
+    	this.slash=File.separator;
+    	this.dbpath=path+"db"+slash;
+		try {
+			mydbinter = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_Intermedio", new Properties());
+    		mydbgaz = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_Gazetteer", new Properties());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
     
     /**
@@ -291,7 +304,7 @@ public class GeoCandidateIdentification {
         boolean equal = false;
         
         try {
-            File fileName = new File("./src/geotag/street.txt");
+            File fileName = new File(GeoApplication.getPath()+"street.txt");
             //Apertura file
             FileReader fr = new FileReader(fileName);
             BufferedReader streetFile = new BufferedReader(fr); 
@@ -331,6 +344,7 @@ public class GeoCandidateIdentification {
             fr.close();            
         } catch (IOException ex) {
             System.err.println("Errore nell'apertura del file street.txt");
+            ex.printStackTrace();
         } 
         
 
@@ -404,16 +418,12 @@ public class GeoCandidateIdentification {
             */
         	
         	Serial a=new Serial();
-            RecordManager mydbinter;
     		BTree tinter=new BTree();
-    		mydbinter = RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_Btree_Intermedio", new Properties());
     		tinter = loadOrCreateBTree(mydbinter, "intermedio", a );
     		
     		BTree tgaz;
     		Serial a1=new Serial();
-    		RecordManager mydbgaz;
     		tgaz = new BTree();
-    		mydbgaz = RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_Btree_Gazetteer", new Properties());
     		tgaz = loadOrCreateBTree(mydbgaz, "gazetteer", a1 );
     		
         	
@@ -439,7 +449,7 @@ public class GeoCandidateIdentification {
             		String dati[];
             		
                     if(results!=null){
-                    	dati=((String)results).split("£#");
+                    	dati=((String)results).split("ï¿½#");
                     	int i=0;
                     	for(i=0;i<dati.length;i++){
                     		
@@ -447,7 +457,7 @@ public class GeoCandidateIdentification {
                     		if(resultsGaz!=null){
                     			//Popolo wordVectorResult3
                     			String datiGaz[];
-                    			datiGaz=((String)resultsGaz).split("£#");
+                    			datiGaz=((String)resultsGaz).split("ï¿½#");
                     			GeographicWord newGeoWord = new GeographicWord();
                     			
                     			newGeoWord.setGeonameid(Integer.parseInt(datiGaz[0]));

@@ -8,6 +8,8 @@ package geotag.search;
 import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
+
+import geotag.GeoApplication;
 import geotag.words.GeoRefDoc;
 import geotag.words.GeographicWord;
 import org.apache.lucene.analysis.KeywordAnalyzer;
@@ -30,14 +32,17 @@ import org.apache.lucene.search.WildcardQuery;
  * @author Giorgio Ghisalberti
  */
 public class ContentSearcher {
-    public File contentIndexDir = new File("./contentIndex");
-    public File geographicIndexDir = new File("./geographicIndex");
+	public String contentIndexPath;
+    public String geographicIndexPath;
     
     /**
      * Costruttore della classe
      */
     public ContentSearcher(){
-        
+    	String path=GeoApplication.getPath();
+    	String slash=File.separator;
+    	this.contentIndexPath=path+slash+"contentIndex";
+    	this.geographicIndexPath=path+slash+"geographicIndex";
     }
     
     /**
@@ -48,8 +53,9 @@ public class ContentSearcher {
      * @throws org.apache.lucene.queryParser.ParseException
      */
     public Vector<GeoRefDoc> createTextualRankig(String keyWords) throws IOException, ParseException{
-        IndexSearcher searcher = new IndexSearcher(contentIndexDir.getName());
-        StandardAnalyzer stdAnalyzer = new StandardAnalyzer();
+        //IndexSearcher searcher = new IndexSearcher(contentIndexDir.getName()); //questa roba è fottutamente perversa!
+    	IndexSearcher searcher = new IndexSearcher(contentIndexPath);
+    	StandardAnalyzer stdAnalyzer = new StandardAnalyzer();
         
         Vector<GeoRefDoc> docs = new Vector<GeoRefDoc>();
         
@@ -90,10 +96,11 @@ public class ContentSearcher {
      * @return vettore con i documenti e le GeoWords associate
      */
     public Vector<GeoRefDoc> findGeoWords(Vector<GeoRefDoc> results) throws IOException, ParseException {
-        IndexSearcher searcher = new IndexSearcher(geographicIndexDir.getName());
+        //IndexSearcher searcher = new IndexSearcher(geographicIndexDir.getName()); //come sopra
+    	IndexSearcher searcher = new IndexSearcher(geographicIndexPath);
         KeywordAnalyzer kwAnalyzer = new KeywordAnalyzer();
                 
-        QueryParser qp = new QueryParser("fileName", kwAnalyzer);
+        QueryParser qp = new QueryParser("fileName", kwAnalyzer);//TODO verificare che non si rompa
         
         for(int i = 0; i < results.size(); i++){
             GeoRefDoc doc = results.elementAt(i);

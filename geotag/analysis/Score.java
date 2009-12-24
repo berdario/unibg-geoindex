@@ -25,6 +25,7 @@ import jdbm.RecordManagerFactory;
 import jdbm.btree.BTree;
 
 import bTree.*;
+import geotag.GeoApplication;
 import geotag.words.StringOperation;
 import geotag.indices.AnalyzerUtils;
 import geotag.words.GeographicWord;
@@ -49,7 +50,7 @@ public class Score {
     
     int shifFeature = 5;
     int distNear = 3;
-    String path="./";
+    String path,dbpath,slash;
     double incrScoreMulti = 0.3;
     double incrScoreContext = 0.7;
     double incrScoreFeature = 0.4;
@@ -64,7 +65,9 @@ public class Score {
      * Costruttore della classe
      */
     public Score(){
-        
+        this.path=GeoApplication.getPath();
+        this.slash=File.separator;
+        this.dbpath=path+"db"+slash;
     }
     
     /**
@@ -194,7 +197,7 @@ public class Score {
         String s = geoWord.getName();
         
         try {
-            File fileName = new File("./src/geotag/geoStopwords.txt");
+            File fileName = new File(GeoApplication.getPath()+"geoStopwords.txt");
             //Apertura file
             FileReader fr = new FileReader(fileName);
             BufferedReader geoStopwordFile = new BufferedReader(fr); 
@@ -213,6 +216,7 @@ public class Score {
             fr.close();            
         } catch (IOException ex) {
             System.err.println("Errore nell'apertura del file geoStopwrods.txt");
+            ex.printStackTrace();
         } 
         
         return geoWord;
@@ -590,11 +594,11 @@ public class Score {
             String dati[]=new String[4];
             RecordManager mydbCountryInfo;
             BTree tContryInfo=new BTree();
-            mydbCountryInfo=RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_countryInfo", new Properties());
+            mydbCountryInfo=RecordManagerFactory.createRecordManager(dbpath+"albero_countryInfo", new Properties());
             tContryInfo=loadOrCreateBTree(mydbCountryInfo, "country", a);
             Object results=tContryInfo.find(searchingName);
             if(results!=null){
-            	dati=((String)results).split("£#");
+            	dati=((String)results).split("ï¿½#");
            
                 stringResult.add(dati[0]); //name
                 stringResult.add(dati[1]); //capital
@@ -636,12 +640,12 @@ public class Score {
             BTree talternatenamesId=new BTree();
             //Input GeoID
             //Output name
-            mydbalternatenamesId=RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_alternatenameId", new Properties());
+            mydbalternatenamesId=RecordManagerFactory.createRecordManager(dbpath+"albero_alternatenameId", new Properties());
             talternatenamesId=loadOrCreateBTree(mydbalternatenamesId, "alternatenameId", a);
             Object results=talternatenamesId.find(searchingId);
             
             if(results!=null){
-            	dati=((String)results).split("£#");
+            	dati=((String)results).split("ï¿½#");
             	int i=0;
             	for(i=0;i<dati.length;i++){
             		stringResult.add(dati[i]);// AlternateName OR Name
@@ -784,12 +788,12 @@ public class Score {
              BTree talternatenamesId=new BTree();
              //Input GeoID
              //Output name
-             mydbalternatenamesId=RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_alternatenameId", new Properties());
+             mydbalternatenamesId=RecordManagerFactory.createRecordManager(dbpath+"albero_alternatenameId", new Properties());
              talternatenamesId=loadOrCreateBTree(mydbalternatenamesId, "alternatenameId", a);
              Object results=talternatenamesId.find(geonameid);
              
              if(results!=null){
-             	dati=((String)results).split("£#");
+             	dati=((String)results).split("ï¿½#");
              	int i=0;
              	for(i=0;i<dati.length;i++){
              		stringResult.add(dati[i]);
@@ -802,7 +806,7 @@ public class Score {
              //Input Alternate
              //output 
              
-             mydbalternatenames=RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_alternatename", new Properties());
+             mydbalternatenames=RecordManagerFactory.createRecordManager(dbpath+"albero_alternatename", new Properties());
              talternatenames=loadOrCreateBTree(mydbalternatenames, "alternatename", a);
              Object results1=talternatenames.find(searchingName);
              if(results1!=null){
@@ -872,11 +876,11 @@ public class Score {
                 String dati[]=new String[4];
                 RecordManager mydbadmin1;
                 BTree tadmin1=new BTree();
-                mydbadmin1=RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_admin1codeascii", new Properties());
+                mydbadmin1=RecordManagerFactory.createRecordManager(dbpath+"albero_admin1codeascii", new Properties());
                 tadmin1=loadOrCreateBTree(mydbadmin1, "admin1", a);
                 Object results=tadmin1.find(searchingName);
                 if(results!=null){
-                	dati=((String)results).split("£#");
+                	dati=((String)results).split("ï¿½#");
                
                     stringResult.add(dati[0]); //name
                     stringResult.add(dati[1]); //asciiname
@@ -957,12 +961,12 @@ public class Score {
             BTree tfeaturecodes=new BTree();
             //Input GeoID
             //Output name
-            mydbfeaturecodes=RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_featurecodes", new Properties());
+            mydbfeaturecodes=RecordManagerFactory.createRecordManager(dbpath+"albero_featurecodes", new Properties());
             tfeaturecodes=loadOrCreateBTree(mydbfeaturecodes, "featurecodes", a);
             Object results=tfeaturecodes.find(code);
             
             if(results!=null){
-            	dati=((String)results).split("£#");
+            	dati=((String)results).split("ï¿½#");
             		stringResult.add(dati[1]);//name
             		stringResult.add(dati[2]);//description
             }

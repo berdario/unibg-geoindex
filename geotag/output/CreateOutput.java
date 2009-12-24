@@ -5,9 +5,12 @@
 
 package geotag.output;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Vector;
+
+import geotag.GeoApplication;
 import geotag.words.GeographicWord;
 
 /**
@@ -29,6 +32,13 @@ public class CreateOutput {
         double maxLong = 0.0;
         double minLat = 0.0;
         double minLong = 0.0;
+        
+        String path=GeoApplication.getPath()+"output";
+        File outputdir=new File(path);
+        
+        if (!outputdir.exists()){
+        	outputdir.mkdirs();
+        }
                   
         //Calcolo le cooordinate minime e massime di ogni documento
         for(int j = 0; j < geoWordVector.size(); j++){
@@ -48,6 +58,7 @@ public class CreateOutput {
                     minLong = gw.getLongitude();
             }    
 
+            
             
             GPX gpxFile = new GPX();
             gpxFile.create(geoWordVector, fileName, maxLat, minLat, maxLong, minLong);

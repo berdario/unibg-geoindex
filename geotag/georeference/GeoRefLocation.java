@@ -21,6 +21,7 @@ import jdbm.RecordManagerFactory;
 import jdbm.btree.BTree;
 import bTree.Serial;
 import bTree.Serializ;
+import geotag.GeoApplication;
 import geotag.words.StringOperation;
 import geotag.words.GeoWordsOperation;
 import geotag.words.GeographicWord;
@@ -35,7 +36,7 @@ public class GeoRefLocation {
     /**
      * Costruttore della classe
      */
-	String path="./";
+	String path,dbpath,slash;
 	public static synchronized BTree loadOrCreateBTree( RecordManager aRecordManager,String aName, Comparator aComparator ) throws IOException
 
  	{
@@ -58,7 +59,9 @@ public class GeoRefLocation {
  	  return tree;
  	} 
     public GeoRefLocation(){
-        
+        this.path=GeoApplication.getPath();
+        this.slash=File.separator;
+        this.dbpath=path+"db"+slash;
     }
     
     /**
@@ -87,20 +90,20 @@ public class GeoRefLocation {
         Serial a=new Serial();
         RecordManager mydbinter;
 		BTree tinter=new BTree();
-		mydbinter = RecordManagerFactory.createRecordManager(path+File.separator+"db"+File.separator+"albero_Btree_Intermedio", new Properties());
+		mydbinter = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_Intermedio", new Properties());//occhio: qui c'erano 2 separator
 		tinter = loadOrCreateBTree(mydbinter, "intermedio", a );
 		
 		BTree tgaz;
 		Serial a1=new Serial();
 		RecordManager mydbgaz;
 		tgaz = new BTree();
-		mydbgaz = RecordManagerFactory.createRecordManager(path+File.separator+"db"+File.separator+"albero_Btree_Gazetteer", new Properties());
+		mydbgaz = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_Gazetteer", new Properties());//occhio: qui c'erano 2 separator
 		tgaz = loadOrCreateBTree(mydbgaz, "gazetteer", a1 );
 		Object results=tinter.find(searchingName);
 		String dati[];
 		
         if(results!=null){
-        	dati=((String)results).split("£#");
+        	dati=((String)results).split("ï¿½#");
         	int i=0;
         	for(i=0;i<dati.length;i++){
         		
@@ -108,7 +111,7 @@ public class GeoRefLocation {
         		if(resultsGaz!=null){
         			//Popolo wordVectorResult3
         			String datiGaz[];
-        			datiGaz=((String)resultsGaz).split("£#");
+        			datiGaz=((String)resultsGaz).split("ï¿½#");
         			GeographicWord newGeoWord = new GeographicWord();
         			
         			newGeoWord.setGeonameid(Integer.parseInt(datiGaz[0]));

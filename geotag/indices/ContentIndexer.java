@@ -5,6 +5,8 @@
 
 package geotag.indices;
 
+import geotag.GeoApplication;
+
 import java.io.File;
 import java.io.IOException;
 import org.apache.lucene.analysis.KeywordAnalyzer;
@@ -28,13 +30,51 @@ import org.apache.lucene.search.TermQuery;
  * @author Giorgio Ghisalberti
  */
 public class ContentIndexer {
-    public File indexDir = new File("./contentIndex"); // Directory di default
+    public File indexDir; // Directory di default
     public boolean create = false;  //"false" = indice deve essere aggiornato
-
+    static IndexWriter index = null;
+    IndexSearcher searcher = null;
+    
     /**
      * Costruttore della classe.
+     * @throws IOException 
      */
-    public ContentIndexer(){     
+    public ContentIndexer() {   
+		indexDir = new File(GeoApplication.getPath() + File.separator
+				+ "contentIndex");
+
+		try {
+
+			// Controllo se esiste già l'indice TODO togliere dopo aver
+			// aggiornato lucene
+			if (!indexDir.exists()) {
+				indexDir.mkdirs();
+			}
+			
+			File[] nameFiles = indexDir.listFiles();
+			if (nameFiles.length > 0){
+				create = false;
+			} else {
+				create = true;
+			}
+
+			String temp = indexDir.getAbsolutePath();
+			index = new IndexWriter(indexDir, new StandardAnalyzer(), create);
+
+			// Controllo se esiste già l'indice
+			//if (indexDir.exists()) {
+				nameFiles = indexDir.listFiles();
+				if (nameFiles.length > 0) { // Indice esiste
+					searcher = new IndexSearcher(indexDir.getAbsolutePath());
+				}
+			//}
+			
+		} catch (IOException e) {
+			System.out.println("pare che il problema si verifichi durante un'apertura dell'indice");
+			//closeIndex();
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     /**
@@ -46,32 +86,32 @@ public class ContentIndexer {
      * @throws java.io.IOException
      * @throws org.apache.lucene.queryParser.ParseException
     */ 
-    public boolean control(String fileName) throws IOException, ParseException {
-        //Controllo se esiste già l'indice
-        if(indexDir.exists()){
-            File[] nameFiles = indexDir.listFiles();  
-            if(nameFiles.length > 0){   //Indice esiste
-                IndexSearcher searcher = new IndexSearcher(indexDir.getName());
-                KeywordAnalyzer kwAnalyzer = new KeywordAnalyzer();
+    public boolean control(String fileName) {
 
-                QueryParser qp = new QueryParser("fileName", kwAnalyzer);
+		try {
+			KeywordAnalyzer kwAnalyzer = new KeywordAnalyzer();
 
-                TermQuery termQuery = new TermQuery(new Term("fileName", "\""+ fileName +"\""));
-                Query query = qp.parse(termQuery.toString());
+			QueryParser qp = new QueryParser("fileName", kwAnalyzer);
 
-                Hits hits = searcher.search(query);
-                int trovati = hits.length();
+			TermQuery termQuery = new TermQuery(new Term("fileName", "\""
+					+ fileName + "\""));
+			Query query = qp.parse(termQuery.toString());
 
-                if (trovati == 0) 
-                    return false;
-                else 
-                    return true;
-            }
-            else    //Indice non esiste
-                return false;
-        }
-        else
-            return false;
+			Hits hits = searcher.search(query);
+			int trovati = hits.length();
+
+			if (trovati != 0){
+				return true;
+			}
+		} catch (ParseException e) {
+			closeIndex();
+			e.printStackTrace();
+		} catch (IOException e) {
+			closeIndex();
+			e.printStackTrace();
+		}
+		return false;
+
     }
     
     
@@ -81,32 +121,40 @@ public class ContentIndexer {
      * @param dir : path della directory contenente i file da indicizzare
      * @param fileName: nome del file in esame
      */
-    public void indexing(String docContent, String fileName) throws IOException{ 
-        IndexWriter index = null;
+    public void indexing(String docContent, String fileName){ 
         
-        //Controllo se esiste già l'indice
-        if(indexDir.exists()){
-            File[] nameFiles = indexDir.listFiles();  
-            if(nameFiles.length > 0)
-                create = false;
-            else
-                create = true;
-        }
-        
-      
-        index = new IndexWriter(indexDir.getName(), new StandardAnalyzer(), create);
-        index.setUseCompoundFile(true);
+        try {
+			index.setUseCompoundFile(true);
 
 
-        Document doc = new Document(); 
-        doc.add(new Field("content", docContent, Field.Store.YES, Field.Index.TOKENIZED));
-        doc.add(new Field("fileName", fileName, Field.Store.YES, Field.Index.UN_TOKENIZED));                
-        index.addDocument(doc);
+			Document doc = new Document(); 
+			doc.add(new Field("content", docContent, Field.Store.YES, Field.Index.TOKENIZED));
+			doc.add(new Field("fileName", fileName, Field.Store.YES, Field.Index.UN_TOKENIZED));                
+			index.addDocument(doc);
+		} catch (IOException e) {
+			closeIndex();
+			e.printStackTrace();
+		}
 
-            
-        index.optimize();
-        index.close();
     }
     
+    public static void closeIndex() {
+		if (index != null) {
+			try {
+				index.optimize();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				try {
+					index.close();
+				} catch (IOException e) {
+					System.out
+							.println("OHSHI... non sono neanche riuscito a chiudere l'indice");
+					e.printStackTrace();
+				}
+			}
+		}
+    }
     
 }

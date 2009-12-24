@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Vector;
+
+import geotag.GeoApplication;
 import geotag.words.GeographicWord;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -25,6 +27,7 @@ import org.jdom.output.XMLOutputter;
 public class GPX {
     NumberFormat formatter = new DecimalFormat("#0.00");  //Formatto il numero a 2 cifre decimali
     //Gamma di colori, varie tonalità di rosso
+    private String path,slash;
     private String[] colors = { "780000", "A00000", "C80000", "EB0000", "FF0000",
                                 "FF3C3C", "FF6464", "FF8C8C", "FFB4B4", "FFDCDC", "FFFFFF"};
     
@@ -32,7 +35,8 @@ public class GPX {
      * Costruttore della classe
      */
     public GPX(){
-        
+    	path=GeoApplication.getPath();
+    	slash=File.separator;    
     }
     
     /**
@@ -119,7 +123,7 @@ public class GPX {
         documento.setRootElement(gpx);
                
          // Create file
-        File indexDir = new File("./output/gpx");
+        File indexDir = new File(path+"output"+slash+"gpx");
         if(!indexDir.isDirectory()){
             // Create one directory
             if(!indexDir.mkdir()){

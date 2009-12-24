@@ -13,6 +13,8 @@ import java.io.Writer;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Vector;
+
+import geotag.GeoApplication;
 import geotag.words.GeographicWord;
 
 /**
@@ -22,11 +24,14 @@ import geotag.words.GeographicWord;
  */
 public class TXT {
     NumberFormat formatter = new DecimalFormat("#0.00");  //Formatto il numero a 2 cifre decimali
+    private String path, slash;
     
     /**
      * Costruttore della classe
      */
     public TXT(){
+    	path = GeoApplication.getPath();
+    	slash=File.separator;
 
     }
     
@@ -37,7 +42,7 @@ public class TXT {
      * @throws java.io.IOException
      */
     public void create(Vector<GeographicWord> geoWordVector, String nomeFile) throws IOException{
-        File indexDir = new File("./output/txt");
+        File indexDir = new File(path+"output"+slash+"txt");
         if(!indexDir.isDirectory()){
             // Create one directory
             if(!indexDir.mkdir()){

@@ -11,6 +11,8 @@ import java.io.FileWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Vector;
+
+import geotag.GeoApplication;
 import geotag.words.GeographicWord;
 
 /**
@@ -21,13 +23,15 @@ import geotag.words.GeographicWord;
 public class GMaps {
     private String apiMapsKey = "ABQIAAAAEppQXP52PXhyP1JIW9Kn1RQj8CehLf8ZxfnoPL0ALVd_4dy80RQdWfJU7t-qHVGjwLY1qVpJQ_uIaQ";
     NumberFormat formatter = new DecimalFormat("#0.00");  //Formatto il numero a 2 cifre decimali
+    private String path,slash;
     private String[] colors = { "red1", "red2", "red3", "red4", "red5",
                                 "red6", "red7", "red8", "red9", "red10"};
     /**
      * Costruttore della classe
      */
     public GMaps(){
-        
+    	path = GeoApplication.getPath();
+    	slash = File.separator;
     }
     
     /**
@@ -67,7 +71,7 @@ public class GMaps {
 
         try{
             // Create file
-            File indexDir = new File("./output/GMaps");
+            File indexDir = new File(GeoApplication.getPath()+"output"+slash+"GMaps");
             if(!indexDir.isDirectory()){
                 // Create one directory
                 if(!indexDir.mkdir()){
