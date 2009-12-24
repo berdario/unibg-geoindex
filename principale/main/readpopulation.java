@@ -23,6 +23,8 @@ public class readpopulation {
 	 */
 	private formdicaricamento frame;
 	
+	public readpopulation(){}
+	
 	public readpopulation(formdicaricamento frame)
 	{
 		this.frame=frame;
@@ -32,7 +34,7 @@ public class readpopulation {
 	// TODO Auto-generated method stub		
 		LineNumberReader lr = null;
 		//File file =new File(path+"allCountries.txt");
-		File file =new File(path+"IT.txt");
+		File file =new File(path+"IT.txt");//il file dev'essere scompattato manualmente, TODO sistemare?
 		//File file =new File(path+"CH.txt");
 		//File file =new File(path+"FR.txt");
 		//File file =new File(path+"AT.txt");
@@ -81,8 +83,9 @@ public class readpopulation {
 						
 			}
 			peso_decrementato=peso_decrementato-line.getBytes().length-2;
-			frame.put(100-(int)((peso_decrementato*100)/peso));
-			
+			if (frame !=null){
+				frame.put(100-(int)((peso_decrementato*100)/peso));
+			}
 			line = lr.readLine();
 			
 		}
@@ -90,7 +93,9 @@ public class readpopulation {
 		if ((count % 100) != 0 && count!=0)
 			mydbgazpop.commit();
 		mydbgazpop.close();
-		frame.finito();
+		if (frame!=null){
+			frame.finito();
+		}
 		
 	}
 	public static BTree loadOrCreateBTree( RecordManager aRecordManager,String aName, Compara aComparator ) throws IOException

@@ -34,19 +34,33 @@ import spatialindex.rtree.*;
 public class RTreeLoad
 {
 	private formdicaricamento frame;
+	String path,dbpath;
 	Serial a=new Serial();
+	RecordManager mydbn;
+	
+	public RTreeLoad(){
+		path=Dbcreator.getPath();
+		dbpath=Dbcreator.getDBPath();
+		try {
+			mydbn = RecordManagerFactory.createRecordManager(dbpath+File.separator+"albero_Btree_osm", new Properties());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	public RTreeLoad(formdicaricamento frame)
 	{
-		this.frame=frame;
+		this();
+		this.frame=frame;	
 	}
 	
 		
 		
-	public void carica(String path)
+	public void carica()
 	{
 		
-		File fdb=new File(path+"db");
+		File fdb=new File(dbpath);
 		fdb.mkdir();
 			
 		String[] args = new String[3];
@@ -56,12 +70,8 @@ public class RTreeLoad
 		try
 		{
 			//-------APERTURA FILE PER IL B-TREE (NOME COMUNE -MBR) --------------------------//
-			RecordManager mydbn;
 			BTree tn=new BTree();
-			
-			
-			mydbn = RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_Btree_osm", new Properties());
-			
+						
 			tn = loadOrCreateBTree(mydbn, "osm", a );
 			//APERTURA PER L' R-TREE
 			
@@ -90,8 +100,8 @@ public class RTreeLoad
 			Boolean b = new Boolean(true);
 			ps.setProperty("Overwrite", b);
 				//overwrite the file if it exists.
-			System.out.println(path+"db"+File.separator+"datiscritti");
-			ps.setProperty("FileName", path+"db"+File.separator+"datiscritti");
+			System.out.println(dbpath+File.separator+"datiscritti");
+			ps.setProperty("FileName", dbpath+File.separator+"datiscritti");
 				// .idx and .dat extensions will be added.
 
 			Integer i = new Integer(args[2]);//8k
@@ -132,6 +142,8 @@ public class RTreeLoad
 			String livello;
 			String paese;
 			StringTokenizer st;
+			
+			FileWriter documenti;
 			while (line != null)
 			{
 				st = new StringTokenizer(line);
@@ -157,16 +169,19 @@ public class RTreeLoad
 				
 				//   FINE INSERIMENTO    ///
 				
-				File cartella=new File(path+"db"+File.separator+Integer.toString(id/1000));
-				FileWriter documenti;
-				if(!cartella.exists())
-						cartella.mkdir();
-				documenti=new FileWriter(path+"db"+File.separator+Integer.toString(id/1000)+File.separator+Integer.toString(id));
+				File cartella=new File(dbpath+File.separator+Integer.toString(id/1000));
+				if(!cartella.exists()){
+					cartella.mkdir();
+				}
 				
-			
+				documenti=new FileWriter(dbpath+File.separator+Integer.toString(id/1000)+File.separator+Integer.toString(id));
+				documenti.close();
+				
 				count++;
 				peso_decrementato=peso_decrementato-line.getBytes().length-2;
-				frame.put(100-(int)((peso_decrementato*100)/peso));
+				if (frame!=null){
+					frame.put(100-(int)((peso_decrementato*100)/peso));
+				}
 
 				line = lr.readLine();
 				if ((count % 100) == 0)
@@ -179,7 +194,7 @@ public class RTreeLoad
 
 			//System.err.println("Operations: " + count);
 			//System.err.println(tree);
-			System.out.print("Secondi: " + ((end - start) / 1000.0f)+"  ");
+			System.out.println("Secondi: " + ((end - start) / 1000.0f)+"  ");
 
 			// since we created a new RTree, the PropertySet that was used to initialize the structure
 			// now contains the IndexIdentifier property, which can be used later to reuse the index.
@@ -193,12 +208,20 @@ public class RTreeLoad
 
 			// flush all pending changes to persistent storage (needed since Java might not call finalize when JVM exits).
 			tree.flush();
-			frame.finito();
+			if (frame!=null){
+				frame.finito();
+			}
 			
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
+			try {
+				Dbcreator.listOpenFiles();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 	}
 	public static Object ricerca(String el,BTree b){

@@ -23,6 +23,9 @@ public class read_alternateNames {
 	 * @throws IOException 
 	 */
 	private formdicaricamento frame;
+	
+	public read_alternateNames(){}
+	
 	public read_alternateNames(formdicaricamento frame)
 	{
 		this.frame=frame;
@@ -31,7 +34,7 @@ public class read_alternateNames {
 		// TODO Auto-generated method stub
 		
 		LineNumberReader lr = null;
-		File file =new File(path+"alternateNames.txt");
+		File file =new File(path+"alternateNames.txt");//il file dev'essere scompattato manualmente, TODO sistemare?
 		FileReader fi =new FileReader(file);
 		lr = new LineNumberReader(fi);
 		float peso=file.length();
@@ -73,13 +76,13 @@ public class read_alternateNames {
 			trovato=(String) tinter.find(parola[3]);
 			
 			if(trovato!=null){
-				indici=trovato.split("£#");
+				indici=trovato.split("ï¿½#");
 				indice_trovato=false;
 				for(in=0;in<indici.length;in++)
 					if(indici[in].equalsIgnoreCase(parola[1]))
 						indice_trovato=true;
 				if(indice_trovato==false)
-					tinter.insert(parola[3], trovato+"£#"+parola[1], true);
+					tinter.insert(parola[3], trovato+"ï¿½#"+parola[1], true);
 			}
 			else
 				tinter.insert(parola[3], parola[1], true);
@@ -88,13 +91,13 @@ public class read_alternateNames {
 			trovato=(String) talternatenamesId.find(parola[1]);
 			
 			if(trovato!=null){
-				indici=trovato.split("£#");
+				indici=trovato.split("ï¿½#");
 				indice_trovato=false;
 				for(in=0;in<indici.length;in++)
 					if(indici[in].equalsIgnoreCase(parola[3]))
 						indice_trovato=true;
 				if(indice_trovato==false)
-					talternatenamesId.insert(parola[1], trovato+"£#"+parola[3], true);
+					talternatenamesId.insert(parola[1], trovato+"ï¿½#"+parola[3], true);
 			}
 			else
 				talternatenamesId.insert(parola[1], parola[3], true);
@@ -104,7 +107,9 @@ public class read_alternateNames {
 				
 			
 			peso_decrementato=peso_decrementato-line.getBytes().length-2;
-			frame.put(100-(int)((peso_decrementato*100)/peso));
+			if (frame != null){
+				frame.put(100-(int)((peso_decrementato*100)/peso));
+			}
 			
 			if(((++conta)%1000)==0){
 				mydbalternatenamesId.commit();
@@ -122,7 +127,9 @@ public class read_alternateNames {
 		mydbalternatenames.close();
 		mydbinter.close();
 		System.out.println((System.currentTimeMillis()-inizio)/1000);
-		frame.finito();
+		if (frame!=null){
+			frame.finito();
+		}
 		
 	}
 	public static BTree loadOrCreateBTree( RecordManager aRecordManager,String aName, Compara aComparator ) throws IOException

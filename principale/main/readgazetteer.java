@@ -38,6 +38,9 @@ public class readgazetteer {
 	private formdicaricamento frame;
 	private BTree tgaz;
 	private BTree tcountryInfo;
+	
+	public readgazetteer(){}
+	
 	public readgazetteer(formdicaricamento frame)
 	{
 		this.frame=frame;
@@ -182,7 +185,7 @@ public class readgazetteer {
 						prescelto=0;
 						rismetrica=0;
 						// LA RICERCA TRAMITE R-TREE VIENE EFFETTUATA UTILIZZANDO IL CENTROIDE
-						// QUINDI LA RICERCA RITORNA NOMI DI PIù PAESI CHE INTERSECANO CON IL CENTROIDE
+						// QUINDI LA RICERCA RITORNA NOMI DI PIï¿½ PAESI CHE INTERSECANO CON IL CENTROIDE
 						for(int num=0;num<vis.visitati.size();num++){
 							dati_rtree=((IData)vis.visitati.elementAt(num));
 							rismetrica=metrica.metric(paesename, new String(dati_rtree.getData()));
@@ -192,23 +195,23 @@ public class readgazetteer {
 							}
 						}
 						
-						// DI QUESTI PAESI PRENDO QUELLO CHE HA "ASSOMIGLIA" DI PIù AL NOME DEL PAESE 
-						// MA SOLO SE QUESTA PROBABILITà è PIù ALTA DEL 70%
+						// DI QUESTI PAESI PRENDO QUELLO CHE HA "ASSOMIGLIA" DI PIï¿½ AL NOME DEL PAESE 
+						// MA SOLO SE QUESTA PROBABILITï¿½ ï¿½ PIï¿½ ALTA DEL 70%
 						if(prescelto>0.70){
 							ritrovati++;
 							mbr_gazzetter=dati_rtreeprescelto.getShape().toString();
 							punti=mbr_gazzetter.split(":");
-							mbr_gazzetter=punti[1].split(" ")[0]+"£#"+punti[1].split(" ")[1]+"£#"+punti[0].split(" ")[0]+"£#"+punti[0].split(" ")[1];
+							mbr_gazzetter=punti[1].split(" ")[0]+"ï¿½#"+punti[1].split(" ")[1]+"ï¿½#"+punti[0].split(" ")[0]+"ï¿½#"+punti[0].split(" ")[1];
 						}
 						else if(prescelto!=0){
 							file_di_log1.addElement(paesename+" "+prescelto+"  "+(new String(dati_rtreeprescelto.getData()))+" "+dati_rtreeprescelto.getShape());
-							mbr_gazzetter="0£#0£#0£#0";
+							mbr_gazzetter="0ï¿½#0ï¿½#0ï¿½#0";
 						}
 						r=null;
 						vis.visitati.removeAllElements();
 					}
 				}
-				// SE IL PAESE è STATO TROVATO VERIFICO CHE IL SUO CENTROIDE 
+				// SE IL PAESE ï¿½ STATO TROVATO VERIFICO CHE IL SUO CENTROIDE 
 				// SIA EFFETTIVAMENTE DENTRO L' MBR
 				if(mbr!=null){
 					st = new StringTokenizer(mbr);
@@ -224,10 +227,10 @@ public class readgazetteer {
 					if(x3<x1 && x3>x2 && y3<y1 && y3>y2){
 						confermati++;
 						//mbr_gazzetter=mbr;
-						mbr_gazzetter=mbr.split(" ")[0]+"£#"+mbr.split(" ")[1]+"£#"+mbr.split(" ")[2]+"£#"+mbr.split(" ")[3];
+						mbr_gazzetter=mbr.split(" ")[0]+"ï¿½#"+mbr.split(" ")[1]+"ï¿½#"+mbr.split(" ")[2]+"ï¿½#"+mbr.split(" ")[3];
 					}
 					else{
-						// SE IL CENTROIDE NON è NELL'MBR SIGNIFICA CHE NON è QUESTO IL PAESE CERCATO 
+						// SE IL CENTROIDE NON ï¿½ NELL'MBR SIGNIFICA CHE NON ï¿½ QUESTO IL PAESE CERCATO 
 						// QUINDI EFFETTUO UNA NUOVA RICERCA SFRUTTANDO L' R-TREE
 						f2[0]=new Double(parola[4]);
 						f2[1] = new Double(parola[5]);
@@ -249,18 +252,18 @@ public class readgazetteer {
 							confermati++;
 							mbr_gazzetter=dati_rtreeprescelto.getShape().toString();
 							punti=mbr_gazzetter.split(":");
-							mbr_gazzetter=punti[1].split(" ")[0]+"£#"+punti[1].split(" ")[1]+"£#"+punti[0].split(" ")[0]+"£#"+punti[0].split(" ")[1];
+							mbr_gazzetter=punti[1].split(" ")[0]+"ï¿½#"+punti[1].split(" ")[1]+"ï¿½#"+punti[0].split(" ")[0]+"ï¿½#"+punti[0].split(" ")[1];
 						}
 						else if(prescelto!=0){
 							file_di_log2.addElement(paesename+" "+parola[4]+" "+parola[5]+" "+mbr+" distanza longitudine="+(distx<0?0:distx)+" distanza latitudine="+(disty<0?0:disty));
-							mbr_gazzetter="0£#0£#0£#0";//non confermato
+							mbr_gazzetter="0ï¿½#0ï¿½#0ï¿½#0";//non confermato
 						}
 						r=null;
 						vis.visitati.removeAllElements();
 					}
 					
 				}
-				// ORA AGGIUNGO AL NUOVO GAZETTEER ALTRE INFORMAZIONI COME (è NAZIONE? , è UNA REGIONE? , è COMPOSTA DA PIù PAROLE? )
+				// ORA AGGIUNGO AL NUOVO GAZETTEER ALTRE INFORMAZIONI COME (ï¿½ NAZIONE? , ï¿½ UNA REGIONE? , ï¿½ COMPOSTA DA PIï¿½ PAROLE? )
 				// QUESTE INFORMAZIONI SERVIRANNO POI NELLA FASE DI GEOTAGGING
 				if(parola[10].equalsIgnoreCase("00") && parola[11].equalsIgnoreCase("") && parola[12].equalsIgnoreCase(""))
 					nazione="1";
@@ -318,12 +321,12 @@ public class readgazetteer {
 					if(numeroparole!=14){
 						
 						if(numeroparole==15 && parola[15].equalsIgnoreCase(""))
-							scrittura=scrittura+"0£#";
+							scrittura=scrittura+"0ï¿½#";
 						else
 							if(numeroparole==16 && parola[16].equalsIgnoreCase(""))
-								scrittura=scrittura+"0£#";
+								scrittura=scrittura+"0ï¿½#";
 							else
-								scrittura=scrittura+parola[numeroparole]+"£#";		
+								scrittura=scrittura+parola[numeroparole]+"ï¿½#";		
 					}
 					else
 					{
@@ -336,15 +339,15 @@ public class readgazetteer {
 							}	
 						if(popolazione!=null)
 							if(popolazione.equalsIgnoreCase(""))
-								scrittura=scrittura+"0"+"£#";
+								scrittura=scrittura+"0"+"ï¿½#";
 							else
-								scrittura=scrittura+popolazione+"£#";
+								scrittura=scrittura+popolazione+"ï¿½#";
 						else
-							scrittura=scrittura+"0"+"£#";
+							scrittura=scrittura+"0"+"ï¿½#";
 					}
 				}
 				
-				tgaz.insert(parola[0], scrittura+mbr_gazzetter+"£#"+nazione+"£#"+regione+"£#"+multiplo, true);
+				tgaz.insert(parola[0], scrittura+mbr_gazzetter+"ï¿½#"+nazione+"ï¿½#"+regione+"ï¿½#"+multiplo, true);
 				
 				// OLTRE AL NUOVO GAZETTEER CREO ANCHE UN B-TREE INTERMEDIO 
 				
@@ -356,13 +359,13 @@ public class readgazetteer {
 				for(int volte=0;volte<2;volte++)
 				{
 					if(trovato!=null){
-						indici=trovato.split("£#");
+						indici=trovato.split("ï¿½#");
 						indice_trovato=false;
 						for(int in=0;in<indici.length;in++)
 							if(indici[in].equalsIgnoreCase(parola[0]))
 								indice_trovato=true;
 						if(indice_trovato==false)
-							tinter.insert(parola[1+volte], trovato+"£#"+parola[0], true);
+							tinter.insert(parola[1+volte], trovato+"ï¿½#"+parola[0], true);
 					}
 					else
 						tinter.insert(parola[1+volte], parola[0], true);
@@ -374,7 +377,9 @@ public class readgazetteer {
 						
 			}
 			peso_decrementato=peso_decrementato-line.getBytes().length-2;
-			frame.put(100-(int)((peso_decrementato*100)/peso));
+			if (frame!=null){
+				frame.put(100-(int)((peso_decrementato*100)/peso));
+			}
 
 			line = lr.readLine();
 			
@@ -403,7 +408,7 @@ public class readgazetteer {
 			file_log.write(file_di_log1.elementAt(num)+"\r\n");
 		file_log.write("\r\nTotale non trovati: "+(nontrovati-ritrovati)+" Paesi");
 		file_log.write("\r\n---------------------------------------------------------------\r\n");
-		file_log.write("Paesi trovati ma non confermati (il centroide è al di fuori del bounding box)\r\n\r\n");
+		file_log.write("Paesi trovati ma non confermati (il centroide ï¿½ al di fuori del bounding box)\r\n\r\n");
 		
 		for(int num=0;num<file_di_log2.size();num++)
 			file_log.write(file_di_log2.elementAt(num)+"\r\n");
@@ -412,16 +417,18 @@ public class readgazetteer {
 		mydbosm.close();
 		mydbinter.close();
 		file_log.close();
-		frame.finito();
+		if (frame!=null){
+			frame.finito();
+		}
 				
 	}
 	public static String cambia_accenti(String a){
 		String b="";
-		b=a.replace("e'","è");
-		b=a.replace("i'","ì");
-		b=a.replace("o'","ò");
-		b=a.replace("u'","ù");
-		b=a.replace("a'","à");
+		b=a.replace("e'","ï¿½");
+		b=a.replace("i'","ï¿½");
+		b=a.replace("o'","ï¿½");
+		b=a.replace("u'","ï¿½");
+		b=a.replace("a'","ï¿½");
 		return b;
 	}
 	

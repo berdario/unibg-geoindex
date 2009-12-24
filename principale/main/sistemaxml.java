@@ -9,7 +9,7 @@ import java.io.OutputStreamWriter;
 
 public class sistemaxml {
 
-	
+	//immagino che serva per convertire il charset di osm, da utf16 (apparentemente problematico) a utf8
 	public void sistema(String path,String path2) {
 		try{
 		File fileIn = new File(path);

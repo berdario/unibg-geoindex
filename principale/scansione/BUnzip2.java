@@ -27,7 +27,12 @@ public class BUnzip2 extends Thread {
 	Thread tScan;
 	
 	private String RelativePath="";
-	private formdicaricamento frm=new formdicaricamento();
+	//private formdicaricamento frm=new formdicaricamento();
+	private formdicaricamento frm=null;
+	public BUnzip2(String path){
+		RelativePath=path;
+		frm=null;
+	}
 	
 	public BUnzip2(String path,formdicaricamento form){
     	RelativePath=path;
@@ -158,7 +163,7 @@ public class BUnzip2 extends Thread {
             		}
             		
             		
-                if(contatore!=0){
+                if(contatore!=0 && frm!=null){
                 	try{
                 		contatore=fis.available();
                 		frm.put((int)(100-(100*(contatore)/massimovalore)));
@@ -190,10 +195,11 @@ public class BUnzip2 extends Thread {
     	    catch (InterruptedException ioe) {}
     	}     
    
-	frm.put(100);
-	//eliminafile(f.getParent());
-    frm.finito();
- 	
+	if (frm!=null){
+        frm.put(100);
+        //eliminafile(f.getParent());
+        frm.finito();
+	}
 
     }
     public void eliminafile(String p){

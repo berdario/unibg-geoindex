@@ -34,7 +34,7 @@ public class metrica {
 		else
 		{
 			T=traspositions(cs,ct);
-			distance=(( cs.length()/(double)s.length() + ct.length()/(double)t.length() + (cs.length() - T)/(double)cs.length() ))/3.0 ;
+			distance=(( cs.length()/(double)s.length() + ct.length()/(double)t.length() + (cs.length() - T)/(double)s.length() ))/3.0 ;
 		}
 		return distance;
 	}
@@ -66,7 +66,7 @@ public class metrica {
 						{
 							founded=true;
 							common=common+Char;
-							copy[j]='£';
+							copy[j]='ï¿½';
 						}
 				}
 				

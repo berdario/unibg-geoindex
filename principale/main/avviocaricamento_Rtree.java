@@ -28,7 +28,7 @@ public class avviocaricamento_Rtree extends Thread{
 		
 		//System.out.println(" Ci" +path[0]+" ");
         RTreeLoad Rtree =(new RTreeLoad(frame2));
-        Rtree.carica(path);
+        Rtree.carica();
         //-------------QUERY-----------------------------
 //        File fl=new File(path[0]);
         
@@ -36,7 +36,7 @@ public class avviocaricamento_Rtree extends Thread{
 //    	long Tempo1=System.currentTimeMillis();
 //    	RTreeQuery qu=new RTreeQuery(arg,"iseo");
 //    	long Tempo2=System.currentTimeMillis();
-//      System.out.println("Il tempo impiegato è : "+(Tempo2-Tempo1));
+//      System.out.println("Il tempo impiegato ï¿½ : "+(Tempo2-Tempo1));
         
         
 	}

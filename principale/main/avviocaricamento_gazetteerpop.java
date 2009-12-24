@@ -29,7 +29,7 @@ public class avviocaricamento_gazetteerpop extends Thread{
 		
         readpopulation r=new readpopulation(frame2);
         try{
-        r.carica(path);
+        r.carica(path);//occhio che il file dev'essere szippato manualmente (TODO correggere?)
         }
         catch (Exception e) {
 			// TODO: handle exception
