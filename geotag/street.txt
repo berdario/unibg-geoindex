@@ -1,0 +1,2 @@
+ENGLISH	Street,St.,St,Av,Road,Buolevard,Avenue,Square,
+ITALIAN	Via,Viale,Piazza,Vicolo,
