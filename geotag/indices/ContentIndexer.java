@@ -32,7 +32,7 @@ import org.apache.lucene.search.TermQuery;
 public class ContentIndexer {
     public File indexDir; // Directory di default
     public boolean create = false;  //"false" = indice deve essere aggiornato
-    static IndexWriter index = null;
+    IndexWriter index = null;
     IndexSearcher searcher = null;
     
     /**
@@ -138,7 +138,7 @@ public class ContentIndexer {
 
     }
     
-    public static void closeIndex() {
+    public void closeIndex() {
 		if (index != null) {
 			try {
 				index.optimize();
@@ -149,8 +149,7 @@ public class ContentIndexer {
 				try {
 					index.close();
 				} catch (IOException e) {
-					System.out
-							.println("OHSHI... non sono neanche riuscito a chiudere l'indice");
+					System.out.println("OHSHI... non sono neanche riuscito a chiudere l'indice");
 					e.printStackTrace();
 				}
 			}

@@ -86,9 +86,8 @@ import org.apache.commons.io.FileUtils;
  * @author  giorgio
  */
 public final class GeoApplication implements Runnable{
-	
-	static Vector<GeoRefDoc> results = new Vector<GeoRefDoc>();
-    static Vector<GeoRefDoc> resultsmerge = new Vector<GeoRefDoc>();
+    private Vector<GeoRefDoc> lastresults = new Vector<GeoRefDoc>();
+    //private Vector<GeoRefDoc> resultsmerge = new Vector<GeoRefDoc>();
     
     private String swLanguage;
     
@@ -864,7 +863,7 @@ public final class GeoApplication implements Runnable{
 	        
 	        String errortext=createIndex(curDir);
 	        
-	        if (errortext!=""){
+	        if (!errortext.equals("")){
 	        	errorLabel.setText(errortext);
 	        }
 	 
@@ -947,10 +946,10 @@ public final class GeoApplication implements Runnable{
 	                    
 	        if(!keyWords.isEmpty()){
 	            try {
-	            	resultsmerge.clear();
+	            	//resultsmerge.clear();
 	                // --> Creazione del RANKING testuale
 	                ContentSearcher content = new ContentSearcher();
-	                results = content.createTextualRankig(keyWords);
+	                lastresults = content.createTextualRankig(keyWords);
 	                //Devo cercare nell'indice geografico le GeoWords di ogni documento
 	                //results = content.findGeoWords(results);
 	                
@@ -999,7 +998,7 @@ public final class GeoApplication implements Runnable{
 	                        gMapsPanel.setVisible(true);
 	
 	                    
-	                    results=search(keyWords, location);
+	                    lastresults=search(keyWords, location);
 	                    
 	                    // --> Creazione del RANKING geografico
 	                    // Se il documento non è georeferenziato ritorna ZERO come distanceScore
@@ -1008,18 +1007,18 @@ public final class GeoApplication implements Runnable{
 	                    //distance.createDistanceRanking(results, geoLocation);
 	                    
 	                    // --> Visualizzazione dei risultati su doppi assi (JFreeChart API)
-	                    final MarkerChart chart = new MarkerChart(geoLocation.getName(), results, chartPanel);
+	                    final MarkerChart chart = new MarkerChart(geoLocation.getName(), lastresults, chartPanel);
 	                    chart.pack();
 	                        
 	                    // --> Visualizzazione dei risultati in una tabella
 	                    final ResultsTable table = new ResultsTable();
-	                    table.createTable(resultsTable, results, 50);
+	                    table.createTable(resultsTable, lastresults, 50);
 	                    
 	                    // --> Calcolo del RANKING distribuito ed aggiorno la tabella dei risultati
 	                    jSlider.setEnabled(true);
 	                    jSlider.addChangeListener(new ChangeListener() {
 	                        public void stateChanged(ChangeEvent e) {
-	                            table.createTable(resultsTable, results, ((JSlider) e.getSource()).getValue());
+	                            table.createTable(resultsTable, lastresults, ((JSlider) e.getSource()).getValue());
 	                        }
 	                    });
 	                    /*
@@ -1117,6 +1116,7 @@ public final class GeoApplication implements Runnable{
 	
 	    private void resultsTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_resultsTableMouseClicked
 	        resultsTable.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
 	            public void mousePressed(java.awt.event.MouseEvent evt) {
 	                int count=evt.getClickCount();
 	                if(count==2){
@@ -1130,7 +1130,7 @@ public final class GeoApplication implements Runnable{
 	                            GNETable.setEnabled(true);
 	                            
 	                            //Popolo la tabella
-	                            GeoWordsTable table = new GeoWordsTable(GNETable, results, selectedDocName);
+	                            GeoWordsTable table = new GeoWordsTable(GNETable, lastresults, selectedDocName);
 	                            
 	                        }
 	                    }catch(Exception ex){
@@ -1875,108 +1875,106 @@ public final class GeoApplication implements Runnable{
 	    return newGeoWordVector;
 	}
 
-	public static Vector<GeoRefDoc> search(String keyWords, String location){
+	public Vector<GeoRefDoc> search(String keyWords, String location){
 		
-		try {
-	    	
-			ContentSearcher content = new ContentSearcher();
-	        results = content.createTextualRankig(keyWords);
-			
-			GeoRefLocation grLoc = new GeoRefLocation();
-	        GeographicWord geoLocation;
-			geoLocation = grLoc.getGeoLocation(location, null);
-			
-			// cerco nell'r-tree con l'mbr del paese (in futuro se si vogliono trovare
-	        // più risultati bisogna allargare l'mbr.
-			
-	        double allarga=0;
-	        int cerca=0;
-	        boolean paeselocalizzato=false;
-			boolean documentotrovato=false;
-			
-	        grLoc = new GeoRefLocation();
-	        int numeroresults=0;
-	        vettori vettoricodici=query_rtree.query(path,geoLocation.getmbr_x1()+allarga, geoLocation.getmbr_y1()+allarga,geoLocation.getmbr_x2()-allarga, geoLocation.getmbr_y2()-allarga);
-	        
-	        for(int trovati=0;trovati<vettoricodici.codici.size();trovati++)
-	        {
-	        	String line = null;
-	        	FileReader fileletto = null;
-	        	LineNumberReader lr = null;
-	        	
-				try {
-					fileletto = new FileReader(dbpath + (Integer.parseInt(vettoricodici.codici.elementAt(trovati)) / 1000) + slash + vettoricodici.codici.elementAt(trovati));
-					// file.write(nameFiles[i].getName()+"�#"+gw.getGeoScore()+"\r\n");
-					lr = new LineNumberReader(fileletto);
-					line = lr.readLine();
-				} catch (IOException e) {
+            Vector<GeoRefDoc> results = new Vector<GeoRefDoc>();
+            Vector<GeoRefDoc> resultsmerge = new Vector<GeoRefDoc>();
 
-				}
-	    		
-	    		paeselocalizzato=false;
-	    		documentotrovato=false;
-	    		
-	    		while (line != null)
-	    		{
-	    			String data[];
-	    			data=line.split("�#");
-	    			GeoRefDoc documentoref=new GeoRefDoc();
-	    			documentotrovato=false;
-	    			numeroresults=0;
-	    			//for(int numeroresults=0;numeroresults<results.size();numeroresults++)
-	    			while(numeroresults<results.size() && documentotrovato==false)
-	    			{
-	    				if(results.elementAt(numeroresults).getNomeDoc().equalsIgnoreCase(data[0])){
-	    					documentoref=results.elementAt(numeroresults);
-	    					if(paeselocalizzato==false){
-	    						try{
-	    							geoLocation = grLoc.getGeoLocation(vettoricodici.nomi.elementAt(trovati), null);
-	    						}
-	    						catch (Exception e) {
-	    							// 	TODO: handle exception
-	    						}
-	    						paeselocalizzato=true;
-	    					}
-	    					boolean trova=false;
-	    					cerca=0;	
-	    					//for(int cerca=0;cerca<resultsmerge.size();cerca++)
-	    					while(cerca<resultsmerge.size() && trova==false)
-	    					{
-	    						if(resultsmerge.elementAt(cerca).getNomeDoc().equalsIgnoreCase(data[0])){
-	    							resultsmerge.elementAt(cerca).addGeoWord(geoLocation);
-	    							trova=true;
-	    						}
-	    						cerca++;
-	    					}
-	    					if(trova==false){
-	    						documentoref.addGeoWord(geoLocation);
-	    						resultsmerge.add(documentoref);
-	    					}
-	    				}
-	    				numeroresults++;
-	    			}
-	    			
-	    			line = lr.readLine();
-	    		}
-	          	
-	    		if (fileletto!=null){
-	    			fileletto.close();
-	          	}
-	        }
-	        results=resultsmerge;
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (java.text.ParseException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (ParseException e1) {
-			e1.printStackTrace();
-		}
-	    return results;
+            try {
+
+                ContentSearcher content = new ContentSearcher();
+                results = content.createTextualRankig(keyWords);
+
+                GeoRefLocation grLoc = new GeoRefLocation();
+                GeographicWord geoLocation;
+                geoLocation = grLoc.getGeoLocation(location, null);
+
+                // cerco nell'r-tree con l'mbr del paese (in futuro se si vogliono trovare
+                // più risultati bisogna allargare l'mbr.
+
+                double allarga = 0;
+                int cerca = 0;
+                boolean paeselocalizzato = false;
+                boolean documentotrovato = false;
+
+                grLoc = new GeoRefLocation();
+                int numeroresults = 0;
+                vettori vettoricodici = query_rtree.query(path, geoLocation.getmbr_x1() + allarga, geoLocation.getmbr_y1() + allarga, geoLocation.getmbr_x2() - allarga, geoLocation.getmbr_y2() - allarga);
+
+                for (int trovati = 0; trovati < vettoricodici.codici.size(); trovati++) {
+                    String line = null;
+                    FileReader fileletto = null;
+                    LineNumberReader lr = null;
+
+                    try {
+                        fileletto = new FileReader(dbpath + (Integer.parseInt(vettoricodici.codici.elementAt(trovati)) / 1000) + slash + vettoricodici.codici.elementAt(trovati));
+                        // file.write(nameFiles[i].getName()+"�#"+gw.getGeoScore()+"\r\n");
+                        lr = new LineNumberReader(fileletto);
+                        line = lr.readLine();
+                    } catch (IOException e) {
+                    }
+
+                    paeselocalizzato = false;
+                    documentotrovato = false;
+
+                    while (line != null) {
+                        String data[];
+                        data = line.split("�#");
+                        GeoRefDoc documentoref = new GeoRefDoc();
+                        documentotrovato = false;
+                        numeroresults = 0;
+                        //for(int numeroresults=0;numeroresults<results.size();numeroresults++)
+                        while (numeroresults < results.size() && documentotrovato == false) {
+                            if (results.elementAt(numeroresults).getNomeDoc().equalsIgnoreCase(data[0])) {
+                                documentoref = results.elementAt(numeroresults);
+                                if (paeselocalizzato == false) {
+                                    try {
+                                        geoLocation = grLoc.getGeoLocation(vettoricodici.nomi.elementAt(trovati), null);
+                                    } catch (Exception e) {
+                                        // 	TODO: handle exception
+                                    }
+                                    paeselocalizzato = true;
+                                }
+                                boolean trova = false;
+                                cerca = 0;
+                                //for(int cerca=0;cerca<resultsmerge.size();cerca++)
+                                while (cerca < resultsmerge.size() && trova == false) {
+                                    if (resultsmerge.elementAt(cerca).getNomeDoc().equalsIgnoreCase(data[0])) {
+                                        resultsmerge.elementAt(cerca).addGeoWord(geoLocation);
+                                        trova = true;
+                                    }
+                                    cerca++;
+                                }
+                                if (trova == false) {
+                                    documentoref.addGeoWord(geoLocation);
+                                    resultsmerge.add(documentoref);
+                                }
+                            }
+                            numeroresults++;
+                        }
+
+                        line = lr.readLine();
+                    }
+
+                    if (fileletto != null) {
+                        fileletto.close();
+                    }
+                }
+                results = resultsmerge;
+                lastresults = results;
+            } catch (SQLException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            } catch (java.text.ParseException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            } catch (ParseException e1) {
+                e1.printStackTrace();
+            }
+            return results;
 	}
 	
 	public void run(){
@@ -2132,7 +2130,7 @@ public final class GeoApplication implements Runnable{
 					}
 				} else if (args.length == 2 || args.length == 3) {
 					mainApp = new GeoApplication(cfgpath);
-					Vector<GeoRefDoc> results = search(args[0], args[1]);
+					Vector<GeoRefDoc> results = mainApp.search(args[0], args[1]);
 					for (GeoRefDoc doc : results) {
 						System.out.println(doc.getNomeDoc() + "\ntextscore: "
 								+ doc.getTextScore() + "\nsortscore: "
