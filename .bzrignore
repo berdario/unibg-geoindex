@@ -1,0 +1,26 @@
+#remember to use `bzr ignore $(bzr unknowns)` to add remaining unwanted unknown files
+.classpath
+.classpath.old
+.project
+.project.old
+bcmail-jdk16-136.jar
+bcprov-jdk16-136.jar
+bin
+build
+build.xml
+dist
+junit3615386198726755822.properties
+junit4312844227738215630.properties
+junit5840374166938804272.properties
+junit6803385299692134737.properties
+junit7631563814106033474.properties
+junitvmwatcher2414235386590783391.properties
+junitvmwatcher428095722449969596.properties
+junitvmwatcher6248223806447495909.properties
+junitvmwatcher7612208845000772001.properties
+junitvmwatcher7739208942210857160.properties
+lib
+manifest.mf
+nbproject
+nbproject-old
+tmp

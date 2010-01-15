@@ -15,9 +15,11 @@ import geotag.georeference.GeoRefLocation;
 import geotag.indices.ContentIndexer;
 import geotag.indices.GeographicIndexer;
 import geotag.output.CreateOutput;
-import geotag.parser.HTMLParser;
+/*import geotag.parser.HTMLParser;
 import geotag.parser.PDFParser;
-import geotag.parser.XMLParser;
+import geotag.parser.XMLParser;*/
+import geotag.parser.DocumentWrapper;
+import geotag.parser.DocumentWrapper.UnsupportedFileException;
 import geotag.search.ContentSearcher;
 import geotag.search.DistanceSearcher;
 import geotag.visualization.CountryItemListener;
@@ -66,8 +68,6 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.queryParser.ParseException;
 import org.jdom.JDOMException;
-import org.pdfbox.exceptions.CryptographyException;
-import org.pdfbox.exceptions.InvalidPasswordException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -92,12 +92,6 @@ public final class GeoApplication implements Runnable{
     private String swLanguage;
     
     NumberFormat formatter = new DecimalFormat("#0.00");  //Formatto il numero a 2 cifre decimali
-    
-    //Campi dei documenti in esame (HTML e XML)
-    private String title = "";
-    private String description = "";
-    private String dateline = "";
-    private String keywords = "";
     
     double goodGeoScore = 0.65; //0.65   
     double uniqueGWScore = 0.2;
@@ -1384,10 +1378,14 @@ public final class GeoApplication implements Runnable{
 	//}
 	
 	private String createIndex(File curDir){
-		String errortext="";
+        String errortext="";
         String documentContent = "";   
         String documentExtension = "";
         String documentName = "";
+        String documentTitle = "";
+        String documentDescription = "";
+        String documentDateline = "";
+        String documentKeywords = "";
         double impValue = 0.0;  //E' un valore che indica l'importanza di un termine nel doc
         boolean stop = false;
         String hash;
@@ -1397,22 +1395,37 @@ public final class GeoApplication implements Runnable{
         if(curDir.isDirectory()){
             File[] nameFiles = curDir.listFiles();           
             for (int i = 0; i < nameFiles.length; i++){
-                if (!nameFiles[i].isDirectory()){
-                        Vector<Word> wordVector = new Vector<Word>();
-                        Vector<Word> filterWordVector = new Vector<Word>();
-                        Vector<GeographicWord> geoWordVector = new Vector<GeographicWord>();
-                        Vector<GeographicWord> finalGeoWordVector = new Vector<GeographicWord>();
-                        Vector<Word> finalWordVector = new Vector<Word>();
-                        Vector<Word> finalFilterWordVector = new Vector<Word>();
-                        boolean alreadyIndexed = false;
-                        boolean upperDateLine = false;
-                        
-                        // Gestione di ogni file contenuto nella directory
-                        String name = nameFiles[i].getName();
-                        documentExtension = nameFiles[i].getName().substring(nameFiles[i].getName().lastIndexOf('.') + 1, nameFiles[i].getName().length());
-                        
-                        documentName = nameFiles[i].getName().substring(0, nameFiles[i].getName().lastIndexOf('.'));
-                        documentContent = openDocument(nameFiles[i].toString(), documentExtension, nameFiles[i]);
+                if (!nameFiles[i].isDirectory()) {
+                    Vector<Word> wordVector = new Vector<Word>();
+                    Vector<Word> filterWordVector = new Vector<Word>();
+                    Vector<GeographicWord> geoWordVector = new Vector<GeographicWord>();
+                    Vector<GeographicWord> finalGeoWordVector = new Vector<GeographicWord>();
+                    Vector<Word> finalWordVector = new Vector<Word>();
+                    Vector<Word> finalFilterWordVector = new Vector<Word>();
+                    boolean alreadyIndexed = false;
+                    boolean upperDateLine = false;
+
+                    // Gestione di ogni file contenuto nella directory
+                    String name = nameFiles[i].getName();
+                    documentExtension = nameFiles[i].getName().substring(nameFiles[i].getName().lastIndexOf('.') + 1, nameFiles[i].getName().length());
+
+                    documentName = nameFiles[i].getName().substring(0, nameFiles[i].getName().lastIndexOf('.'));
+
+                    DocumentWrapper doc;
+                    try {
+                        doc = new DocumentWrapper(nameFiles[i], documentExtension);
+                        documentContent = doc.content;
+                        documentTitle = doc.title;
+                        documentDescription=doc.description;
+                        documentDateline=doc.dateline;
+                        documentKeywords=doc.keywords;
+                    } catch (UnsupportedFileException ex) {
+                        //TODO: netbeans auto-generated, funziona?
+                        Logger.getLogger(GeoApplication.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+
+                        //errortext+=""
 
                         /* commentato: nel caso lo si può riaggiungere, ma per evitare un if(gui) sarebbe necessario reimplementarlo con una sottoclasse e quindi ripensare l'architettura di geoapplication
                          * comunque pare che non essendo parte di un thread questo non possa comparire nella gui così facilmente
@@ -1470,24 +1483,24 @@ public final class GeoApplication implements Runnable{
                                     Se gli altri campi, oltre al contenuto del documento sono vuoti
                                     vado avanti, altrimenti eseguo indicizzazione ed analisi anche di quelli
                                      */
-                                    if (!title.isEmpty()) {
-                                        documentContent = title;
-                                        title = "";
+                                    if (documentTitle != null && !documentTitle.isEmpty()) {
+                                        documentContent = documentTitle;
+                                        documentTitle = "";
                                         impValue = 1;
                                         upperDateLine = false;
-                                    } else if (description != null && !description.isEmpty()) {
-                                        documentContent = description;
-                                        description = "";
+                                    } else if (documentDescription != null && !documentDescription.isEmpty()) {
+                                        documentContent = documentDescription;
+                                        documentDescription = "";
                                         upperDateLine = false;
                                         impValue = 0.5;
-                                    } else if (dateline != null && !dateline.isEmpty()) {
-                                        documentContent = dateline;
-                                        dateline = "";
+                                    } else if (documentDateline != null && !documentDateline.isEmpty()) {
+                                        documentContent = documentDateline;
+                                        documentDateline = "";
                                         upperDateLine = true;
                                         impValue = 0.5;
-                                    } else if (keywords != null && !keywords.isEmpty()) {
-                                        documentContent = keywords;
-                                        keywords = "";
+                                    } else if (documentKeywords != null && !documentKeywords.isEmpty()) {
+                                        documentContent = documentKeywords;
+                                        documentKeywords = "";
                                         upperDateLine = false;
                                         impValue = 1;
                                     } else {
@@ -1607,127 +1620,6 @@ public final class GeoApplication implements Runnable{
 			//ContentIndexer.closeIndex();
 		}
 		return errortext;
-	}
-
-	/**
-	 * Metodo per la gestione dell'apertura dei file da indicizzare.
-	 * Sono accettati 3 formati: PDF, HTML e XML
-	 * @param documentName : nome del documento
-	 * @param documentExtension : estensione del file
-	 * @param fileName : nome completo del file
-	 * @return il contenuto del documento
-	 * @throws ParserException
-	 */
-	public String openDocument(String documentName, String documentExtension, File fileName) {        
-	    String content = "";
-	    String errortext="";
-	    if (documentExtension.equalsIgnoreCase("pdf")) {           
-	        content = openPDFDocument(documentName);            
-	    } else if (documentExtension.equalsIgnoreCase("html")
-	            || documentExtension.equalsIgnoreCase("htm")) {
-	        content = openHTMLDocument(documentName);
-	    } else if (documentExtension.equalsIgnoreCase("xml")) {
-	        content = openXMLDocument(fileName);
-	    } else {
-	        errortext+="File format isn't supported\n";//era un errorlabel, da ripristinare per la gui? 
-	    }
-	               
-	    return content;
-	}
-
-	/**
-	 * Apertura del file in formato PDF .
-	 * Per eseguire questa operazione mi sono affidato alle librerie PDFBox e FontBox
-	 * @param documentName : nome del documento
-	 * @return il contenuto del file PDF
-	 */
-	public String openPDFDocument(String documentName) { 
-	    String docContent = "";
-	    String errortext="";
-	    PDFParser pdfFileParser = new PDFParser();
-	    
-	    try {
-	        docContent = pdfFileParser.parsinfPDFFile(documentName);
-	        
-	    } catch (IOException ex) {
-	        errortext+="Error onening PDF file\n";//era un errorlabel
-	    } catch (CryptographyException ex) {
-	        //statusMessageLabel.setText("Error");
-	    } catch (InvalidPasswordException ex) {
-	        errortext+="Error: password invalid\n";//era un errorlabel
-	    }
-	    
-	    return docContent;
-	}
-
-	/**
-	 * Apertura del documento il formato HTML:
-	 * Estraggo il testo dal documento contenuto all'interno del tag <body>,
-	 * escludendo i LINK perché potrebbero essere fuorvianti.
-	 * In particolare memorizzo i campi "title", "description" e "keywords" per i quali, se 
-	 * conterranno un elemento geografico, dovrò aumentare il peso di rilevanza.
-	 * Per eseguire queste operazioni mi sono affidato alle librerie: HTMLParser, Jericho-HTML
-	 * @param docURL : indirizzo del documento
-	 * @return il contenuto del file HTML
-	 * @throws org.htmlparser.util.ParserException
-	 */
-	public String openHTMLDocument(String docURL){                 	
-	    String body = "";
-	    String errortext="";
-	    
-	    try {
-	        HTMLParser htmlFileParser = new HTMLParser(docURL);
-	        body = htmlFileParser.parsingHTMLFile();
-	          
-	        //Document title
-	        title = htmlFileParser.getTitle();
-	        String t = title;
-	        
-	        //Document description
-	        description = htmlFileParser.getMetaValue("description");
-	        String s = description;
-	        
-	        //Document keywords
-	        keywords = htmlFileParser.getMetaValue("keywords");
-	        String k = keywords;
-	
-	    } catch (IOException ex) {
-	        errortext+="Error opening HTML file\n";//era un errorlabel
-	    }
-	
-	    return body;
-	}
-
-	/**
-	 * Apertura del file nel formato XML.
-	 * Per eseguire questa operazione mi sono affidato alla libreria SAX e JDOM
-	 * @param fileName : nome del file 
-	 * @return il contenuto del file
-	 */
-	public String openXMLDocument(File fileName){         
-	    String content = "";
-	    String errortext="";
-	    
-	    try {              
-	        XMLParser xmlFileParser = new XMLParser(fileName);
-	        
-	        content = xmlFileParser.parsingXMLfile("");
-	
-	        //Document title
-	        title = xmlFileParser.parsingXMLfile("title");
-	        String t = title;
-	        
-	        //Document dateline
-	        dateline = xmlFileParser.parsingXMLfile("dateline");
-	        String d = dateline;
-	        String a = d;
-	    } catch (JDOMException ex) {
-	        errortext+="Error parsing XML file\n";//erano errorlabel
-	    } catch (IOException ex) {
-	        errortext+="Error opening XML file\n";
-	    }
-	
-	    return content;
 	}
 
 	public Vector<Word>  update (Vector<Word> finalWordVector, Vector<Word> wordVector){
