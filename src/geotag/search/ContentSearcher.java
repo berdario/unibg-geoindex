@@ -81,6 +81,10 @@ public class ContentSearcher {
                 //Popolo documento
                 GeoRefDoc newDoc = new GeoRefDoc();               
                 newDoc.setNomeDoc(doc.get("fileName"));
+                newDoc.docTitle=doc.get("title");
+                newDoc.docDescription=doc.get("description");
+                newDoc.docKeyWords=doc.get("keywords");
+                newDoc.docDateLine=doc.get("dateline");
                 newDoc.setTextScore(hits.score(i)); 
                 docs.add(newDoc);
             }

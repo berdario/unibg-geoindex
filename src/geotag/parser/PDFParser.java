@@ -67,13 +67,6 @@ public class PDFParser {
 
             if (metadata != null){
                 pdfTitle=parseTitle(metadata.createInputStream());
-                /*
-                BufferedReader xml = new BufferedReader(new InputStreamReader(metadata.createInputStream()));
-
-                String input = xml.readLine();
-                while (!(input==null || (input.contains("A New SQL")))) {
-                    input = xml.readLine();
-                }*/
             }
 
             // Lettura del contenuto del documento
@@ -108,29 +101,12 @@ public class PDFParser {
             DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
             Document metadata = docBuilder.parse(xmlstream);
             metadata.getDocumentElement().normalize();
-            //System.out.println("Root element of the doc is " + metadata.getDocumentElement().getNodeName());
-            //int lenListOfTitles = metadata.getDocumentElement().getElementsByTagName("dc:title").getLength();
             Element titleElement = (Element) metadata.getDocumentElement().getElementsByTagName("dc:title").item(0);
-            //String prova1 = titleElement.getFirstChild().getNodeValue();
-            //String prova2 = ((Element) titleElement.getFirstChild()).getFirstChild().getNodeValue();
-            //int djgfye = titleElement.getElementsByTagName("*").getLength();
             if (titleElement == null){
                 return null;
             }
             title= titleElement.getElementsByTagName("rdf:li").item(0).getFirstChild().getNodeValue();//TODO, sistemare per bene... occhio ai controlli
-            //String sjhfgi=((Element) titleElement.getElementsByTagName("*").item(djgfye-1)).
-              //      String prrrr = titleElement.getTextContent();
-            /*for (int i=0;i<listOfTitles.getLength();i++){
-                Node titleNode = listOfTitles.item(i);
-                if(titleNode.getNodeType()==Node.ELEMENT_NODE){
-                    Element prova=(Element) titleNode;
-                    NodeList listofboh = prova.getElementsByTagName("rdf:Alt");
-                    for (int j=0;j<listofboh.getLength();j++){
-                        Node bohNode = listofboh.item(j);
-                        prrrr=bohNode.
-                    }
-                }
-            }*/
+            
         } catch (SAXException ex) {
             Logger.getLogger(PDFParser.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {

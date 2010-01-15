@@ -7,6 +7,7 @@ package geotag.indices;
 
 import geotag.GeoApplication;
 
+import geotag.words.GeoRefDoc;
 import java.io.File;
 import java.io.IOException;
 import org.apache.lucene.analysis.KeywordAnalyzer;
@@ -118,10 +119,11 @@ public class ContentIndexer {
     /**
      * Metodo principale della classe. Ha il compito di aggiornare l'indice del contenuto.
      * L'indice viene memorizzato nella cartella "contentIndex".
-     * @param dir : path della directory contenente i file da indicizzare
+     * @param docContent : testo del documento
+     * @param geoDoc : documento contente altri valori da indicizzare (titolo, descrizione, keyword...)
      * @param fileName: nome del file in esame
      */
-    public void indexing(String docContent, String fileName){ 
+    public void indexing(String docContent, GeoRefDoc geoDoc, String fileName){
         
         try {
 			index.setUseCompoundFile(true);
@@ -129,7 +131,19 @@ public class ContentIndexer {
 
 			Document doc = new Document(); 
 			doc.add(new Field("content", docContent, Field.Store.YES, Field.Index.TOKENIZED));
-			doc.add(new Field("fileName", fileName, Field.Store.YES, Field.Index.UN_TOKENIZED));                
+			doc.add(new Field("fileName", fileName, Field.Store.YES, Field.Index.UN_TOKENIZED));
+                        if (geoDoc.docTitle != null){
+                            doc.add(new Field("title", geoDoc.docTitle, Field.Store.YES, Field.Index.UN_TOKENIZED));
+                        }
+                        if (geoDoc.docDescription!= null){
+                            doc.add(new Field("description", geoDoc.docDescription, Field.Store.YES, Field.Index.UN_TOKENIZED));
+                        }
+                        if (geoDoc.docDateLine != null){
+                            doc.add(new Field("dateline", geoDoc.docDateLine, Field.Store.YES, Field.Index.UN_TOKENIZED));
+                        }
+                        if (geoDoc.docKeyWords != null){
+                            doc.add(new Field("keywords", geoDoc.docKeyWords, Field.Store.YES, Field.Index.UN_TOKENIZED));
+                        }
 			index.addDocument(doc);
 		} catch (IOException e) {
 			closeIndex();

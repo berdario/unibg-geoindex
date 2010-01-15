@@ -1371,7 +1371,11 @@ public final class GeoApplication implements Runnable{
 						"\ntextscore: "+doc.getTextScore()+
 						"\nsortscore: "+doc.getSortScore()+
 						"\ndistancescore: "+doc.getDistanceScore()+
-						"\nid: "+doc.getId()+"\n");
+						"\nid: "+doc.getId()+
+                                                "\ntitle: "+doc.docTitle+
+                                                "\ndescription: "+doc.docDescription+
+                                                "\nkeywords: "+doc.docKeyWords+
+                                                "\ndateline: "+doc.docDateLine+"\n");
 			}
 		}
 		
@@ -1382,12 +1386,9 @@ public final class GeoApplication implements Runnable{
         String documentContent = "";   
         String documentExtension = "";
         String documentName = "";
-        String documentTitle = "";
-        String documentDescription = "";
-        String documentDateline = "";
-        String documentKeywords = "";
-        double impValue = 0.0;  //E' un valore che indica l'importanza di un termine nel doc
-        boolean stop = false;
+        double importanceValue = 0.0;  //E' un valore che indica l'importanza di un termine nel doc
+        //non trattando più come prima titoli, descrizioni e keyword, non ne si ricerca la presenza di geoword all'interno
+        //TODO valutare se è ancora utile (probabilmente no)
         String hash;
         ContentIndexer contInd = new ContentIndexer();
         
@@ -1412,13 +1413,14 @@ public final class GeoApplication implements Runnable{
                     documentName = nameFiles[i].getName().substring(0, nameFiles[i].getName().lastIndexOf('.'));
 
                     DocumentWrapper doc;
+                    GeoRefDoc geoDoc = new GeoRefDoc();
                     try {
                         doc = new DocumentWrapper(nameFiles[i], documentExtension);
                         documentContent = doc.content;
-                        documentTitle = doc.title;
-                        documentDescription=doc.description;
-                        documentDateline=doc.dateline;
-                        documentKeywords=doc.keywords;
+                        geoDoc.docTitle = doc.title;
+                        geoDoc.docDescription=doc.description;
+                        geoDoc.docDateLine=doc.dateline;
+                        geoDoc.docKeyWords=doc.keywords;
                     } catch (UnsupportedFileException ex) {
                         //TODO: netbeans auto-generated, funziona?
                         Logger.getLogger(GeoApplication.class.getName()).log(Level.SEVERE, null, ex);
@@ -1456,8 +1458,7 @@ public final class GeoApplication implements Runnable{
                             	//TODO verificare il comportamento con file con lo stesso nome
                             	FileUtils.copyFile(nameFiles[i], new File(cachepath + hash +"."+ documentExtension));
                             	
-                                do{   
-                                    stop = false;
+                                
                                     // Estrazione delle Word candidate                                    
                                     WordAnalyzer generator = new WordAnalyzer(); 
                                     wordVector = generator.getWordVector(documentContent, swLanguage); 
@@ -1468,7 +1469,7 @@ public final class GeoApplication implements Runnable{
 
                                     // Fase di GEO-VALUTAZIONE                                                                                   
                                     GeoCandidateIdentification geoAnalysis = new GeoCandidateIdentification();                            
-                                    geoWordVector = geoAnalysis.analyzing(filterWordVector, wordVector, documentContent, impValue, stmt, upperDateLine);                    
+                                    geoWordVector = geoAnalysis.analyzing(filterWordVector, wordVector, documentContent, importanceValue, stmt, upperDateLine);
 
                                     //Tra elementi con uguale geonameid ne prendo solo 1 con peso e importanza maggiore 
                                     finalGeoWordVector = importanceControl(geoWordVector, finalGeoWordVector); 
@@ -1477,36 +1478,10 @@ public final class GeoApplication implements Runnable{
                                     
                                     //Indicizzo il contenuto del file 
                                     //PRIMA ERA COMMENTATO
-                                     contInd.indexing(documentContent, hash);
+                                     contInd.indexing(documentContent, geoDoc, hash);
                                                                         
-                                    /*
-                                    Se gli altri campi, oltre al contenuto del documento sono vuoti
-                                    vado avanti, altrimenti eseguo indicizzazione ed analisi anche di quelli
-                                     */
-                                    if (documentTitle != null && !documentTitle.isEmpty()) {
-                                        documentContent = documentTitle;
-                                        documentTitle = "";
-                                        impValue = 1;
-                                        upperDateLine = false;
-                                    } else if (documentDescription != null && !documentDescription.isEmpty()) {
-                                        documentContent = documentDescription;
-                                        documentDescription = "";
-                                        upperDateLine = false;
-                                        impValue = 0.5;
-                                    } else if (documentDateline != null && !documentDateline.isEmpty()) {
-                                        documentContent = documentDateline;
-                                        documentDateline = "";
-                                        upperDateLine = true;
-                                        impValue = 0.5;
-                                    } else if (documentKeywords != null && !documentKeywords.isEmpty()) {
-                                        documentContent = documentKeywords;
-                                        documentKeywords = "";
-                                        upperDateLine = false;
-                                        impValue = 1;
-                                    } else {
-                                        stop = true;
-                                    }
-                                 }while(!stop);
+                                    
+                                 
                                 
                                 
                                     // Fase di SCORING   
@@ -2028,7 +2003,11 @@ public final class GeoApplication implements Runnable{
 								+ doc.getTextScore() + "\nsortscore: "
 								+ doc.getSortScore() + "\ndistancescore: "
 								+ doc.getDistanceScore() + "\nid: "
-								+ doc.getId() + "\n");
+								+ doc.getId() +
+                                                "\ntitle: "+doc.docTitle+
+                                                "\ndescription: "+doc.docDescription+
+                                                "\nkeywords: "+doc.docKeyWords+
+                                                "\ndateline: "+doc.docDateLine+"\n");
 					}
 				} else if (args.length == 0 || args.length == 1) {
 					mainApp = new GeoApplication(cfgpath);

@@ -22,6 +22,7 @@ public class GeoRefDoc {
     private boolean geoRef = false;
     private int id = 0;
     private double sortScore = 0.0;
+    public String docTitle, docDescription, docDateLine, docKeyWords;
     
     /**
      * Costruttore della classe
