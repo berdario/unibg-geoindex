@@ -110,7 +110,7 @@ public class ResultsTable {
         }
         
         //Creo il ranking dei documenti in base al campo "sortScore"
-        do{
+        while(!results.isEmpty()){
             GeoRefDoc newDoc = findMax(results);
             newResults.add(newDoc);
             
@@ -121,7 +121,7 @@ public class ResultsTable {
                     oldResults.add(doc);
             }
             results = oldResults;            
-        }while(!results.isEmpty());
+        }
    
         return newResults;
     }
