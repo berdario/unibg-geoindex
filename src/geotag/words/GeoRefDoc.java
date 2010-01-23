@@ -19,7 +19,7 @@ public class GeoRefDoc {
     private double textScore = 0.0;
     private double distanceScore = 0.0;
     private Vector<GeographicWord> geoWord = null;
-    private boolean geoRef = false;
+    private boolean geoRef = false;//TODO probabilmente inutile: basta controllare se geoWord è null
     private int id = 0;
     private double sortScore = 0.0;
     public String docTitle, docDescription, docDateLine, docKeyWords;

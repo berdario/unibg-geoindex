@@ -65,7 +65,7 @@ public class PDFParser {
             PDDocumentCatalog catalog = document.getDocumentCatalog();
             PDMetadata metadata = catalog.getMetadata();
 
-            if (metadata != null){
+            if (metadata != null){//TODO non tutti i documenti hanno dei metadata xmp, ma possono avere lo stesso un titolo... indagare dove si trova ed eventualmente implementare
                 pdfTitle=parseTitle(metadata.createInputStream());
             }
 

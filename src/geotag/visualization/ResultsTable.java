@@ -74,7 +74,7 @@ public class ResultsTable {
      * @param locationImportance : costante che indica l'importanza della "query" e dela "location"
      * @return il vettore dei documenti ordinato
      */
-    private Vector<GeoRefDoc> createRanking(Vector<GeoRefDoc> results, int locationImportance) {
+    public Vector<GeoRefDoc> createRanking(Vector<GeoRefDoc> results, int locationImportance) {
         double queryImp = 1.0;
         double locationImp = 1.0;
         double sortScore = 0.0;

@@ -45,7 +45,6 @@ public class query_rtree {
 		MyVisitor vis = new MyVisitor();
 		
 		Region r;
-		//45.8045195£#10.064864£#45.761764£#9.995776 
 		f2[0]=a;
 		f2[1] =b;
 		f1[0] = c;
