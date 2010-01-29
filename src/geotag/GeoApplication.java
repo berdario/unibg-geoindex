@@ -962,8 +962,8 @@ public final class GeoApplication implements Runnable{
 	                        //stmt.close();
 	                    }
 	                    catch (Exception e) {
-							// TODO: handle exception
 	                    	System.out.print("Errore in Ricerca");
+                                e.printStackTrace();
 						}
 		//                    catch (InstantiationException ex) {
 		//                        Logger.getLogger(GeoApplication.class.getName()).log(Level.SEVERE, null, ex);
@@ -1416,8 +1416,7 @@ public final class GeoApplication implements Runnable{
                         geoDoc.docDateLine=doc.dateline;
                         geoDoc.docKeyWords=doc.keywords;
                     } catch (UnsupportedFileException ex) {
-                        //TODO: netbeans auto-generated, funziona?
-                        Logger.getLogger(GeoApplication.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(GeoApplication.class.getName()).log(Level.INFO, nameFiles[i].getName() + " is not a supported file", ex);
                     }
 
 
@@ -1813,7 +1812,6 @@ public final class GeoApplication implements Runnable{
 			cachepath=config.getString("cachepath");
 			swLanguage=path+"stopWords"+slash+config.getString("languagefile");
 		} catch (ConfigurationException e) {		
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -1834,7 +1832,6 @@ public final class GeoApplication implements Runnable{
 			
 			return innerIndexDirs;
 		} catch (ConfigurationException e) {		
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
@@ -1852,7 +1849,6 @@ public final class GeoApplication implements Runnable{
 			return innerIndexDirs;
 				
 		} catch (ConfigurationException e) {		
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}

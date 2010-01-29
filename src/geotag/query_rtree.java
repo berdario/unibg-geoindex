@@ -29,7 +29,6 @@ public class query_rtree {
 	 * @throws SecurityException 
 	 */
 	public static vettori query(String path,double a,double b,double c,double d) throws SecurityException, NullPointerException, FileNotFoundException, IllegalArgumentException, IOException {
-		// TODO Auto-generated method stub
 
 		double f1[]=new double[2],f2[]=new double[2];
 		vettori codici=new vettori();
