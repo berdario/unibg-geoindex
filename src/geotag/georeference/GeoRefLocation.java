@@ -72,12 +72,6 @@ public class GeoRefLocation {
  	  }
  	  return tree;
  	} 
-    
-    
-    public GeographicWord getGeoLocation(String location, Statement stmt){
-        //TODO eliminare: c'è un mismatch fra gli indici/strutture dati su disco e il fatto che gli score vengano inseriti nella geoword
-        return getGeoLocation(location, (Double) null, stmt);
-    }
 
 
      /**
@@ -91,7 +85,7 @@ public class GeoRefLocation {
      * @throws java.text.ParseException
      * @throws IOException 
      */
-    public GeographicWord getGeoLocation(String location, Double geoRefValue, Statement stmt) {
+    public GeographicWord getGeoLocation(String location, Statement stmt) {
 
         GeographicWord geoLocation = new GeographicWord();
         try {
@@ -125,9 +119,7 @@ public class GeoRefLocation {
                         //Popolo wordVectorResult3
                         String[] datiGaz = ((String) resultsGaz).split("�#");
                         GeographicWord newGeoWord = populateGeoWord(datiGaz);
-                        if (geoRefValue != null){ //TODO: vedi sopra
-                           newGeoWord.setGeoRefValue(geoRefValue);
-                        }
+                        
                         //newGeoWord = population(result);
                         //newGeoWord.setPosition(pos);
                         //newGeoWord.setZoneDocName(searchingName);
@@ -508,7 +500,7 @@ public class GeoRefLocation {
                             documentoref = results.elementAt(numeroresults);
                             if (paeselocalizzato == false) {
                                 try {
-                                    geoLocation = getGeoLocation(vettoricodici.nomi.elementAt(trovati),new Double(data[2]), null);
+                                    geoLocation = getGeoLocation(vettoricodici.nomi.elementAt(trovati), null);
                                 } catch (Exception e) {
                                     // 	TODO: handle exception
                                     }
@@ -519,14 +511,14 @@ public class GeoRefLocation {
                             //for(int cerca=0;cerca<resultsmerge.size();cerca++)
                             while (cerca < resultsmerge.size() && trova == false) {
                                 if (resultsmerge.elementAt(cerca).getNomeDoc().equalsIgnoreCase(data[0])) {
-                                    resultsmerge.elementAt(cerca).addGeoWord(geoLocation);
+                                    resultsmerge.elementAt(cerca).addGeoWord(geoLocation,new Double(data[2]));
                                     resultsmerge.elementAt(cerca).setHaveGeoRef(true);
                                     trova = true;
                                 }
                                 cerca++;
                             }
                             if (trova == false) {
-                                documentoref.addGeoWord(geoLocation);
+                                documentoref.addGeoWord(geoLocation,new Double(data[2]));
                                 resultsmerge.add(documentoref);
                             }
                         }

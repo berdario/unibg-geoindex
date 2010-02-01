@@ -12,6 +12,8 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import geotag.words.GeoRefDoc;
 import geotag.words.GeographicWord;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  *
@@ -38,15 +40,16 @@ public class GeoWordsTable {
         for(int i = 0; i < results.size(); i++){
             GeoRefDoc doc = results.elementAt(i);
             if(doc.getNomeDoc().equalsIgnoreCase(docName)){                
-                if(doc.getGeoWord() != null){
-                    Vector<GeographicWord> vector = doc.getGeoWord();
-                    for(int j = 0; j < vector.size(); j++){
-                        GeographicWord gw = vector.elementAt(j);
+                if(doc.getScores() != null){
+                    HashMap<GeographicWord, Double> hash = doc.getScores();
+                    Iterator keyList = hash.keySet().iterator();
+                    while(keyList.hasNext()){
+                        GeographicWord gw = (GeographicWord) keyList.next();
                         row = new Vector<String>();
 
                         row.add(gw.getName());
                         row.add(formatter.format(gw.getGeoScore()));
-                        row.add(formatter.format(gw.getGeoRefValue()));
+                        row.add(formatter.format(doc.getScores().get(gw)));
                         row.add(gw.getCountryCode());
                         row.add(gw.getAdmin1Code());
                         row.add(gw.getAdmin2Code());

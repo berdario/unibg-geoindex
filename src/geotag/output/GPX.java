@@ -15,6 +15,8 @@ import java.util.Vector;
 
 import geotag.GeoApplication;
 import geotag.words.GeographicWord;
+import java.util.HashMap;
+import java.util.Iterator;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.output.Format;
@@ -51,7 +53,8 @@ public class GPX {
      * @throws java.io.FileNotFoundException
      * @throws java.io.IOException
      */
-    public void create(Vector<GeographicWord> geoWordVector, String nomeFile, double maxLat, double minLat, double maxLong, double minLong) throws FileNotFoundException, IOException{
+    public void create(HashMap<GeographicWord, Double> scores, String nomeFile, double maxLat, double minLat, double maxLong, double minLong) throws FileNotFoundException, IOException{
+        Iterator scoreList = scores.keySet().iterator();
         FileOutputStream fileOutputStream = null;
         String completeFileName = "";
         String markerColor = "";
@@ -77,8 +80,8 @@ public class GPX {
       
         
         //WPT: punti di interesse
-        for(int i = 0; i < geoWordVector.size(); i++){
-            GeographicWord gw = geoWordVector.elementAt(i);               
+        while(scoreList.hasNext()){
+            GeographicWord gw = (GeographicWord) scoreList.next();
             
                 Element wpt = new Element("wpt");
                 wpt.setAttribute("lat", formatter.format(gw.getLatitude()));
@@ -101,12 +104,12 @@ public class GPX {
                 wpt.addContent(comment);
                 
                 Element description = new Element("desc");
-                String text = "GeoRefValue: " + formatter.format(gw.getGeoRefValueNorm());
+                String text = "GeoRefValue: " + formatter.format(scores.get(gw));
                 description.setText(text);
                 wpt.addContent(description);
                 
                 //Assegno colore più scuro se geoRefValue è alto, più chiaro in caso contrario
-                markerColor = findColor(gw.getGeoRefValueNorm());
+                markerColor = findColor(scores.get(gw));
                 
                 Element color = new Element("color");
                 color.setText(markerColor);

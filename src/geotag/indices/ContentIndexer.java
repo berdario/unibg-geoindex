@@ -73,7 +73,6 @@ public class ContentIndexer {
 		} catch (IOException e) {
 			System.out.println("pare che il problema si verifichi durante un'apertura dell'indice");
 			//closeIndex();
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }
@@ -157,7 +156,6 @@ public class ContentIndexer {
 			try {
 				index.optimize();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {
 				try {

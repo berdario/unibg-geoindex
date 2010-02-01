@@ -16,6 +16,8 @@ import java.util.Vector;
 
 import geotag.GeoApplication;
 import geotag.words.GeographicWord;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Classe responsabile della creazione e scrittura di un file strutturato in formato 
@@ -41,7 +43,8 @@ public class TXT {
      * @param nomeFile : nome da assegnare al nuovo file creato
      * @throws java.io.IOException
      */
-    public void create(Vector<GeographicWord> geoWordVector, String nomeFile) throws IOException{
+    public void create(HashMap<GeographicWord, Double> scores, String nomeFile) throws IOException{
+        Iterator scoreList = scores.keySet().iterator();
         File indexDir = new File(path+"output"+slash+"txt");
         if(!indexDir.isDirectory()){
             // Create one directory
@@ -78,11 +81,11 @@ public class TXT {
             output.write("GTopo30" + "\n");
         
         
-        for(int i = 0; i < geoWordVector.size(); i++){
-            GeographicWord gw = geoWordVector.elementAt(i);
+        while(scoreList.hasNext()){
+            GeographicWord gw = (GeographicWord) scoreList.next();
             output.write(gw.getName() + "\t");
-            output.write(gw.getGeoRefValueNorm() + "\t");
-            output.write(gw.getGeoRefValue() + "\t");
+            output.write(scores.get(gw) + "\t");
+            output.write(scores.get(gw) + "\t");
             output.write(gw.getGeoScore() + "\t");
             output.write(gw.getFrequency() + "\t");
             output.write(gw.getZoneDocName() + "\t");

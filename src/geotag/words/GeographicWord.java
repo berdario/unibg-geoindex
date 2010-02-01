@@ -34,8 +34,6 @@ public class GeographicWord extends Word {
     private boolean adminZone = false;
     private String zoneDocName = null;
     private double importance = 0.0; 
-    private double geoRefValue = 0.0;
-    private double geoRefValueNorm = 0.0;
     private boolean location = false;
     private boolean maxPop = false;
     private boolean multiLow = false;
@@ -242,28 +240,12 @@ public class GeographicWord extends Word {
         this.importance = importance;
     }
 
-    public double getGeoRefValue() {
-        return geoRefValue;
-    }
-
-    public void setGeoRefValue(double geoRefValue) {
-        this.geoRefValue = geoRefValue;
-    }
-
     public boolean isLocation() {
         return location;
     }
 
     public void setLocation(boolean location) {
         this.location = location;
-    }
-
-    public double getGeoRefValueNorm() {
-        return geoRefValueNorm;
-    }
-
-    public void setGeoRefValueNorm(double geoRefValueNorm) {
-        this.geoRefValueNorm = geoRefValueNorm;
     }
 
     public boolean isMaxPop() {

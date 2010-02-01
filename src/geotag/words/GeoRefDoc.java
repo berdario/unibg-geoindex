@@ -5,6 +5,8 @@
 
 package geotag.words;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Vector;
 
 /**
@@ -18,7 +20,7 @@ public class GeoRefDoc {
     private String nomeDoc = "";
     private double textScore = 0.0;
     private double distanceScore = 0.0;
-    private Vector<GeographicWord> geoWord = null;
+    private HashMap<GeographicWord, Double> scores = null;//il secondo campo è il vecchio geoRefScore normalizzato
     private boolean geoRef = false;//TODO probabilmente inutile: basta controllare se geoWord è null
     private int id = 0;
     private double sortScore = 0.0;
@@ -50,26 +52,34 @@ public class GeoRefDoc {
 
     /**
      * Restituisce il vettore delle GeoWord associate al documento
-     * @return il vettore delle GeoWord
+     * @return HashMap delle GeoWord con i geoRefValue
      */
-    public Vector<GeographicWord> getGeoWord() {
-        return geoWord;
+    public HashMap<GeographicWord, Double> getScores() {
+        return scores;
     }
 
     /**
      * Riceve il vettore delle GeoWord che corrispondono alle entità geografiche
      * associate al documento
-     * @param geoWord : vettore delle GeoWord
+     * @param geoWord : HashMap delle GeoWord con i geoRefValue
      */
-    public void setGeoWord(Vector<GeographicWord> geoWord) {
-        this.geoWord = geoWord;
-    }
-    public void addGeoWord(GeographicWord geoWord) {
-    	if(this.geoWord==null)
-    		this.geoWord=new Vector<GeographicWord>();
-   		this.geoWord.add(geoWord);
+    public void setScores(HashMap<GeographicWord, Double> geoWord) {
+        this.scores = geoWord;
     }
     
+    public void addGeoWord(GeographicWord geoWord) {
+    	if(this.scores == null){
+    		this.scores=new HashMap<GeographicWord, Double>();
+        }
+   	this.scores.put(geoWord, 0.0);
+    }
+
+    public void addGeoWord(GeographicWord geoWord, double geoRefValue){
+        if(this.scores == null){
+            this.scores=new HashMap<GeographicWord, Double>();
+        }
+        this.scores.put(geoWord, geoRefValue);
+    }
 
     /**
      * Restituisce il nome del documento

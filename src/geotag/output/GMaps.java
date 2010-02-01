@@ -14,6 +14,8 @@ import java.util.Vector;
 
 import geotag.GeoApplication;
 import geotag.words.GeographicWord;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Classe responsabile della creazione di un file in formato HTML
@@ -40,7 +42,8 @@ public class GMaps {
      * @param geoWordVector : elenco delle GeoWord da inserire nel file
      * @param nomeFile : nome da assegnare al file
      */
-    public void create(Vector<GeographicWord> geoWordVector, String nomeFile){
+    public void create(HashMap<GeographicWord, Double> scores, String nomeFile){
+        Iterator scoreList = scores.keySet().iterator();
         int gwTot = 0;
         double avgLat = 0.0;
         double avgLong = 0.0;
@@ -54,17 +57,21 @@ public class GMaps {
         GeographicWord gwMax = new GeographicWord();
 
         //Cerco GeoWord con geoRefValue maggiore
-        for(int i = 0; i < geoWordVector.size(); i++){
-            if(geoWordVector.elementAt(i).getGeoRefValue() > refGeoRefValue){
-                refGeoRefValue = geoWordVector.elementAt(i).getGeoRefValue();
-                gwMax = geoWordVector.elementAt(i);
+        while(scoreList.hasNext()){
+            GeographicWord gw = (GeographicWord) scoreList.next();
+            double geoRefValue = scores.get(gw);
+            if(geoRefValue > refGeoRefValue){
+                refGeoRefValue = geoRefValue;
+                gwMax = gw;
             }
         }
+        scoreList = scores.keySet().iterator();
         //Assegno il valore alle coordinate di riferimento
-        for(int i = 0; i < geoWordVector.size(); i++){
-            if(geoWordVector.elementAt(i).getGeoRefValue() == refGeoRefValue){
-                refLat = geoWordVector.elementAt(i).getLatitude();
-                refLong = geoWordVector.elementAt(i).getLongitude();
+        while(scoreList.hasNext()){
+            GeographicWord gw = (GeographicWord) scoreList.next();
+            if(scores.get(gw) == refGeoRefValue){
+                refLat = gw.getLatitude();
+                refLong = gw.getLongitude();
             }                
         }
 
@@ -111,12 +118,13 @@ public class GMaps {
             out.write("var myHtml = '<p><font face=\"Arial\"><font size=4><b>' + gName + '</b></font>,<font size=2> ' + countryCode + '<br/>Latitude: ' + lat + '<br/>Longitude: ' + long + '<br/>Population: ' + population + '<br/>GeoScore: ' + geoScore + '</font><br/><font size=2 color=\"#e10000\"><i>GeoReferenceValue: ' + geoRefScore + '</i></font></font></p>';");
             out.write("map.openInfoWindowHtml(point, myHtml );});");
             out.write("return marker;}");
-            
-            //Creazione Marker da GeoWords  
-            for(int i = 0; i < geoWordVector.size(); i++){
-                GeographicWord gw = geoWordVector.elementAt(i);
+
+            scoreList = scores.keySet().iterator();
+            //Creazione Marker da GeoWords
+            while(scoreList.hasNext()){
+                GeographicWord gw = (GeographicWord) scoreList.next();
                     out.write("var point = new GLatLng(" + gw.getLatitude() + "," + gw.getLongitude() + ");");                    
-                    out.write("map.addOverlay(createMarker(point, \"" + gw.getName() + "\", \"" + gw.getLatitude() + "\", \"" + gw.getLongitude() + "\", \"" + gw.getCountryCode() + "\", \"" + gw.getPopulation() + "\", \"" + formatter.format(gw.getGeoScore()) + "\", \"" + formatter.format(gw.getGeoRefValueNorm()) + "\", \"" + findColor(gw.getGeoRefValue()) + "\" ));");
+                    out.write("map.addOverlay(createMarker(point, \"" + gw.getName() + "\", \"" + gw.getLatitude() + "\", \"" + gw.getLongitude() + "\", \"" + gw.getCountryCode() + "\", \"" + gw.getPopulation() + "\", \"" + formatter.format(gw.getGeoScore()) + "\", \"" + formatter.format(scores.get(gw)) + "\", \"" + findColor(scores.get(gw)) + "\" ));");
             }
 
             

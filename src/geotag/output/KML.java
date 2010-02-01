@@ -15,6 +15,8 @@ import java.util.Vector;
 
 import geotag.GeoApplication;
 import geotag.words.GeographicWord;
+import java.util.HashMap;
+import java.util.Iterator;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.output.Format;
@@ -47,7 +49,8 @@ public class KML {
      * @throws java.io.FileNotFoundException
      * @throws java.io.IOException
      */
-    public void create(Vector<GeographicWord> geoWordVector, String nomeFile) throws FileNotFoundException, IOException{
+    public void create(HashMap<GeographicWord, Double> scores, String nomeFile) throws FileNotFoundException, IOException{
+        Iterator scoreList = scores.keySet().iterator();
         FileOutputStream fileOutputStream = null;
         String completeFileName = "";
         String markerColor = "";
@@ -58,8 +61,8 @@ public class KML {
         //Elemento radice
         Element gpx = new Element("kml");
 
-        for(int i = 0; i < geoWordVector.size(); i++){
-            GeographicWord gw = geoWordVector.elementAt(i);               
+        while(scoreList.hasNext()){
+            GeographicWord gw = (GeographicWord) scoreList.next();
             
             Element place = new Element("Placemark");
             gpx.addContent(place);
@@ -74,7 +77,7 @@ public class KML {
                                  "<br/>Longitude: " + formatter.format(gw.getLongitude()) + 
                                  "<br/>Population: " + gw.getPopulation() + 
                                  "<br/>GeoScore: " + formatter.format(gw.getGeoScore()) + 
-                                 "<br/><font color=\"#e10000\"><i>GeoReferencingValue: " + formatter.format(gw.getGeoRefValueNorm()) + "</i></font></font></p>";
+                                 "<br/><font color=\"#e10000\"><i>GeoReferencingValue: " + formatter.format(scores.get(gw)) + "</i></font></font></p>";
             descr.setText(description);
             place.addContent(descr);
             
@@ -87,7 +90,7 @@ public class KML {
             point.addContent(coord); 
             
             //Assegno colore più scuro se geoRefValue è alto, più chiaro in caso contrario
-            markerColor = findColor(gw.getGeoRefValueNorm());
+            markerColor = findColor(scores.get(gw));
             
             Element style = new Element("Style");
             place.addContent(style);

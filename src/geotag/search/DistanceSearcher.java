@@ -9,6 +9,8 @@ import java.util.Vector;
 import geotag.analysis.GeoDistance;
 import geotag.words.GeoRefDoc;
 import geotag.words.GeographicWord;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Classe responsiabile del calcolo del punteggio da assegnare ai documenti
@@ -41,15 +43,18 @@ public class DistanceSearcher {
             GeoRefDoc doc = results.elementAt(k);
             
             if(doc.isGeoRef()){
-                double[] dist = new double[doc.getGeoWord().size()];
-                double[] distNorm = new double[doc.getGeoWord().size()];
+                double[] dist = new double[doc.getScores().size()];
+                double[] distNorm = new double[doc.getScores().size()];
+                HashMap<GeographicWord, Double> scores = doc.getScores();
+                Iterator keyList = scores.keySet().iterator();
 
-                
-                    for(int i = 0; i < doc.getGeoWord().size(); i++){
-                        GeographicWord gw = doc.getGeoWord().elementAt(i);
+                int i=0;
+                while (keyList.hasNext()){
+                    GeographicWord gw = (GeographicWord) keyList.next();
+                    dist[i] = deoDist.calculateDistance(gw.getLatitude(), gw.getLongitude(), geoLocation.getLatitude(), geoLocation.getLongitude(), 'K');
+                    i++;
+                }
 
-                        dist[i] = deoDist.calculateDistance(gw.getLatitude(), gw.getLongitude(), geoLocation.getLatitude(), geoLocation.getLongitude(), 'K');
-                    }
 
                     //Trovo la distanza MININA (diversa da zero)
                     for(int j = 0; j < dist.length; j++){
@@ -68,21 +73,24 @@ public class DistanceSearcher {
         for(int i = 0; i < results.size(); i++){
             GeoRefDoc doc = results.elementAt(i);
             if(doc.isGeoRef()){
-                double[] distNorm = new double[doc.getGeoWord().size()];
-                double[] refAndDistScore = new double[doc.getGeoWord().size()];
+                double[] distNorm = new double[doc.getScores().size()];
+                double[] refAndDistScore = new double[doc.getScores().size()];
                 double maxValue = 0.0;
+                HashMap<GeographicWord, Double> scores = doc.getScores();
+                Iterator keyList = scores.keySet().iterator();
 
                 //Per prima cosa devo calcolare le DISTANZE NORMALIZZATE tra le gw del doc e la geoLocation
                 distNorm = calculateDistance(doc, geoLocation, distMin);
 
                 //Calcolo il valore relativo al MERGE tra il geoRiferimento e la distNormalizzata
-                for(int j = 0; j < doc.getGeoWord().size(); j++){
-                    GeographicWord gw = doc.getGeoWord().elementAt(j);
+                int j=0;
+                while (keyList.hasNext()){
+                    GeographicWord gw = (GeographicWord) keyList.next();
                     String name = gw.getZoneDocName();
-                    double georefvalue = gw.getGeoRefValue();
                     double distnorm = distNorm[j];
-                    refAndDistScore[j] = gw.getGeoRefValue() * distNorm[j];
+                    refAndDistScore[j] = scores.get(gw) * distNorm[j];
                     double r = refAndDistScore[j];
+                    j++;
                 }
 
                 
@@ -107,15 +115,19 @@ public class DistanceSearcher {
      * @return
      */
     public double[] calculateDistance(GeoRefDoc doc, GeographicWord geoLocation, double distMin) {
-        double[] dist = new double[doc.getGeoWord().size()];
-        double[] distNorm = new double[doc.getGeoWord().size()];
+        double[] dist = new double[doc.getScores().size()];
+        double[] distNorm = new double[doc.getScores().size()];
         GeoDistance deoDist = new GeoDistance();
-        
+        HashMap<GeographicWord, Double> hash = doc.getScores();
+        Iterator keyList = hash.keySet().iterator();
+
         //Calcolo le distanze di ogni GeoWord dalla GeoLocation
-        for(int i = 0; i < doc.getGeoWord().size(); i++){
-            GeographicWord gw = doc.getGeoWord().elementAt(i);
+        int i=0;
+        while (keyList.hasNext()){
+            GeographicWord gw = (GeographicWord) keyList.next();
             
             dist[i] = deoDist.calculateDistance(gw.getLatitude(), gw.getLongitude(), geoLocation.getLatitude(), geoLocation.getLongitude(), 'K');
+            i++;
         }
 
         

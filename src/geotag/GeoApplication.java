@@ -13,7 +13,6 @@ import geotag.analysis.WordAnalyzer;
 import geotag.georeference.GeoRef;
 import geotag.georeference.GeoRefLocation;
 import geotag.indices.ContentIndexer;
-import geotag.indices.GeographicIndexer;
 import geotag.output.CreateOutput;
 /*import geotag.parser.HTMLParser;
 import geotag.parser.PDFParser;
@@ -53,6 +52,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -266,10 +266,10 @@ public final class GeoApplication implements Runnable{
                                     finalGeoWordVector = selectGeoWords(finalGeoWordVector);
 
                                     //GEOREFERENZIAZIONE
-                                    GeoRef geoReferencing = new GeoRef();
-                                    finalGeoWordVector = geoReferencing.calculateGeoRefValue(finalGeoWordVector);
-                                    finalGeoWordVector = geoReferencing.delete(finalGeoWordVector);	//Controllo incrociato tra GeoScore e GeoRef
-
+                                    GeoRef geoReferencing = new GeoRef(finalGeoWordVector);
+                                    HashMap<GeographicWord, Double> scores = geoReferencing.calculateGeoRefValue();
+                                    geoDoc.setScores(scores);
+                                    
                                     /*for(int r=0; r < finalGeoWordVector.size(); r++){
                                         System.out.println(finalGeoWordVector.elementAt(r).getName() + " - "
                                                 + formatter.format(finalGeoWordVector.elementAt(r).getGeoScore()) + " - "
@@ -287,7 +287,7 @@ public final class GeoApplication implements Runnable{
                                         // cerco nell'r-tree
                                         System.out.print(finalGeoWordVector.elementAt(ind).getName() + " - geoscore: "
                                                 + formatter.format(finalGeoWordVector.elementAt(ind).getGeoScore()) + " - georefvalue: "
-                                                + formatter.format(finalGeoWordVector.elementAt(ind).getGeoRefValue())+" - codici: ");
+                                                + formatter.format(scores.get(gw))+" - codici: ");
                                         
                                         vettori vettoricodici=new vettori();
                                         vettoricodici=query_rtree.query(path,gw.getmbr_x1(), gw.getmbr_y1(),gw.getmbr_x2(), gw.getmbr_y2());
@@ -315,7 +315,7 @@ public final class GeoApplication implements Runnable{
                                         	
                                         	if(trovato==false){
                                         		FileWriter file2=new FileWriter(dbpath+(Integer.parseInt(vettoricodici.codici.elementAt(trovati))/1000)+slash+vettoricodici.codici.elementAt(trovati),true);
-                                        		file2.write(hash+"�#"+gw.getGeoScore()+"�#"+gw.getGeoRefValue()+"\r\n");
+                                        		file2.write(hash+"�#"+gw.getGeoScore()+"�#"+scores.get(gw)+"\r\n");
                                         		file2.close();
                                         	}
                                         }
@@ -324,7 +324,7 @@ public final class GeoApplication implements Runnable{
                                     //FINE MODIFICA
                                     
                                     //Creazione dei file di output                 
-                                    CreateOutput output = new CreateOutput(finalGeoWordVector, documentName);
+                                    CreateOutput output = new CreateOutput(geoDoc, documentName);
                                 }
                             else{ //erano errorlabel, da ripristinare?
                                 errortext+="Il file " + nameFiles[i].getName() +" è già stato indicizzato\n";
@@ -475,7 +475,6 @@ public final class GeoApplication implements Runnable{
 	    for(int j = 0; j < geoWordVector.size(); j++){
 	        GeographicWord gw = geoWordVector.elementAt(j);
 	        double geoScore = gw.getGeoScore();
-	        double geoReferenceValue = gw.getGeoRefValue();
 	        int frequency = gw.getFrequency();
 	        String geoName = gw.getName();
 	        String zoneDocName = gw.getZoneDocName();
@@ -495,8 +494,7 @@ public final class GeoApplication implements Runnable{
 	            }
 	                
 	            if(geoScore > goodGeoScore){   
-	                //if(!(geoScore <= 0.7 && geoReferenceValue <= 0.2))
-	                    newGeoWordVector.add(gw);
+                        newGeoWordVector.add(gw);
 	            }
 	                
 	        }

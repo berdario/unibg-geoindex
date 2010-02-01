@@ -69,7 +69,6 @@ public class GeoCandidateIdentification {
 			mydbinter = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_Intermedio", new Properties());
     		mydbgaz = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_Gazetteer", new Properties());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }
@@ -615,10 +614,8 @@ public class GeoCandidateIdentification {
 //        } catch (SQLException ex) {
 //            Logger.getLogger(GeoCandidateIdentification.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}                                   
                 

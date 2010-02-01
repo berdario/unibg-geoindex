@@ -8,6 +8,8 @@ package geotag.georeference;
 import geotag.analysis.GeoDistance;
 import java.util.Vector;
 import geotag.words.GeographicWord;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Classe responsabile del calcolo del valore identificativo del georiferimento di
@@ -22,15 +24,20 @@ public class GeoRef {
     private double constantPopulation = 0.1;
     private double geoRefLim = 0.1;
     private double geoScoreLim = 0.7;
+    private Vector<GeographicWord> geoWordVector;
+    private HashMap<GeographicWord, Double> scores;
+    private int numberOfWords;
+    private Iterator scoreList;
     
     
     /**
      * Costruttore della classe
      */
-    public void GeoRef(){
-        
+    public GeoRef(Vector<GeographicWord> geoWordVector){
+        this.geoWordVector = geoWordVector;
+        numberOfWords = this.geoWordVector.size();
+        scores = new HashMap<GeographicWord, Double>(numberOfWords);
     }
-    
     /**
      * Metodo responsabile del calcolo del peso relativo alla georeferenziazione del documento. 
      * Viene assegnato un peso (geoRefValue) ad ogni GeoWord, compreso tra 0 ed 1, in base
@@ -43,23 +50,26 @@ public class GeoRef {
      * @param geoWordVector : elenco di tutte le GeoWord 
      * @return il vettore delle GeoWord con il campo geoRefValue aggiornato
      */
-    public Vector<GeographicWord> calculateGeoRefValue(Vector<GeographicWord> geoWordVector){
+    public HashMap<GeographicWord, Double> calculateGeoRefValue(){
         int popMax = 0;
         double minDist = 0.0;
         GeoDistance dist = new GeoDistance();
         
-        if(geoWordVector.size() > 2500)
-             return geoWordVector;
+        
+        if(numberOfWords > 2500){
+             return null;//ci si aspetta che si rompa? non restituiva i geoRefValue
+        }
         
         //Creo una matrice (quadrata) di distanze tra le varie zone geografiche
-        double[][] distMatr = new double[geoWordVector.size()][geoWordVector.size()];
+        double[][] distMatr = new double[numberOfWords][numberOfWords];
         int countryMaxFreq = 0;
         Vector<String> countryCodeVector = new Vector<String>();    // Vettore con l'elenco dei countryCode
-        int[] countryCodeFreq = new int[geoWordVector.size()];  // Vettore con countryCodeFreq
+        int[] countryCodeFreq = new int[numberOfWords];  // Vettore con countryCodeFreq
         int maxFreq = 0;
         
-       for(int i = 0; i < geoWordVector.size(); i++){
+       for(int i = 0; i < numberOfWords; i++){
             GeographicWord gw = geoWordVector.elementAt(i);
+            scores.put(gw, (double) 0);
             
             //Calcolo la popolazione maggiore
             if(gw.getPopulation() > popMax && !gw.isAdminZone())
@@ -133,24 +143,31 @@ public class GeoRef {
          avgDist = sumDist / distTot;           //Distanza media
          avgDistNorm = (minDist / avgDist);     //Distanza media normalizzata
          
-                
-        geoWordVector = populationInfluence(geoWordVector, popMax);
-        geoWordVector = distanceInfluence(geoWordVector, distMatr, minDist, avgDistNorm);
-        geoWordVector = majorityInfluence(geoWordVector, countryCodeVector, countryCodeFreq, countryMaxFreq);
-        geoWordVector = frequencyInfluence(geoWordVector, maxFreq);        
-        geoWordVector = importanceInfluence(geoWordVector);
+
+        scoreList = scores.keySet().iterator();
+
+        //TODO molte delle seguenti funzioni all'interno continuano a ciclare... normalizzazione dei valori a parte, si dovrebbe poter riuscire a calcolare ogni geoRefValue in un solo passo
+        populationInfluence(popMax);
+        distanceInfluence(distMatr, minDist, avgDistNorm);
+        majorityInfluence(countryCodeVector, countryCodeFreq, countryMaxFreq);
+        frequencyInfluence(maxFreq);        
+        importanceInfluence();
     
         //Controllo che geoRefValue NON sia maggiore di 1
-        for(int i = 0; i < geoWordVector.size(); i++){
+        for(int i = 0; i < numberOfWords; i++){
             GeographicWord gw = geoWordVector.elementAt(i);
-            if(gw.getGeoRefValue() > 1.0)
-                gw.setGeoRefValue(1.0);
+            if(scores.get(gw) > 1.0){
+                scores.put(gw, 1.0);
+            }
         }
         
         //Normalizzo i valori
-        geoWordVector = normalizeGeoRefValue(geoWordVector);
+        normalizeGeoRefValue();
+
+        //ripulisco valori anomali
+        clean();
         
-        return geoWordVector;
+        return scores;
     }
     
     /**
@@ -158,38 +175,34 @@ public class GeoRef {
      * Massimizza le popolazioni di tutte le GeoWord rispetto alla popMax.
      * Nel fare questa operazione però non considero le Nazioni, altrimenti il loro
      * valore della popolazione distorcerebbe gli altri risultati.
-     * @param geoWordVector : elenco delle GeoWord
      * @param popMax : indice della popolazione più alta
-     * @return il vettore delle GeoWord con il campo geoRefValue aggiornato
      */
-    public Vector<GeographicWord> populationInfluence(Vector<GeographicWord> geoWordVector, int popMax){
-        
-        for(int i = 0; i < geoWordVector.size(); i++){
-            GeographicWord gw = geoWordVector.elementAt(i);
+    public void populationInfluence(int popMax){
+        double geoRefValue;
+        double increase;
+        while (scoreList.hasNext()){
+            GeographicWord gw = (GeographicWord) scoreList.next();
             if(!gw.isAdminZone()){
-                double geoRefValue = gw.getGeoRefValue();
-                int p = gw.getPopulation();
-                
+                geoRefValue = scores.get(gw);
+
                 if(popMax != 0){
-                    double increase = (double) gw.getPopulation() / popMax;
-                    gw.setGeoRefValue(geoRefValue + increase * constantPopulation);  
-                }else
-                    gw.setGeoRefValue(geoRefValue + constantPopulation);
+                    increase = (double) gw.getPopulation() / popMax;
+                }else{
+                    increase = 1;
+                }
+
+                scores.put(gw,geoRefValue + increase * constantPopulation);
             }
         }
-        
-        return geoWordVector;
     }
     
     
     /**
      * Metodo che calcola l'incremento del geoRefValue in base alla distanza tra le GeoWord
-     * @param geoWordVector : elenco delle GeoWord
      * @param distMatr : matrice delle distanze
      * @param minDist : distanza minima
-     * @return il vettore delle GeoWord con il campo geoRefValue aggiornato
      */
-    public Vector<GeographicWord> distanceInfluence(Vector<GeographicWord> geoWordVector, double[][] distMatr, double minDist, double avgDistNorm){
+    public void distanceInfluence(double[][] distMatr, double minDist, double avgDistNorm){
          double[][] distMatrNorm = new double[geoWordVector.size()][geoWordVector.size()];
          double increase = 0.0;
          double[] sumDistNormRow = new double[distMatr.length];
@@ -232,123 +245,115 @@ public class GeoRef {
          //Calcolo l'incremento da dare ad ogni GeoWord
          for (int i = 0; i < distMatrNorm.length; i++) {
              GeographicWord gw1 = geoWordVector.elementAt(i);
-             double geoRefValue = gw1.getGeoRefValue();
+             double geoRefValue = scores.get(gw1);
 
              if(maxSumDistNormRow != 0){
                  increase = sumDistNormRow[i] / maxSumDistNormRow;                     
-                 gw1.setGeoRefValue(geoRefValue + increase * constantDistance);
-             }else
-                 gw1.setGeoRefValue(geoRefValue + constantDistance);
+                 
+             }else{
+                increase = 1;
+             }
+             scores.put(gw1, geoRefValue + increase * constantDistance);
+
          }
-         
-        
-        return geoWordVector;
     }
     
     
     /**
      * Calcolo dell'incremento del geoRefValue in base alla regione con più GeoWord
-     * @param geoWordVector : vettore delle GeoWord
      * @param countryCodeVector : vettore delle nazioni
      * @param countryCodeFreq : frequenza delle nazioni
      * @param countryMaxFreq : frequenza massima
-     * @return il vettore delle GeoWord con il campo geoRefValue aggiornato
      */
-    public Vector<GeographicWord> majorityInfluence(Vector<GeographicWord> geoWordVector, Vector<String> countryCodeVector, int[] countryCodeFreq, int countryMaxFreq){
-        
+    public void majorityInfluence(Vector<String> countryCodeVector, int[] countryCodeFreq, int countryMaxFreq){
+        double increase;
         for (int i = 0; i < geoWordVector.size(); i++) {
             GeographicWord gw = geoWordVector.elementAt(i);
-            double geoRefValue = gw.getGeoRefValue();
+            double geoRefValue = scores.get(gw);
             
             for (int j = 0; j < countryCodeVector.size(); j++) {
                 String cc = countryCodeVector.elementAt(j);
                 
                 if(gw.getCountryCode().equals(cc)){
                     if(countryMaxFreq != 0){
-                        double increase = (double) countryCodeFreq[j] / countryMaxFreq;                  
-                        gw.setGeoRefValue(geoRefValue + increase* constantMajority);
-                    }else
-                        gw.setGeoRefValue(geoRefValue + constantMajority);
+                        increase = (double) countryCodeFreq[j] / countryMaxFreq;                  
+                        
+                    }else{
+                        increase = 1;
+                    }
+                    scores.put(gw, geoRefValue + increase* constantMajority);
                 }                
             }            
         }
-              
-        return geoWordVector;
     }
     
     
     /**
      * Calcola l'aumento del geoRefVAlue in base alla frequenza della parola nel testo
-     * @param geoWordVector : elenco delle GeoWord
      * @param freqMax : frequenza massima tra tutte le GeoWord
-     * @return il vettore delle GeoWord con il campo geoRefValue aggiornato
      */
-    public Vector<GeographicWord> frequencyInfluence(Vector<GeographicWord> geoWordVector, int maxFreq){
-        
+    public void frequencyInfluence(int maxFreq){
+        double increase;
         for (int i = 0; i < geoWordVector.size(); i++) {
             GeographicWord gw = geoWordVector.elementAt(i);
-            double geoRefValue = gw.getGeoRefValue();
+            double geoRefValue = scores.get(gw);
             
             String n = gw.getName();
             double f = gw.getFrequency();
             
             if(maxFreq != 0){
-                double increase = (double) gw.getFrequency() / maxFreq;
-                gw.setGeoRefValue(geoRefValue + increase * constantFrequency);
-            }else
-                gw.setGeoRefValue(geoRefValue + constantFrequency);
+                increase = (double) gw.getFrequency() / maxFreq;
+                
+            }else{
+                increase = 1;
+            }
+            scores.put(gw, geoRefValue + increase * constantFrequency);
         }    
-        
-        return geoWordVector;
     }
     
     
     
     /**
      * Incremento del geoRefValue in base all'importanza della GeoWord
-     * @param geoWordVector : elenco delle GeoWord
-     * @return il vettore delle GeoWord con il campo geoRefValue aggiornato
      */
-    public Vector<GeographicWord> importanceInfluence(Vector<GeographicWord> geoWordVector){
+    public void importanceInfluence(){
         
         for (int i = 0; i < geoWordVector.size(); i++) {
             GeographicWord gw = geoWordVector.elementAt(i);
-            double geoRefValue = gw.getGeoRefValue();
+            double geoRefValue = scores.get(gw);
             
             double increase = gw.getImportance() * constantImportance;
             
-            gw.setGeoRefValue(geoRefValue + increase);
+            scores.put(gw, geoRefValue + increase);
         }
-        
-        return geoWordVector;
     }
     
     
     /**
      * Metodo che NORMALIZZA il peso relativo alla georeferenziaizone delle GeoWord
      * rispetto al GeoRef MAX.
-     * @param geoWordVector : elenco delle GeoWord
-     * @return il vettore delle GeoWord con il campo geoRefValue normalizzato
      */
-    public Vector<GeographicWord> normalizeGeoRefValue(Vector<GeographicWord> geoWordVector){
+    public void normalizeGeoRefValue(){
+        HashMap<GeographicWord, Double> normalizedScores = new HashMap<GeographicWord, Double>(numberOfWords);
         double maxGeoRefValue = 0.0;
         
         //Trovo il geoRefValue MAX
         for (int i = 0; i < geoWordVector.size(); i++) {
             GeographicWord gw = geoWordVector.elementAt(i);
-            if(gw.getGeoRefValue() > maxGeoRefValue)
-                maxGeoRefValue = gw.getGeoRefValue();
+            double geoRefValue = scores.get(gw);
+            if(geoRefValue > maxGeoRefValue)
+                maxGeoRefValue = geoRefValue;
         }
         
         for (int i = 0; i < geoWordVector.size(); i++) {
             GeographicWord gw = geoWordVector.elementAt(i);
-            double geoRefValue = gw.getGeoRefValue();
+            double geoRefValue = scores.get(gw);
             
             double newGeoRefValue = geoRefValue / maxGeoRefValue;
-            gw.setGeoRefValueNorm(newGeoRefValue);  //Normalizzato
+            normalizedScores.put(gw, newGeoRefValue);  //Normalizzato
         }
         
-        return geoWordVector;
+        scores = normalizedScores;
     }
     
     /**
@@ -356,21 +361,17 @@ public class GeoRef {
      * Se le geoWord hanno geoRefValue < geoRefLim e geoScore < geoScoreLim vengono eliminate dal vettore
      * perché spesso rappresentano degli errori, mentre negli altri casi sono entità
      * geografiche corrette ma che non costituiscono un georiferimento.
-     * @param finalGeoWordVector : elenco delle GeoWord
-     * @return : elenco GeoWord ritenute valide
      */
-    public Vector<GeographicWord> delete(Vector<GeographicWord> finalGeoWordVector) {
-        Vector<GeographicWord> newGeoWordVector = new Vector<GeographicWord>();
+    public void clean() {
         
-        for(int i = 0; i < finalGeoWordVector.size(); i++){
-            GeographicWord gw = finalGeoWordVector.elementAt(i);
+        for(int i = 0; i < numberOfWords; i++){
+            GeographicWord gw = geoWordVector.elementAt(i);
             
-            if(!(gw.getGeoRefValue() < geoRefLim && gw.getGeoScore() < geoScoreLim ))
+            if(scores.get(gw) < geoRefLim && gw.getGeoScore() < geoScoreLim ){
                     //&& (gw.getFeatureClass().equals("P") || gw.getFeatureClass().equals("A"))))
-                newGeoWordVector.add(gw);
+                scores.remove(gw);
+            }
         }
-        
-        return newGeoWordVector;
     }
     
     

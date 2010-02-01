@@ -11,7 +11,10 @@ import java.io.IOException;
 import java.util.Vector;
 
 import geotag.GeoApplication;
+import geotag.words.GeoRefDoc;
 import geotag.words.GeographicWord;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Classe che gestisce la creazione dei file di output che permettono
@@ -27,7 +30,9 @@ public class CreateOutput {
      * @throws java.io.FileNotFoundException
      * @throws java.io.IOException
      */
-    public CreateOutput(Vector<GeographicWord> geoWordVector, String fileName) throws FileNotFoundException, IOException {
+    public CreateOutput(GeoRefDoc geoDoc, String fileName) throws FileNotFoundException, IOException {
+        HashMap<GeographicWord, Double> scores = geoDoc.getScores();
+        Iterator scoreList = scores.keySet().iterator();
         double maxLat = 0.0;
         double maxLong = 0.0;
         double minLat = 0.0;
@@ -41,33 +46,39 @@ public class CreateOutput {
         }
                   
         //Calcolo le cooordinate minime e massime di ogni documento
-        for(int j = 0; j < geoWordVector.size(); j++){
-            GeographicWord gw = geoWordVector.elementAt(j);               
+        int j=0;
+        while(scoreList.hasNext()){
+            GeographicWord gw = (GeographicWord) scoreList.next();
             if(gw.getGeoScore() > 0.5){
                 if(j == 0){
                     minLat = gw.getLatitude();
                     minLong = gw.getLongitude();
                 }
-                if(gw.getLatitude() > maxLat)
+                if(gw.getLatitude() > maxLat){
                     maxLat = gw.getLatitude();
-                if(gw.getLongitude() > maxLong)
+                }
+                if(gw.getLongitude() > maxLong){
                     maxLong = gw.getLongitude();
-                if(gw.getLatitude() < minLat)
+                }
+                if(gw.getLatitude() < minLat){
                     minLat = gw.getLatitude();
-                if(gw.getLongitude() > minLong)
+                }
+                if(gw.getLongitude() > minLong){
                     minLong = gw.getLongitude();
+                }
+                j++;
             }    
 
             
             
             GPX gpxFile = new GPX();
-            gpxFile.create(geoWordVector, fileName, maxLat, minLat, maxLong, minLong);
+            gpxFile.create(scores, fileName, maxLat, minLat, maxLong, minLong);
             GMaps gMapsFile = new GMaps();
-            gMapsFile.create(geoWordVector, fileName);
+            gMapsFile.create(scores, fileName);
             KML kmlFile = new KML();
-            kmlFile.create(geoWordVector, fileName);
+            kmlFile.create(scores, fileName);
             TXT txtFile = new TXT();
-            txtFile.create(geoWordVector, fileName);
+            txtFile.create(scores, fileName);
         }
      
     }
