@@ -22,7 +22,6 @@ public class GeoRefDoc {
     private double distanceScore = 0.0;
     private HashMap<GeographicWord, Double> scores = null;//il secondo campo è il vecchio geoRefScore normalizzato
     private boolean geoRef = false;//TODO probabilmente inutile: basta controllare se geoWord è null
-    private int id = 0;
     private double sortScore = 0.0;
     public String docTitle, docDescription, docDateLine, docKeyWords;
     
@@ -119,14 +118,6 @@ public class GeoRefDoc {
 
     public void setHaveGeoRef(boolean haveGeoRef) {
         this.geoRef = haveGeoRef;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public double getSortScore() {

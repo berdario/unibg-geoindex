@@ -145,7 +145,6 @@ public final class GeoApplication implements Runnable{
 						"\ntextscore: "+doc.getTextScore()+
 						"\nsortscore: "+doc.getSortScore()+
 						"\ndistancescore: "+doc.getDistanceScore()+
-						"\nid: "+doc.getId()+
                                                 "\ntitle: "+doc.docTitle+
                                                 "\ndescription: "+doc.docDescription+
                                                 "\nkeywords: "+doc.docKeyWords+
@@ -690,8 +689,7 @@ public final class GeoApplication implements Runnable{
 						System.out.println(doc.getNomeDoc() + "\ntextscore: "
 								+ doc.getTextScore() + "\nsortscore: "
 								+ doc.getSortScore() + "\ndistancescore: "
-								+ doc.getDistanceScore() + "\nid: "
-								+ doc.getId() +
+								+ doc.getDistanceScore() +
                                                 "\ntitle: "+doc.docTitle+
                                                 "\ndescription: "+doc.docDescription+
                                                 "\nkeywords: "+doc.docKeyWords+
