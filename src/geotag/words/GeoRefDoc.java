@@ -23,7 +23,7 @@ public class GeoRefDoc {
     private HashMap<GeographicWord, Double> scores = null;//il secondo campo è il vecchio geoRefScore normalizzato
     private boolean geoRef = false;//TODO probabilmente inutile: basta controllare se geoWord è null
     private double sortScore = 0.0;
-    public String docTitle, docDescription, docDateLine, docKeyWords;
+    public String docTitle, docDescription, docDateLine, docKeyWords, htmlSnippet;
     
     /**
      * Costruttore della classe

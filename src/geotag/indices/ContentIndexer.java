@@ -45,31 +45,9 @@ public class ContentIndexer {
 				+ "contentIndex");
 
 		try {
+			index = new IndexWriter(indexDir, new StandardAnalyzer(), IndexWriter.MaxFieldLength.UNLIMITED);
+			searcher = new IndexSearcher(indexDir.getAbsolutePath());
 
-			// Controllo se esiste già l'indice TODO togliere dopo aver
-			// aggiornato lucene
-			if (!indexDir.exists()) {
-				indexDir.mkdirs();
-			}
-			
-			File[] nameFiles = indexDir.listFiles();
-			if (nameFiles.length > 0){
-				create = false;
-			} else {
-				create = true;
-			}
-
-			String temp = indexDir.getAbsolutePath();
-			index = new IndexWriter(indexDir, new StandardAnalyzer(), create);
-
-			// Controllo se esiste già l'indice
-			//if (indexDir.exists()) {
-				nameFiles = indexDir.listFiles();
-				if (nameFiles.length > 0) { // Indice esiste
-					searcher = new IndexSearcher(indexDir.getAbsolutePath());
-				}
-			//}
-			
 		} catch (IOException e) {
 			System.out.println("pare che il problema si verifichi durante un'apertura dell'indice");
 			//closeIndex();

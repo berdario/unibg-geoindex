@@ -15,8 +15,11 @@ import geotag.words.GeographicWord;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.lucene.analysis.KeywordAnalyzer;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.FilterIndexReader;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
@@ -27,6 +30,13 @@ import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
+import org.apache.lucene.search.highlight.Highlighter;
+import org.apache.lucene.search.highlight.QueryScorer;
+import org.apache.lucene.search.highlight.SimpleHTMLFormatter;
+import org.apache.lucene.search.highlight.TextFragment;
+import org.apache.lucene.search.highlight.TokenSources;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 
 /**
  * Classe che esegue la ricerca dei documenti che soddisfano la query testuale
@@ -55,11 +65,10 @@ public class ContentSearcher {
      * @throws org.apache.lucene.queryParser.ParseException
      */
     public Vector<GeoRefDoc> createTextualRankig(String keyWords){
-
+        String text;
         Vector<GeoRefDoc> docs = new Vector<GeoRefDoc>();
 
         try {
-            //IndexSearcher searcher = new IndexSearcher(contentIndexDir.getName()); //questa roba è fottutamente perversa!
             IndexSearcher searcher = new IndexSearcher(contentIndexPath);
             StandardAnalyzer stdAnalyzer = new StandardAnalyzer();
             QueryParser qp = new QueryParser("content", stdAnalyzer);
@@ -67,12 +76,15 @@ public class ContentSearcher {
             Query query = qp.parse(wildcardQuery.toString());
             //Ordinati in base al peso, al contenuto e al nome del file
             Sort sort = new Sort(new SortField[]{SortField.FIELD_SCORE, new SortField("fileName")}); //Nome del documento
+            //FilterIndexReader reader = new FilterIndexReader(IndexReader.open(contentIndexPath));
+            //query = query.rewrite(IndexReader.open(contentIndexPath)); //necessario per l'highlighting dello snippet
             Hits hits = searcher.search(query, sort);
-            int trovati = hits.length();
-            if (trovati == 0) {
+            Highlighter highlighter = new Highlighter(new SimpleHTMLFormatter(), new QueryScorer(query));
+            int numRisultati = hits.length();
+            if (numRisultati == 0) {
                 //System.out.println("Nessun risultato per \"" + keyWords + "\"");
             } else {
-                for (int i = 0; i < trovati; i++) {
+                for (int i = 0; i < numRisultati; i++) {
                     Document doc = hits.doc(i);
                     //Popolo documento
                     GeoRefDoc newDoc = new GeoRefDoc();
@@ -81,15 +93,27 @@ public class ContentSearcher {
                     newDoc.docDescription = doc.get("description");
                     newDoc.docKeyWords = doc.get("keywords");
                     newDoc.docDateLine = doc.get("dateline");
+                    
+                    text = doc.get("content");
+                    TokenStream tokenStream = TokenSources.getAnyTokenStream(searcher.getIndexReader(), hits.id(i), "content", new StandardAnalyzer());
+                    TextFragment[] frag = highlighter.getBestTextFragments(tokenStream, text, false, 10);
+                    text = "";
+                    for (int j = 0; j < frag.length; j++) {
+                        if ((frag[j] != null) && (frag[j].getScore() > 0)) {
+                            text += frag[j].toString()+"\n";
+                        }
+                    }
+                    newDoc.htmlSnippet=text;
+
                     newDoc.setTextScore(hits.score(i));
                     docs.add(newDoc);
                 }
             }
             
         } catch (ParseException ex) {
-            Logger.getLogger(ContentSearcher.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ContentSearcher.class.getName()).log(Level.SEVERE, "errore durante il parsing della query", ex);
         } catch (IOException ex) {
-            Logger.getLogger(ContentSearcher.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ContentSearcher.class.getName()).log(Level.SEVERE, "errore di lettura I/O", ex);
         }
 
         return docs;
