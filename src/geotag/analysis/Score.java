@@ -59,7 +59,9 @@ public class Score {
     double incrScoreGeoAdminZone = 0.4;
     double incrScoreDistance = 0.6;
     double rho = 0.25;
-    double decrScoreGeoStopWords = -0.5; 
+    double decrScoreGeoStopWords = -0.5;
+
+    MyStandardAnalyzer myStdAnalyzer;
     
     /**
      * Costruttore della classe
@@ -81,6 +83,7 @@ public class Score {
      * @return l'elenco delle GeoWord con il campo geoScore aggiornato
      */
     public Vector<GeographicWord> updateGeoScore(Vector<GeographicWord> finalWordVector, Vector<Word> allWordVector, String swLanguage, Vector<Word> filterWordVector, Statement stmt) throws IOException{        
+        myStdAnalyzer = new MyStandardAnalyzer(swLanguage);
         Vector<GeographicWord> newFinalWordVector = new Vector<GeographicWord>();
         Vector<Word> countryRank = new Vector<Word>();
         int countryFreqMax = 0;
@@ -117,7 +120,7 @@ public class Score {
             newGeoWord = searchContext(geoWord, finalWordVector, allWordVector, filterWordVector, stmt);
    
             // 2) In base alla descrizione geografica della zona
-            newGeoWord = searchFeature(geoWord, allWordVector, swLanguage, countryCodeWithMaxFreq, stmt);
+            newGeoWord = searchFeature(geoWord, allWordVector, countryCodeWithMaxFreq, stmt);
                                  
             // 3) In base alla maggioranza (Nazione e Continente)
             newGeoWord = searchMajority(geoWord, countryRank, countryFreqMax);
@@ -362,7 +365,7 @@ public class Score {
      * @return la geoWord con il GeoScore aggiornato
      * @throws java.io.IOException
      */
-    public GeographicWord  searchFeature(GeographicWord geoWord, Vector<Word> allWordVector, String swLanguage, String countryCodeWithMaxFreq, Statement stmt) throws IOException{
+    public GeographicWord  searchFeature(GeographicWord geoWord, Vector<Word> allWordVector, String countryCodeWithMaxFreq, Statement stmt) throws IOException{
         String featureClass = geoWord.getFeatureClass();
         String featureCode = geoWord.getFeatureCode();
         String code = featureClass + "." + featureCode; // H.STMQ
@@ -376,7 +379,6 @@ public class Score {
         descriptionString = selectFeatureQuery(code, stmt);
         
         // Devo selezionare solo le parole UTILI (sfrutto l'analizzatore da me creato)
-        MyStandardAnalyzer myStdAnalyzer = new MyStandardAnalyzer(swLanguage);
         AnalyzerUtils descriptionAnalyzer = new AnalyzerUtils();
         for(int i = 0; i < descriptionString.size(); i++){
             descriptionTerm = descriptionAnalyzer.getNameTokens(myStdAnalyzer, descriptionString.elementAt(i));

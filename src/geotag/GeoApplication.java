@@ -546,7 +546,7 @@ public final class GeoApplication implements Runnable{
             cachedUnsortedResults.put(Tuple.from(keyWords, location), results);
         }
 
-        //ordinamento dei risultati di default, bilanciato fra place e keyword
+        //ordinamento dei risultati bilanciato fra place e keyword
         results = createRanking(results, weigth);
 
         cachedResults.put(Tuple.from(keyWords,location,weigth), results);
