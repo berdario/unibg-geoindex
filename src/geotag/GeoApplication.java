@@ -6,6 +6,9 @@
 
 package geotag;
 
+import com.mallardsoft.tuple.Pair;
+import com.mallardsoft.tuple.Triple;
+import com.mallardsoft.tuple.Tuple;
 import geotag.analysis.Filter;
 import geotag.analysis.GeoCandidateIdentification;
 import geotag.analysis.Score;
@@ -53,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -86,8 +90,10 @@ import org.apache.commons.io.FileUtils;
  * @author  giorgio
  */
 public final class GeoApplication implements Runnable{
-    //private Vector<GeoRefDoc> resultsmerge = new Vector<GeoRefDoc>();
-    
+    private int maxCachedResults = 300;
+    CacheHashMap<Triple<String,String,Double>,Vector<GeoRefDoc>> cachedResults = new CacheHashMap<Triple<String, String, Double>, Vector<GeoRefDoc>>(maxCachedResults);
+    CacheHashMap<Pair<String,String>,Vector<GeoRefDoc>> cachedUnsortedResults = new CacheHashMap<Pair<String, String>, Vector<GeoRefDoc>>(maxCachedResults);
+
     private String swLanguage;
     
     NumberFormat formatter = new DecimalFormat("#0.00");  //Formatto il numero a 2 cifre decimali
@@ -512,24 +518,38 @@ public final class GeoApplication implements Runnable{
 	    return newGeoWordVector;
 	}
 
-    public Vector<GeoRefDoc> search(String keyWords, String location) {
 
-        Vector<GeoRefDoc> results = new Vector<GeoRefDoc>();
+    public Vector<GeoRefDoc> search(String keyWords, String location){
+       return search(keyWords, location, 0.5);
+    }
 
+    public Vector<GeoRefDoc> search(String keyWords, String location, Double weigth) {
 
-        ContentSearcher content = new ContentSearcher();
-        results = content.createTextualRankig(keyWords);
+        Vector<GeoRefDoc> results = cachedResults.get(Tuple.from(keyWords,location,weigth));
+        if (results != null){
+            return results;
+        }
 
-        GeoRefLocation grLoc = new GeoRefLocation();
-        results = grLoc.mergeLocation(results, location);
+        results = cachedUnsortedResults.get(Tuple.from(keyWords,location));
 
-        DistanceSearcher distanceSorter = new DistanceSearcher();
-        distanceSorter.createDistanceRanking(results, grLoc.getGeoLocation(location, null));
+        if (results == null){
 
-        ResultsTable resultSorter = new ResultsTable();
+            ContentSearcher content = new ContentSearcher();
+            results = content.createTextualRankig(keyWords);
+
+            GeoRefLocation grLoc = new GeoRefLocation();
+            results = grLoc.mergeLocation(results, location);
+
+            DistanceSearcher distanceSorter = new DistanceSearcher();
+            distanceSorter.createDistanceRanking(results, grLoc.getGeoLocation(location, null));
+            
+            cachedUnsortedResults.put(Tuple.from(keyWords, location), results);
+        }
+
         //ordinamento dei risultati di default, bilanciato fra place e keyword
-        results = resultSorter.createRanking(results, 50);
+        results = createRanking(results, weigth);
 
+        cachedResults.put(Tuple.from(keyWords,location,weigth), results);
 
         return results;
     }
@@ -630,7 +650,26 @@ public final class GeoApplication implements Runnable{
 			return null;
 		}
 	}
-	
+
+    /**
+     * Metodo che ordina il vettore dei documenti reperiti rispetto al campo "sortScore"
+     * @param results : vettore dei documenti
+     * @param weigth : costante che indica il peso da attribuire fra contenuto e distanceScore
+     * @return il vettore dei documenti ordinato
+     */
+    public static Vector<GeoRefDoc> createRanking(Vector<GeoRefDoc> results, double weigth) {
+        //Calcolo il sortScore
+        //TODO: probabilmente si può migliorare inserendo direttamente i risultati in un nuovo vector mentre vengono calcolati i sortscore uno per uno
+        //comunque non è di sicuro un collo di bottiglia: durante il calcolo del distanceScore a monte ci sono ottimizzazioni simili da fare (con 100000 risultati da ordinare si intaserebbe prima li che qui)
+        for (int i = 0; i < results.size(); i++) {
+            GeoRefDoc doc = results.elementAt(i);
+            doc.setSortScore(weigth * doc.getDistanceScore() + (1 - weigth) * doc.getTextScore());
+        }
+
+        Collections.sort(results,Collections.reverseOrder());
+        
+        return results;
+    }	
 	/**
 	 * @param args the command line arguments
 	 */

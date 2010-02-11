@@ -5,6 +5,7 @@
 
 package geotag.words;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
@@ -16,13 +17,13 @@ import java.util.Vector;
  * entità geografiche ad esso associate, trovate nella fase di GeoTagging.
  * @author Giorgio Ghisalberti
  */
-public class GeoRefDoc {
+public class GeoRefDoc implements Comparable {
     private String nomeDoc = "";
     private double textScore = 0.0;
     private double distanceScore = 0.0;
     private HashMap<GeographicWord, Double> scores = null;//il secondo campo è il vecchio geoRefScore normalizzato
     private boolean geoRef = false;//TODO probabilmente inutile: basta controllare se geoWord è null
-    private double sortScore = 0.0;
+    private Double sortScore = 0.0;
     public String docTitle, docDescription, docDateLine, docKeyWords, htmlSnippet;
     
     /**
@@ -127,5 +128,11 @@ public class GeoRefDoc {
     public void setSortScore(double sortScore) {
         this.sortScore = sortScore;
     }
+
+    public int compareTo(Object o1) {
+        return sortScore.compareTo(((GeoRefDoc)o1).sortScore);
+    }
+
+
 
 }
