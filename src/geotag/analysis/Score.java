@@ -30,6 +30,8 @@ import geotag.words.StringOperation;
 import geotag.indices.AnalyzerUtils;
 import geotag.words.GeographicWord;
 import geotag.words.Word;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Classe che ha il compito di incrementare il peso geografico delle GeoWord reperite 
@@ -62,7 +64,8 @@ public class Score {
     double decrScoreGeoStopWords = -0.5;
 
     MyStandardAnalyzer myStdAnalyzer;
-    
+    ArrayList<String> geoStopwords = new ArrayList();
+
     /**
      * Costruttore della classe
      */
@@ -70,6 +73,18 @@ public class Score {
         this.path=GeoApplication.getPath();
         this.slash=File.separator;
         this.dbpath=path+"db"+slash;
+        try {
+            BufferedReader geoStopwordFile = new BufferedReader(new FileReader(new File(GeoApplication.getPath() + "geoStopwords.txt")));
+            String line = "";
+
+            while ((line = geoStopwordFile.readLine()) != null) {
+                geoStopwords.addAll(Arrays.asList(line.split(",")));
+            }
+            geoStopwordFile.close();
+        } catch (IOException ex) {
+            System.err.println("Errore nell'apertura del file geoStopwords.txt");
+            ex.printStackTrace();
+        }
     }
     
     /**
@@ -194,34 +209,12 @@ public class Score {
      * @return la geoWord con il GeoScore aggiornato
      */
     public GeographicWord searchGeoStopwords(GeographicWord geoWord, Vector<Word> allWordVector){
-        String line = "";
-        String[] geoStopwords = null;        
-        
-        String s = geoWord.getName();
-        
-        try {
-            File fileName = new File(GeoApplication.getPath()+"geoStopwords.txt");
-            //Apertura file
-            FileReader fr = new FileReader(fileName);
-            BufferedReader geoStopwordFile = new BufferedReader(fr); 
-            
-
-            while ((line = geoStopwordFile.readLine()) != null) {
-                geoStopwords = line.split(",");
-                for (int i = 0; i < geoStopwords.length; i++) {
-                    if (geoStopwords[i].equals(geoWord.getName()) || geoStopwords[i].equals(geoWord.getZoneDocName())) {
-                        double score = geoWord.getGeoScore();
-                        geoWord.setGeoScore(score + decrScoreGeoStopWords * 1);
-                    }
-                }
+        for (int i = 0; i < geoStopwords.size(); i++) {
+            if (geoStopwords.get(i).equals(geoWord.getName()) || geoStopwords.get(i).equals(geoWord.getZoneDocName())) {
+                double score = geoWord.getGeoScore();
+                geoWord.setGeoScore(score + decrScoreGeoStopWords * 1);
             }
-
-            fr.close();            
-        } catch (IOException ex) {
-            System.err.println("Errore nell'apertura del file geoStopwrods.txt");
-            ex.printStackTrace();
-        } 
-        
+        }
         return geoWord;
     }
 
