@@ -33,6 +33,17 @@ public class GeoRefDoc implements Comparable {
         
     }
 
+    @Override
+    public String toString() {
+        return "documento: " + nomeDoc +
+               "\ntextscore: " + textScore +
+               "\nsortscore: " + sortScore +
+               "\ndistancescore: " + distanceScore +
+               "\ntitle: " + docTitle +
+               "\ndescription: " + docDescription +
+               "\nkeywords: " + docKeyWords +
+               "\ndateline: " + docDateLine + "\n";
+    }
 
     /**
      * Restituisce il peso geografico associato al documento

@@ -27,7 +27,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 
-public class GeoApplicationGui extends javax.swing.JFrame {
+public class GeoApplicationGui extends javax.swing.JFrame implements Runnable{
     //COSTANTI
 
     String DRIVER_CLASS_NAME = "org.postgresql.Driver";
@@ -1102,6 +1102,11 @@ public class GeoApplicationGui extends javax.swing.JFrame {
     private javax.swing.JTabbedPane tabbedPane;
     private javax.swing.JSplitPane visualizationSplitPane;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void run() {
+        setVisible(true);
+    }
 
 }
 

@@ -28,21 +28,13 @@ import geotag.words.GeoRefDoc;
 import geotag.words.GeographicWord;
 import geotag.words.StringOperation;
 import geotag.words.Word;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.LineNumberReader;
-import java.lang.reflect.Method;
-import java.nio.Buffer;
-import java.nio.CharBuffer;
 import java.nio.charset.CodingErrorAction;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -64,12 +56,6 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.queryParser.ParseException;
 import org.jdom.JDOMException;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.PosixParser;
 //import org.apache.commons.configuration.Configuration;
 //import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -81,7 +67,9 @@ import org.apache.commons.io.FileUtils;
  *
  * @author  giorgio
  */
-public final class GeoApplication implements Runnable{
+public final class GeoApplication {
+    
+
     private int maxCachedResults = 300;
     CacheHashMap<Triple<String,String,Double>,Vector<GeoRefDoc>> cachedResults = new CacheHashMap<Triple<String, String, Double>, Vector<GeoRefDoc>>(maxCachedResults);
     CacheHashMap<Pair<String,String>,Vector<GeoRefDoc>> cachedUnsortedResults = new CacheHashMap<Pair<String, String>, Vector<GeoRefDoc>>(maxCachedResults);
@@ -97,62 +85,6 @@ public final class GeoApplication implements Runnable{
     
     private static String path,dbpath,cachepath,configfile,slash;
     private ArrayList<File> indexDirs;
-	
-	//public class GeoApplicationCmd{
-		private void GeoApplicationCmd() {
-			boolean flag=true;
-			//InputStreamReader cin = new InputStreamReader(System.in);
-			BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
-			//CharBuffer target=CharBuffer.allocate(200);//sostituisco charbuffer con bufferedreader
-			String buffer;
-			String[] pair;
-			System.out.print("LocationBasedSearch:\n" +
-					"------------------------------------------------------------" +
-					"--------------------\n" +
-					"Interactive prompt: to quit type \"quit\" or press Ctrl-D\n");
-			flag=true;
-			do{
-	    		try {
-	    			System.out.print(">");
-	    			buffer=in.readLine();
-					
-					if( buffer==null || buffer.equals("quit") ){
-						flag=false;
-					} else if ((pair=buffer.split(",")).length==2){
-						cmdSearch(pair[0],pair[1]);
-					} else if ((pair=buffer.split(" ")).length==2){
-						cmdSearch(pair[0],pair[1]);
-					}
-					/*if (target.toString().equals("help")){
-						
-					}*/else if (!buffer.equals("")){
-						System.out.print("unknown command\n");
-					}
-					
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			} while (flag);
-		}
-		//TODO questa modifica non mi piace molto
-		
-		private void cmdSearch(String keywords, String location){
-			Vector<GeoRefDoc> results=search(keywords,location);
-			int i=0;
-			for (GeoRefDoc doc : results) {
-				i++;
-				System.out.println(i+"° documento:\n"+doc.getNomeDoc()+
-						"\ntextscore: "+doc.getTextScore()+
-						"\nsortscore: "+doc.getSortScore()+
-						"\ndistancescore: "+doc.getDistanceScore()+
-                                                "\ntitle: "+doc.docTitle+
-                                                "\ndescription: "+doc.docDescription+
-                                                "\nkeywords: "+doc.docKeyWords+
-                                                "\ndateline: "+doc.docDateLine+"\n");
-			}
-		}
-		
-	//}
 	
 	public String createIndex(File curDir){
         String errortext="";
@@ -544,10 +476,6 @@ public final class GeoApplication implements Runnable{
         return results;
     }
 	
-	public void run(){
-		new GeoApplicationGui().setVisible(true);
-	}
-	
 	public static String getPath(){
 		return path;
 	}
@@ -613,10 +541,10 @@ public final class GeoApplication implements Runnable{
 		}
 	}
 	
-	private ArrayList<File> updateIndexConfig(String inputpath) {//da aggiungere controllo? permette di aggiungere in continuazione lo stesso path
+	public void updateIndexConfig(String inputpath) {//da aggiungere controllo? permette di aggiungere in continuazione lo stesso path
 		try {
 			PropertiesConfiguration config = new PropertiesConfiguration(configfile);
-			ArrayList<File> innerIndexDirs=updateIndexConfig();
+			ArrayList<File> innerIndexDirs=getIndexedDirs();
 			
 			if (inputpath!=null){
 				File inputfile=new File(inputpath);
@@ -627,14 +555,13 @@ public final class GeoApplication implements Runnable{
 				}
 			}
 			
-			return innerIndexDirs;
+			indexDirs = innerIndexDirs;
 		} catch (ConfigurationException e) {		
 			e.printStackTrace();
-			return null;
 		}
 	}
 	
-	private ArrayList<File> updateIndexConfig() {
+	private ArrayList<File> getIndexedDirs() {
 		try {
 			PropertiesConfiguration config = new PropertiesConfiguration(configfile);
 			String[] indexDirPaths=config.getStringArray("indexdirs");
@@ -670,81 +597,6 @@ public final class GeoApplication implements Runnable{
         
         return results;
     }	
-	/**
-	 * @param args the command line arguments
-	 */
-	public static void main(String args[]) {
-		GeoApplication mainApp;
-		CommandLineParser parser = new PosixParser();
-		Options options=new Options();
-		options.addOption("g", "gui", false, "starts with the gui");
-		options.addOption("h", "help", false, "print this message");
-		//options.addOption("i", "index", false, "indexes the documents on the given path");
-		options.addOption(OptionBuilder.withLongOpt("index").hasOptionalArg().withDescription("indexes the documents on the given path or reindex everything if without argument").create("i"));
-		HelpFormatter usagehelp = new HelpFormatter();
-		String cfgpath = null;
-		try {
-			CommandLine cmd = parser.parse(options, args);
-			args = cmd.getArgs();
-
-			if (cmd.hasOption("help")) {
-				StackTraceElement[] stack = Thread.currentThread ().getStackTrace ();
-				String programName = stack[stack.length - 1].getFileName();
-				String usage=programName+" [configfile] --index [path]\n" +
-				programName+" [configfile] keyword place";
-				usagehelp.printHelp(usage, options);
-			} else if (cmd.hasOption("gui")) {
-				mainApp = new GeoApplication(cfgpath);
-				java.awt.EventQueue.invokeLater(mainApp
-				/*
-				 * new Runnable() { public void run() { new
-				 * GeoApplicationGui().setVisible(true); } }
-				 */);
-			} else {
-				if (args.length==1 || args.length==3){
-					cfgpath=args[0];
-					if (args.length==3){
-						String[] temp={args[1],args[2]};
-						args=temp;
-					}
-				}
-				if (cmd.hasOption("index")) {
-					mainApp = new GeoApplication(cfgpath);
-					String inputpath = cmd.getOptionValue("index");
-					mainApp.indexDirs = mainApp.updateIndexConfig(inputpath);
-
-					if (inputpath != null) {
-						String errortext = mainApp.createIndex(new File(
-								inputpath));
-						System.out.println(errortext);
-					} else {
-						String errortext = mainApp.createIndex();
-						System.out.println(errortext);
-					}
-				} else if (args.length == 2 || args.length == 3) {
-					mainApp = new GeoApplication(cfgpath);
-					Vector<GeoRefDoc> results = mainApp.search(args[0], args[1]);
-					for (GeoRefDoc doc : results) {
-						System.out.println(doc.getNomeDoc() + "\ntextscore: "
-								+ doc.getTextScore() + "\nsortscore: "
-								+ doc.getSortScore() + "\ndistancescore: "
-								+ doc.getDistanceScore() +
-                                                "\ntitle: "+doc.docTitle+
-                                                "\ndescription: "+doc.docDescription+
-                                                "\nkeywords: "+doc.docKeyWords+
-                                                "\ndateline: "+doc.docDateLine+"\n");
-					}
-				} else if (args.length == 0 || args.length == 1) {
-					mainApp = new GeoApplication(cfgpath);
-					mainApp.GeoApplicationCmd();
-				}
-			}
-		} catch (org.apache.commons.cli.ParseException e) {
-			e.printStackTrace();
-		}
-	}
-
-	
 
 
 }
