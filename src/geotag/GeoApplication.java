@@ -38,6 +38,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -93,6 +94,8 @@ public final class GeoApplication implements Runnable{
     private int maxCachedResults = 300;
     CacheHashMap<Triple<String,String,Double>,Vector<GeoRefDoc>> cachedResults = new CacheHashMap<Triple<String, String, Double>, Vector<GeoRefDoc>>(maxCachedResults);
     CacheHashMap<Pair<String,String>,Vector<GeoRefDoc>> cachedUnsortedResults = new CacheHashMap<Pair<String, String>, Vector<GeoRefDoc>>(maxCachedResults);
+
+    public static RTreeReader rtree;
 
     private String swLanguage;
     
@@ -295,7 +298,7 @@ public final class GeoApplication implements Runnable{
                                                 + formatter.format(scores.get(gw))+" - codici: ");
                                         
                                         vettori vettoricodici=new vettori();
-                                        vettoricodici=query_rtree.query(path,gw.getmbr_x1(), gw.getmbr_y1(),gw.getmbr_x2(), gw.getmbr_y2());
+                                        vettoricodici=rtree.query(gw.getmbr_x1(), gw.getmbr_y1(),gw.getmbr_x2(), gw.getmbr_y2());
                                         boolean trovato=false;
                                         for(int trovati=0;trovati<vettoricodici.codici.size();trovati++)
                                         {
@@ -562,38 +565,48 @@ public final class GeoApplication implements Runnable{
 		return path;
 	}
 	
-	public GeoApplication(String cfgpath){
-		slash = System.getProperty("file.separator");
-		
-		if (cfgpath!=null){
-			configfile=cfgpath;
-		} else {
-			// set default config path
+    public GeoApplication(String cfgpath) {
+        slash = System.getProperty("file.separator");
 
-			String os = System.getProperty("os.name");
-			String homepath = System.getProperty("user.home");
-			if (os.startsWith("Linux")) {
+        if (cfgpath != null) {
+            configfile = cfgpath;
+        } else {
+            // set default config path
 
-				configfile = System.getenv("XDG_CONFIG_HOME");
-				if (configfile == null) {
-					configfile = homepath + "/.config/";
-				}
-				configfile += "geosearch/config";
+            String os = System.getProperty("os.name");
+            String homepath = System.getProperty("user.home");
+            if (os.startsWith("Linux")) {
 
-			} else if (os.startsWith("Windows")) {
-				configfile = System.getenv("APPDATA") + slash + "geosearch"
-						+ slash + "config";
-			} else if (os.startsWith("Mac")) {
-				configfile = homepath
-						+ "/Library/Application Support/geosearch/" + "config";
-			} else {
-				configfile = System.getProperty("user.dir") + "geosearch"
-						+ slash + "config";
-			}
-		}
-		
-		loadConfiguration();
-	}
+                configfile = System.getenv("XDG_CONFIG_HOME");
+                if (configfile == null) {
+                    configfile = homepath + "/.config/";
+                }
+                configfile += "geosearch/config";
+
+            } else if (os.startsWith("Windows")) {
+                configfile = System.getenv("APPDATA") + slash + "geosearch" + slash + "config";
+            } else if (os.startsWith("Mac")) {
+                configfile = homepath + "/Library/Application Support/geosearch/" + "config";
+            } else {
+                configfile = System.getProperty("user.dir") + "geosearch" + slash + "config";
+            }
+        }
+
+        loadConfiguration();
+        try {
+            rtree = new RTreeReader(dbpath);
+        } catch (SecurityException ex) {
+            Logger.getLogger(GeoApplication.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NullPointerException ex) {
+            Logger.getLogger(GeoApplication.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(GeoApplication.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalArgumentException ex) {
+            Logger.getLogger(GeoApplication.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(GeoApplication.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 	
 	public void loadConfiguration(){
 		File cfgfile=new File(configfile);

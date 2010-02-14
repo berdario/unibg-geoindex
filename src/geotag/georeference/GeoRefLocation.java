@@ -24,7 +24,7 @@ import jdbm.btree.BTree;
 import bTree.Serial;
 import bTree.Serializ;
 import geotag.GeoApplication;
-import geotag.query_rtree;
+import geotag.RTreeReader;
 import geotag.vettori;
 import geotag.words.GeoRefDoc;
 import geotag.words.StringOperation;
@@ -40,6 +40,7 @@ import java.io.LineNumberReader;
  */
 public class GeoRefLocation {
     String path,dbpath,slash;
+    RTreeReader rtree;
     /**
      * Costruttore della classe
      */
@@ -47,6 +48,7 @@ public class GeoRefLocation {
         this.path=GeoApplication.getPath();
         this.slash=File.separator;
         this.dbpath=path+"db"+slash;
+        this.rtree=GeoApplication.rtree;
     }
 
 
@@ -468,7 +470,7 @@ public class GeoRefLocation {
             boolean documentotrovato = false;
 
             int numeroresults = 0;
-            vettori vettoricodici = query_rtree.query(path, geoLocation.getmbr_x1() + allarga, geoLocation.getmbr_y1() + allarga, geoLocation.getmbr_x2() - allarga, geoLocation.getmbr_y2() - allarga);
+            vettori vettoricodici = rtree.query(geoLocation.getmbr_x1() + allarga, geoLocation.getmbr_y1() + allarga, geoLocation.getmbr_x2() - allarga, geoLocation.getmbr_y2() - allarga);
 
             for (int trovati = 0; trovati < vettoricodici.codici.size(); trovati++) {
 

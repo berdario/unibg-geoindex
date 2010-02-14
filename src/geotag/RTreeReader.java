@@ -1,6 +1,5 @@
 package geotag;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Vector;
@@ -17,41 +16,39 @@ import spatialindex.IVisitor;
 import spatialindex.IData;
 import spatialindex.INode;
 
-public class query_rtree {
+public class RTreeReader {
 
-	/**
-	 * @param args
+    ISpatialIndex tree;
+    MyVisitor visitor;
+
+    /**
 	 * @throws IOException 
 	 * @throws IllegalArgumentException 
 	 * @throws FileNotFoundException 
 	 * @throws NullPointerException 
 	 * @throws SecurityException 
-	 */
-	public static vettori query(String path,double a,double b,double c,double d) throws SecurityException, NullPointerException, FileNotFoundException, IllegalArgumentException, IOException {
+    */
+    public RTreeReader(String dbpath) throws SecurityException, NullPointerException, FileNotFoundException, IllegalArgumentException, IOException {
+        //---------------------------APERTURA R-TREE------------------------------//
+        IStorageManager diskfile = new DiskStorageManager(dbpath+ "datiscritti");
+        IBuffer filebuffer = new RandomEvictionsBuffer(diskfile, 10, false);
+        PropertySet ps2 = new PropertySet();
+        ps2.setProperty("IndexIdentifier", 1);
+        tree = new RTree(ps2, filebuffer);
+        visitor = new MyVisitor();
+    }
 
-		double f1[]=new double[2],f2[]=new double[2];
+
+	
+	public  vettori query(double a,double b,double c,double d) {
+
+		double f1[]={c,d},f2[]={a,b};
 		vettori codici=new vettori();
-		//---------------------------APERTURA R-TREE------------------------------//
-		IStorageManager diskfile = new DiskStorageManager(path+"db"+File.separator+"datiscritti");
-		IBuffer filebuffer = new RandomEvictionsBuffer(diskfile, 10, false);
-		PropertySet ps2 = new PropertySet();
-		Integer i = new Integer(1);
-		ps2.setProperty("IndexIdentifier", i);
-		ISpatialIndex tree = new RTree(ps2, filebuffer);
-		MyVisitor vis = new MyVisitor();
+		tree.containmentQuery(new Region(f1,f2), visitor);
 		
-		Region r;
-		f2[0]=a;
-		f2[1] =b;
-		f1[0] = c;
-		f1[1] = d;
-		r = new Region(f1,f2);	
-		//tree.intersectionQuery(r, vis);
-		tree.containmentQuery(r, vis);
-		
-		for(int num=0;num<vis.visitati.size();num++){
+		for(int num=0;num<visitor.visited.size();num++){
 			
-			IData dati_rtree = ((IData)vis.visitati.elementAt(num));
+			IData dati_rtree = ((IData)visitor.visited.elementAt(num));
 			codici.codici.add(String.valueOf((dati_rtree.getIdentifier())));
 			codici.nomi.add(new String(dati_rtree.getData()));
 		}
@@ -63,7 +60,7 @@ class MyVisitor implements IVisitor
 {
 	public int m_indexIO = 0;
 	public int m_leafIO = 0;
-	public Vector<IData> visitati=new Vector<IData>();
+	public Vector<IData> visited=new Vector<IData>();
     @Override
 	public void visitNode(final INode n)
 	{
@@ -79,6 +76,6 @@ class MyVisitor implements IVisitor
 		System.out.print(" "+a+" ");
 		System.out.println(" "+d.getShape());
 		*/
-		visitati.addElement(d);
+		visited.addElement(d);
 	}
 }
