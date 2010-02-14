@@ -5,18 +5,17 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Vector;
 
-import principale.Spatialindex.IData;
-import principale.Spatialindex.INode;
-import principale.Spatialindex.ISpatialIndex;
-import principale.Spatialindex.IVisitor;
-import principale.Spatialindex.Region;
-
-import principale.r_tree.RTree;
-import principale.storagemanager.DiskStorageManager;
-import principale.storagemanager.IBuffer;
-import principale.storagemanager.IStorageManager;
-import principale.storagemanager.PropertySet;
-import principale.storagemanager.RandomEvictionsBuffer;
+import spatialindex.storagemanager.DiskStorageManager;
+import spatialindex.storagemanager.IStorageManager;
+import spatialindex.storagemanager.RandomEvictionsBuffer;
+import spatialindex.storagemanager.IBuffer;
+import spatialindex.ISpatialIndex;
+import spatialindex.rtree.RTree;
+import spatialindex.storagemanager.PropertySet;
+import spatialindex.Region;
+import spatialindex.IVisitor;
+import spatialindex.IData;
+import spatialindex.INode;
 
 public class query_rtree {
 
@@ -33,9 +32,7 @@ public class query_rtree {
 		double f1[]=new double[2],f2[]=new double[2];
 		vettori codici=new vettori();
 		//---------------------------APERTURA R-TREE------------------------------//
-		PropertySet ps = new PropertySet();        
-		ps.setProperty("FileName", path+"db"+File.separator+"datiscritti");
-		IStorageManager diskfile = new DiskStorageManager(ps);
+		IStorageManager diskfile = new DiskStorageManager(path+"db"+File.separator+"datiscritti");
 		IBuffer filebuffer = new RandomEvictionsBuffer(diskfile, 10, false);
 		PropertySet ps2 = new PropertySet();
 		Integer i = new Integer(1);
@@ -67,12 +64,14 @@ class MyVisitor implements IVisitor
 	public int m_indexIO = 0;
 	public int m_leafIO = 0;
 	public Vector<IData> visitati=new Vector<IData>();
+    @Override
 	public void visitNode(final INode n)
 	{
 		if (n.isLeaf()) m_leafIO++;
 		else m_indexIO++;
 	}
 
+    @Override
 	public void visitData(final IData d)
 	{   /*
 		String a=new String(d.getData());
