@@ -65,13 +65,15 @@ public class PDFParser {
             PDDocumentCatalog catalog = document.getDocumentCatalog();
             PDMetadata metadata = catalog.getMetadata();
 
-            if (metadata != null){//TODO non tutti i documenti hanno dei metadata xmp, ma possono avere lo stesso un titolo... indagare dove si trova ed eventualmente implementare
-                pdfTitle=parseTitle(metadata.createInputStream());
-            }
-
             // Lettura del contenuto del documento
             stripper = new PDFTextStripper();
             docContent = stripper.getText(document);
+
+            if (metadata != null){//TODO non tutti i documenti hanno dei metadata xmp, ma possono avere lo stesso un titolo... indagare dove si trova ed eventualmente implementare
+                pdfTitle=parseTitle(metadata.createInputStream());
+            } else { //per ora, se non troviamo metadati, settiamo come titolo la prima riga del pdf
+                pdfTitle=docContent.split("\n",2)[0];
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
         } finally {
