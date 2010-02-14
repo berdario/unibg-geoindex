@@ -23,15 +23,17 @@ import jdbm.RecordManagerFactory;
 import jdbm.btree.BTree;
 import bTree.Serial;
 import bTree.Serializ;
+import com.mallardsoft.tuple.Pair;
+import com.mallardsoft.tuple.Tuple;
 import geotag.GeoApplication;
 import geotag.RTreeReader;
-import geotag.vettori;
 import geotag.words.GeoRefDoc;
 import geotag.words.StringOperation;
 import geotag.words.GeoWordsOperation;
 import geotag.words.GeographicWord;
 import java.io.FileReader;
 import java.io.LineNumberReader;
+import java.util.ArrayList;
 
 /**
  * Classe che ha il compito di georeferenziare la Locazione, ovvero la zona ricevuta
@@ -470,9 +472,9 @@ public class GeoRefLocation {
             boolean documentotrovato = false;
 
             int numeroresults = 0;
-            vettori vettoricodici = rtree.query(geoLocation.getmbr_x1() + allarga, geoLocation.getmbr_y1() + allarga, geoLocation.getmbr_x2() - allarga, geoLocation.getmbr_y2() - allarga);
+            ArrayList<Pair<String,String>> codici = rtree.query(geoLocation.getmbr_x1() + allarga, geoLocation.getmbr_y1() + allarga, geoLocation.getmbr_x2() - allarga, geoLocation.getmbr_y2() - allarga);
 
-            for (int trovati = 0; trovati < vettoricodici.codici.size(); trovati++) {
+            for (int trovati = 0; trovati < codici.size(); trovati++) {
 
                 //TODO estrarre questi pezzi in una funzione di query sull'indice geografico apposta
                 String line = null;
@@ -480,7 +482,8 @@ public class GeoRefLocation {
                 LineNumberReader lr = null;
 
                 try {
-                    fileletto = new FileReader(dbpath + (Integer.parseInt(vettoricodici.codici.elementAt(trovati)) / 1000) + slash + vettoricodici.codici.elementAt(trovati));
+                    String codice = Tuple.get1(codici.get(trovati));
+                    fileletto = new FileReader(dbpath + (Integer.parseInt(codice) / 1000) + slash + codice);
                     // file.write(nameFiles[i].getName()+"�#"+gw.getGeoScore()+"\r\n");
                     lr = new LineNumberReader(fileletto);
                     line = lr.readLine();
@@ -502,7 +505,7 @@ public class GeoRefLocation {
                             documentoref = results.elementAt(numeroresults);
                             if (paeselocalizzato == false) {
                                 try {
-                                    geoLocation = getGeoLocation(vettoricodici.nomi.elementAt(trovati), null);
+                                    geoLocation = getGeoLocation(Tuple.get2(codici.get(trovati)), null);
                                 } catch (Exception e) {
                                     // 	TODO: handle exception
                                     }

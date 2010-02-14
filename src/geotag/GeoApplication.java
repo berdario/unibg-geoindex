@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -297,13 +296,13 @@ public final class GeoApplication implements Runnable{
                                                 + formatter.format(finalGeoWordVector.elementAt(ind).getGeoScore()) + " - georefvalue: "
                                                 + formatter.format(scores.get(gw))+" - codici: ");
                                         
-                                        vettori vettoricodici=new vettori();
-                                        vettoricodici=rtree.query(gw.getmbr_x1(), gw.getmbr_y1(),gw.getmbr_x2(), gw.getmbr_y2());
+                                        ArrayList<Pair<String,String>> codici = rtree.query(gw.getmbr_x1(), gw.getmbr_y1(),gw.getmbr_x2(), gw.getmbr_y2());
                                         boolean trovato=false;
-                                        for(int trovati=0;trovati<vettoricodici.codici.size();trovati++)
+                                        for(int trovati=0;trovati<codici.size();trovati++)
                                         {
-                                        	System.out.print(vettoricodici.codici.elementAt(trovati)+" ");
-                                        	File file = new File(dbpath+(Integer.parseInt(vettoricodici.codici.elementAt(trovati))/1000)+slash+vettoricodici.codici.elementAt(trovati));
+                                            String codice = Tuple.get1(codici.get(trovati));
+                                            System.out.print(codice+" ");
+                                        	File file = new File(dbpath+(Integer.parseInt(codice)/1000)+slash+codice);
                                         	if (file.exists()){
 
                                         		FileReader reader=new FileReader(file);
@@ -322,7 +321,7 @@ public final class GeoApplication implements Runnable{
                                         	}
                                         	
                                         	if(trovato==false){
-                                        		FileWriter file2=new FileWriter(dbpath+(Integer.parseInt(vettoricodici.codici.elementAt(trovati))/1000)+slash+vettoricodici.codici.elementAt(trovati),true);
+                                        		FileWriter file2=new FileWriter(dbpath+(Integer.parseInt(codice)/1000)+slash+codice,true);
                                         		file2.write(hash+"�#"+gw.getGeoScore()+"�#"+scores.get(gw)+"\r\n");
                                         		file2.close();
                                         	}

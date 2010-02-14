@@ -1,7 +1,11 @@
 package geotag;
 
+import com.mallardsoft.tuple.Pair;
+import com.mallardsoft.tuple.Tuple;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.Exception;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import spatialindex.storagemanager.DiskStorageManager;
@@ -38,22 +42,19 @@ public class RTreeReader {
         visitor = new MyVisitor();
     }
 
+    public ArrayList<Pair<String, String>> query(double a, double b, double c, double d) {
 
-	
-	public  vettori query(double a,double b,double c,double d) {
+        ArrayList<Pair<String, String>> codes = new ArrayList<Pair<String, String>>();
+        double f1[] = {c, d}, f2[] = {a, b};
+        tree.containmentQuery(new Region(f1, f2), visitor);
 
-		double f1[]={c,d},f2[]={a,b};
-		vettori codici=new vettori();
-		tree.containmentQuery(new Region(f1,f2), visitor);
-		
-		for(int num=0;num<visitor.visited.size();num++){
-			
-			IData dati_rtree = ((IData)visitor.visited.elementAt(num));
-			codici.codici.add(String.valueOf((dati_rtree.getIdentifier())));
-			codici.nomi.add(new String(dati_rtree.getData()));
-		}
-		return codici;
-	}
+        for (int num = 0; num < visitor.visited.size(); num++) {
+
+            IData dati_rtree = ((IData) visitor.visited.elementAt(num));
+            codes.add(Tuple.from(String.valueOf((dati_rtree.getIdentifier())), new String(dati_rtree.getData())));
+        }
+        return codes;
+    }
 
 }
 class MyVisitor implements IVisitor
