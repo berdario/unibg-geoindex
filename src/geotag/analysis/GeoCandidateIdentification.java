@@ -5,25 +5,17 @@
 
 package geotag.analysis;
 
-import geotag.DatabaseGazetteerConnection;
 import geotag.GeoApplication;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Properties;
-//import java.util.Properties;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import jdbm.RecordManager;
 import jdbm.RecordManagerFactory;
@@ -44,7 +36,6 @@ import geotag.words.Word;
  * @author Giorgio Ghisalberti
  */
 public class GeoCandidateIdentification {
-    private static DatabaseGazetteerConnection dbConnection = null;
     RecordManager mydbinter = null, mydbgaz = null;
     
     Vector<Word> filterWordVector = new Vector<Word>(); 
@@ -79,10 +70,9 @@ public class GeoCandidateIdentification {
      * uguale all'interno del DB.
      * @param filterWordVector : vettore contenente le Word che superano la fase di Filtro
      * @param allWordVector : vettore contenente tutte le word del documento
-     * @param stmt : Statement necessario per l'esecuzioni delel query sul DB
      * @return un vettore di GeoWord, ovvero di word che potenzialmente potrebbero rappresentare zone geografiche
      */
-    public Vector<GeographicWord> analyzing (Vector<Word> filterWordVector, Vector<Word> allWordVector, String documentContent, double impValue, Statement stmt, boolean upperDateLine){
+    public Vector<GeographicWord> analyze (Vector<Word> filterWordVector, Vector<Word> allWordVector, String documentContent, double impValue, boolean upperDateLine){
         this.filterWordVector = filterWordVector;
         this.allWordVector = allWordVector;
         Vector<GeographicWord> finalVectorResult = new Vector<GeographicWord>();
@@ -110,7 +100,7 @@ public class GeoCandidateIdentification {
             pos = analyzingWord.getPosition();
             
             //Eseguo l'analisi della Word ed aggiorno il vettore dei risultati parziali
-            wordVectorResult = geoAnalysis(analyzingWord, allWordVector, pos, stmt, upperDateLine);
+            wordVectorResult = geoAnalysis(analyzingWord, allWordVector, pos, upperDateLine);
  
             //Aggiorno il vettore contenente TUTTE le GeoWord trovate nel documento
             finalVectorResult = update(finalVectorResult, wordVectorResult);            
@@ -391,10 +381,9 @@ public class GeoCandidateIdentification {
      * @param analyzingWord : parola che deve essere analizzata
      * @param allWordVector : elenco di tutti i token presenti nel documento
      * @param pos : posizione della parola in analisi
-     * @param stmt : statement necessario per l'esecuzione delle query sul DataBase
      * @return un vettore di GeoWord 
      */
-    public Vector<GeographicWord> geoAnalysis(Word analyzingWord, Vector<Word> allWordVector, int pos, Statement stmt, boolean upperDateLine) {
+    public Vector<GeographicWord> geoAnalysis(Word analyzingWord, Vector<Word> allWordVector, int pos, boolean upperDateLine) {
         Vector<GeographicWord> wordVectorResult = new Vector<GeographicWord>();
         Vector<GeographicWord> wordVectorResult3 = new Vector<GeographicWord>();
         Vector<String> geonameId = new Vector<String>();
@@ -648,51 +637,7 @@ public class GeoCandidateIdentification {
     
         return geoWordVector;
     }
-  
-   
-    /**
-     * Metodo che ricerca la parola in esame nella tabella "alternatename"
-     * @param searchingName : parola in esame
-     * @param wordVectorResult : vettore dei risultati
-     * @param shift2 : parametro che indica da quanti termini è formata la parola
-     * @param pos : posizione nel testo
-     * @return i risultati della ricerca nella tabella "alternatename"
-     * @throws java.sql.SQLException
-     */
-    public Vector<GeographicWord> alternateSearch(String searchingName, int shift2, int pos, Statement stmt) throws SQLException{
-        Vector<String> geonameId = new Vector<String>();
-        Vector<GeographicWord> wordVectorResult = new Vector<GeographicWord>();
-        Vector<GeographicWord> wordVectorResult2 = new Vector<GeographicWord>();
-        
-        //ALTERNATE
-        geonameId = selectIDQuery(searchingName, "alternatename", "alternatename", stmt);
-        //Se trovo risultato cerco nella tabella "geoname" i valori della Word, basandomi sul'GEONAMEID
-        if(geonameId.isEmpty()) //Se in "name" NON trovo risultato cerco in "asciiname"
-            geonameId = selectIDQuery(searchingName, "alternatename", "asciialternatename", stmt);
 
-        if(!geonameId.isEmpty()){            
-            for(int j = 0; j < geonameId.size(); j++){
-                try {     
-                    //FALSE indica che NON è una zona amministrativa
-                    wordVectorResult2 = selectGeonameQuery(searchingName, Integer.parseInt(geonameId.elementAt(j)), false, pos, stmt);
-                    //Controllo se da un termine singolo estraggo un termne multiplo
-                    if(shift2 == 1 && !wordVectorResult2.isEmpty())
-                        wordVectorResult2 = multiWordControl(wordVectorResult2);
-                    //Aggiungo al vettore dei risultati i campi trovati dopo la ricerca nella tabella "alternatename"
-                    for(int i = 0; i < wordVectorResult2.size(); i++){
-                        wordVectorResult.add(wordVectorResult2.elementAt(i));
-                    }
-                } catch (SQLException ex) {
-                    Logger.getLogger(GeoCandidateIdentification.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-        
-        return wordVectorResult;
-    }
-    
-    
-    
     /**
      * Metodo che ritorna una Word formata dalla parola in esame e le "numTerm" successive
      * @param word : parola in esame
@@ -726,158 +671,7 @@ public class GeoCandidateIdentification {
     }
      
    
-    /**
-     * Metodo che esegue una query di tipo SELECT sulla tabelle "geoname", 
-     * basando la ricerca sul nome della Word. Restituisce l'elenco delle GeoWord trovate 
-     * popolate con le caratteristiche geografiche corrispondenti.
-     * @param wordName : nome della Word in esame
-     * @param field : campo su cui eseguire la ricerca
-     * @param pos : posizione della Word
-     * @param stmt : Statement necessario per l'esecuzioni delel query sul DB
-     * @return il vettore con le GeoWords popolate con i campi trovati nel DataBase
-     * @throws java.sql.SQLException
-     */
-    public static Vector<GeographicWord> selectGeonameQuery(String wordName, String field, int pos, Statement stmt) throws SQLException {       
-        GeographicWord newGeoWord = new GeographicWord();
-        Vector<GeographicWord> geoWordVector = new Vector<GeographicWord>();
-                     
-        ResultSet result = stmt.executeQuery("SELECT * FROM geoname WHERE " +
-                field + "='" + wordName + "'");
-                //field + "='" + wordName + "' AND countrycode='IT'");
-
-        ResultSetMetaData meta = result.getMetaData();
-        String[] colNames = new String[meta.getColumnCount()];
-        Vector[] cells = new Vector[colNames.length];           
-
-        while (result.next()) {
-            newGeoWord = population(result);
-            newGeoWord.setPosition(pos);
-            newGeoWord.setZoneDocName(wordName);
-            geoWordVector.add(newGeoWord);
-        }                         
-
-        result.close();
-                 
-        return geoWordVector;
-    }
     
-    
-    /**
-     * Metodo che prende i risultati trovati nel DataBase e crea una nuova GeoWord 
-     * popolando i vari campi
-     * @param result : risultati della query
-     * @return la GeoWord popolata con i valori trovati nel DataBase
-     */
-    public static GeographicWord population(ResultSet result){
-        GeographicWord newGeoWord = new GeographicWord();
-        try {
-            newGeoWord.setGeonameid(Integer.parseInt(result.getString(1)));
-            newGeoWord.setName(result.getString(2));
-            newGeoWord.setAsciiName(result.getString(3));
-            newGeoWord.setAlternateNames(result.getString(4));
-            newGeoWord.setLatitude(Float.parseFloat(result.getString(5)));
-            newGeoWord.setLongitude(Float.parseFloat(result.getString(6)));
-            newGeoWord.setFeatureClass(result.getString(7));
-            newGeoWord.setFeatureCode(result.getString(8));
-            newGeoWord.setCountryCode(result.getString(9));
-            newGeoWord.setCc2(result.getString(10));
-            newGeoWord.setAdmin1Code(result.getString(11));
-            newGeoWord.setAdmin2Code(result.getString(12));
-            newGeoWord.setAdmin3Code(result.getString(13));
-            newGeoWord.setAdmin4Code(result.getString(14));
-            newGeoWord.setPopulation(Integer.parseInt(result.getString(15)));
-            newGeoWord.setElevation(Integer.parseInt(result.getString(16)));
-            newGeoWord.setGtopo30(Integer.parseInt(result.getString(17)));
-            newGeoWord.setTimeZone(result.getString(18));
-            newGeoWord.setModificationDate(new SimpleDateFormat("yyyy-MM-dd").parse(result.getString(19)));
-        } catch (ParseException ex) {
-            Logger.getLogger(GeoCandidateIdentification.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(GeoCandidateIdentification.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        return newGeoWord;
-    }
-    
-    /**
-     * Metodo che esegue una query di tipo SELECT sulla tabelle "geoname", 
-     * basando la ricerca sul geonameId della Word. Restituisce l'elenco delle GeoWord trovate 
-     * popolate con le caratteristiche geografiche corrispondenti.
-     * @param wordName : nome della Word in esame
-     * @param field : campo su cui eseguire la ricerca
-     * @param pos : posizione della Word
-     * @param stmt : Statement necessario per l'esecuzioni delel query sul DB
-     * @return il vettore con le GeoWords popolate con i campi trovati nel DataBase
-     * @throws java.sql.SQLException
-     */
-    public static Vector<GeographicWord> selectGeonameQuery(String wordName, int geonameid, boolean adminZone, int pos, Statement stmt) throws SQLException {       
-        GeographicWord newGeoWord = new GeographicWord();
-        Vector<GeographicWord> geoWordVector = new Vector<GeographicWord>();
-        
-        ResultSet result = stmt.executeQuery("SELECT * FROM geoname " + 
-                "WHERE geonameid='" + geonameid + "'");
-                //"WHERE geonameid='" + geonameid + "' AND countrycode='IT'");    
-
-        while (result.next()) { // process results one row at a time  
-            newGeoWord = population(result);
-            newGeoWord.setPosition(pos);
-            newGeoWord.setZoneDocName(wordName);
-            newGeoWord.setAdminZone(adminZone); //TRUE se è una zona amministrativa
-            geoWordVector.add(newGeoWord);
-
-        }
-
-        result.close();
-        
-        return geoWordVector;
-    }
-   
-    /**
-     * Questo metodo verifica se la zona scelta è una zona amministrativa
-     * ed in tal caso restituisce l'id trovato nel DB.
-     * Esegue una query di tipo SELECT sulla tabella "alternatename"
-     * (o "countryinfo" o "continentcode") e restitiusce l'elenco dei geonameid.
-     * @param wordName : nome della parola in esame
-     * @param field : campo su cui eseguire la ricerca
-     * @param stmt : Statement necessario per l'esecuzioni delel query sul DB
-     * @return il vettore contenente i nomi delle zone amministrative trovate
-     * @throws java.sql.SQLException
-     */
-    public static Vector<String> selectIDQuery(String wordName, String table, String field, Statement stmt) throws SQLException {       
-        String geonameid = "";
-        Vector<String> elencoId = new Vector<String>();
-                
-         
-        ResultSet result = stmt.executeQuery("SELECT * FROM " + table + " WHERE " +
-                field + "='" + wordName + "'");
-
-        if(table.equals("alternatename")){
-            while (result.next()) { // process results one row at a time   
-                geonameid = result.getString(2);
-                elencoId.add(geonameid);
-            }  
-        }
-        else if(table.equals("countryinfo")){
-            while (result.next()) {
-                geonameid = result.getString(12);
-                elencoId.add(geonameid);
-            } 
-        }else if(table.equals("continentcodes")){
-            while (result.next()) {
-                geonameid = result.getString(3);
-                elencoId.add(geonameid);
-            } 
-        }else{
-            while (result.next()) {
-                geonameid = result.getString(4);
-                elencoId.add(geonameid);
-            } 
-        }
-
-        result.close();
-        
-        return elencoId;
-    }
     
     
 

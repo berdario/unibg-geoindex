@@ -85,25 +85,23 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="locationPanel" alignment="1" max="32767" attributes="1"/>
+                          <Component id="queryPanel" alignment="1" max="32767" attributes="1"/>
+                      </Group>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
-                              <Component id="queryPanel" min="-2" max="-2" attributes="1"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" attributes="0">
-                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                      <Component id="searchButton" min="-2" pref="70" max="-2" attributes="1"/>
-                                  </Group>
-                                  <Group type="102" attributes="0">
-                                      <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
-                                      <Component id="jLabel6" min="-2" pref="21" max="-2" attributes="1"/>
-                                  </Group>
-                              </Group>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="searchButton" min="-2" pref="70" max="-2" attributes="1"/>
                           </Group>
-                          <Group type="102" alignment="0" attributes="0">
-                              <EmptySpace min="-2" pref="133" max="-2" attributes="0"/>
+                          <Group type="102" attributes="0">
+                              <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
+                              <Component id="jLabel6" min="-2" pref="21" max="-2" attributes="1"/>
+                          </Group>
+                          <Group type="102" alignment="1" attributes="0">
+                              <EmptySpace min="-2" pref="55" max="-2" attributes="0"/>
                               <Component id="jLabel9" min="-2" max="-2" attributes="2"/>
                           </Group>
-                          <Component id="locationPanel" alignment="0" min="-2" pref="160" max="-2" attributes="1"/>
                       </Group>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Component id="resultsSplitPane" max="32767" attributes="0"/>
@@ -201,24 +199,10 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="searchButton2" min="-2" pref="59" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="locationTextField" pref="513" max="32767" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                              </Group>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="countryComboBox" min="-2" pref="222" max="-2" attributes="1"/>
-                                  <EmptySpace pref="122" max="32767" attributes="0"/>
-                                  <Component id="locationComboBox" min="-2" pref="226" max="-2" attributes="1"/>
-                                  <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
-                              </Group>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="jCheckBox" min="-2" max="-2" attributes="1"/>
-                                  <EmptySpace pref="401" max="32767" attributes="0"/>
-                              </Group>
-                          </Group>
+                          <Component id="searchButton2" min="-2" pref="59" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="locationTextField" pref="513" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -230,17 +214,7 @@
                               <Component id="locationTextField" max="32767" attributes="1"/>
                               <Component id="searchButton2" alignment="0" max="32767" attributes="1"/>
                           </Group>
-                          <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
-                          <Component id="jCheckBox" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="1" attributes="0">
-                              <Group type="102" attributes="0">
-                                  <Component id="countryComboBox" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                              </Group>
-                              <Component id="locationComboBox" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace pref="23" max="32767" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -257,44 +231,6 @@
                     <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="locationTextFieldMouseClicked"/>
                     <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="locationTextFieldFocusGained"/>
                   </Events>
-                </Component>
-                <Component class="javax.swing.JCheckBox" name="jCheckBox">
-                  <Properties>
-                    <Property name="text" type="java.lang.String" resourceKey="jCheckBox.text"/>
-                    <Property name="toolTipText" type="java.lang.String" resourceKey="jCheckBox.toolTipText"/>
-                    <Property name="name" type="java.lang.String" value="jCheckBox" noResource="true"/>
-                  </Properties>
-                  <Events>
-                    <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jCheckBoxMouseClicked"/>
-                  </Events>
-                </Component>
-                <Component class="javax.swing.JComboBox" name="countryComboBox">
-                  <Properties>
-                    <Property name="font" type="java.awt.Font" resourceKey="countryComboBox.font"/>
-                    <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                      <StringArray count="1">
-                        <StringItem index="0" value="select a country"/>
-                      </StringArray>
-                    </Property>
-                    <Property name="toolTipText" type="java.lang.String" resourceKey="countryComboBox.toolTipText"/>
-                    <Property name="enabled" type="boolean" value="false"/>
-                    <Property name="name" type="java.lang.String" value="countryComboBox" noResource="true"/>
-                  </Properties>
-                  <Events>
-                    <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="countryComboBoxItemStateChanged"/>
-                  </Events>
-                </Component>
-                <Component class="javax.swing.JComboBox" name="locationComboBox">
-                  <Properties>
-                    <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                      <StringArray count="1">
-                        <StringItem index="0" value="select a location"/>
-                      </StringArray>
-                    </Property>
-                    <Property name="toolTipText" type="java.lang.String" resourceKey="locationComboBox.toolTipText"/>
-                    <Property name="enabled" type="boolean" value="false"/>
-                    <Property name="name" type="java.lang.String" value="locationComboBox" noResource="true"/>
-                  </Properties>
                 </Component>
                 <Component class="javax.swing.JButton" name="searchButton2">
                   <Properties>

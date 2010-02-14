@@ -94,10 +94,9 @@ public class Score {
      * @param allWordVector : vettore contenente tutte le Word del documento
      * @param swLanguage : indica il file di riferimento contenente le stopWords di interesse
      * @param filterWordVector : vettore delle Word che hanno superato la fase di filtro
-     * @param stmt : Statemente necessario per l'esecuzione delle query sul DataBase
      * @return l'elenco delle GeoWord con il campo geoScore aggiornato
      */
-    public Vector<GeographicWord> updateGeoScore(Vector<GeographicWord> finalWordVector, Vector<Word> allWordVector, String swLanguage, Vector<Word> filterWordVector, Statement stmt) throws IOException{        
+    public Vector<GeographicWord> updateGeoScore(Vector<GeographicWord> finalWordVector, Vector<Word> allWordVector, String swLanguage, Vector<Word> filterWordVector) throws IOException{        
         myStdAnalyzer = new MyStandardAnalyzer(swLanguage);
         Vector<GeographicWord> newFinalWordVector = new Vector<GeographicWord>();
         Vector<Word> countryRank = new Vector<Word>();
@@ -132,10 +131,10 @@ public class Score {
             newGeoWord = searchGeoStopwords(geoWord, allWordVector);
                  
             // 1) In base al contesto (Nazione, Regione, Provincia)
-            newGeoWord = searchContext(geoWord, finalWordVector, allWordVector, filterWordVector, stmt);
+            newGeoWord = searchContext(geoWord, finalWordVector, allWordVector, filterWordVector);
    
             // 2) In base alla descrizione geografica della zona
-            newGeoWord = searchFeature(geoWord, allWordVector, countryCodeWithMaxFreq, stmt);
+            newGeoWord = searchFeature(geoWord, allWordVector, countryCodeWithMaxFreq);
                                  
             // 3) In base alla maggioranza (Nazione e Continente)
             newGeoWord = searchMajority(geoWord, countryRank, countryFreqMax);
@@ -228,10 +227,9 @@ public class Score {
      * @param finalWordVector : vettore contenente tutte le GeoWord reperite
      * @param allWordVector : vettore contenente tutte le Word del documento
      * @param filterWordVector : vettore delle Word che hanno superato la fase di filtro
-     * @param stmt : Statemente necessario per l'esecuzione delle query sul DataBase
      * @return la geoWord con il GeoScore aggiornato
      */
-     public GeographicWord  searchContext(GeographicWord geoWord, Vector<GeographicWord> finalWordVector, Vector<Word> allWordVector, Vector<Word> filterWordVector, Statement stmt){
+     public GeographicWord  searchContext(GeographicWord geoWord, Vector<GeographicWord> finalWordVector, Vector<Word> allWordVector, Vector<Word> filterWordVector){
         String countryCode = geoWord.getCountryCode();  // IT --> Italia
         String admin1Code = geoWord.getAdmin1Code();    // 9 --> Lombardia
         String admin2Code = geoWord.getAdmin2Code();    // BG --> Bergamo
@@ -251,18 +249,18 @@ public class Score {
         
         //Reperisco dalla tabella "countryinfo" NomeNazione, Continente a partire dal CountryCode
         searchingName = StringOperation.convertString(countryCode);
-        stringResult = selectCountryInfoQuery(searchingName, stmt); 
+        stringResult = selectCountryInfoQuery(searchingName); 
         
         //TROVO I NOMI DI TUTTE LE DIVISIONI ADMIN 1
         if(!admin1Code.equalsIgnoreCase("00")){
             String composeField = countryCode + "." + admin1Code; // IT.9
             searchingName = StringOperation.convertString(composeField);
-            admin1names = selectAdmin1CodesQuery(searchingName, stmt); //Cerco i nomi della Regione
+            admin1names = selectAdmin1CodesQuery(searchingName); //Cerco i nomi della Regione
 
             for(int j = 0; j < admin1names.size()-1; j++){ //Cerco i nomi alternativi della Regione
                 String c = StringOperation.convertString(admin1names.elementAt(j));
                 String geonameid = admin1names.elementAt(2);
-                regionNames = selectGeonameQuery(c, geonameid, stmt); 
+                regionNames = selectGeonameQuery(c, geonameid); 
             }
             regionNames = eraseEquals(regionNames); //Elimino uguali e nulli
             //Incremento il peso
@@ -325,14 +323,14 @@ public class Score {
          	
                  
                 //continentGeonameId = selectContinentCodesQuery(stringResult.elementAt(2), stmt);
-                continentNames = selectGeonameIdQuery(continentGeonameId.elementAt(1), "alternatename", stmt);               
+                continentNames = selectGeonameIdQuery(continentGeonameId.elementAt(1), "alternatename");
                 continentNames = eraseEquals(continentNames); //Elimino uguali e nulli
             }
             
             //country
             if(!stringResult.elementAt(3).isEmpty()){
-                countryNames = selectGeonameIdQuery(stringResult.elementAt(3), "geoname", stmt);               
-                alternateCountryNames = selectGeonameIdQuery(stringResult.elementAt(3), "alternatename", stmt);
+                countryNames = selectGeonameIdQuery(stringResult.elementAt(3), "geoname");               
+                alternateCountryNames = selectGeonameIdQuery(stringResult.elementAt(3), "alternatename");
                 for(int i = 0; i < alternateCountryNames.size(); i++){
                     countryNames.add(alternateCountryNames.elementAt(i));
                 }        
@@ -354,11 +352,10 @@ public class Score {
      * @param allWordVector : vettore contenente tutte le Word del documento
      * @param swLanguage 
      * @param countryCodeWithMaxFreq : codice della nazione che possiede più Word nel testo
-     * @param stmt : Statemente necessario per l'esecuzione delle query sul DataBase
      * @return la geoWord con il GeoScore aggiornato
      * @throws java.io.IOException
      */
-    public GeographicWord  searchFeature(GeographicWord geoWord, Vector<Word> allWordVector, String countryCodeWithMaxFreq, Statement stmt) throws IOException{
+    public GeographicWord  searchFeature(GeographicWord geoWord, Vector<Word> allWordVector, String countryCodeWithMaxFreq) throws IOException{
         String featureClass = geoWord.getFeatureClass();
         String featureCode = geoWord.getFeatureCode();
         String code = featureClass + "." + featureCode; // H.STMQ
@@ -369,7 +366,7 @@ public class Score {
         int k = 0; //numero di match tra parole testo e parole tabella
         
         //Ottengo il NOME e la DESCRIZIONE della zona
-        descriptionString = selectFeatureQuery(code, stmt);
+        descriptionString = selectFeatureQuery(code);
         
         // Devo selezionare solo le parole UTILI (sfrutto l'analizzatore da me creato)
         AnalyzerUtils descriptionAnalyzer = new AnalyzerUtils();
@@ -575,10 +572,9 @@ public class Score {
      * Interrogo il DB cercando nella tabella countryinfo la Nazione, la Capitale
      * e il Continente corrispondenti al countryCode ricevuto come parametro
      * @param searchingName : nome della Word in esame
-     * @param stmt : Statemente necessario per l'esecuzione delle query sul DataBase
      * @return 4 termini nel seguente ordine: nome della Nazione, Capitale, Continente, geonameId
      */
-    public Vector<String> selectCountryInfoQuery(String searchingName, Statement stmt){       
+    public Vector<String> selectCountryInfoQuery(String searchingName){       
         Vector<String> stringResult = new Vector<String>();
 
         try {
@@ -620,10 +616,9 @@ public class Score {
      * ricevuto come parametro. 
      * @param searchingName : nome della Word di interesse
      * @param table : nome della tabella su cui eseguire la query
-     * @param stmt : Statemente necessario per l'esecuzione delle query sul DataBase
      * @return l'elenco dei nomi alternativi trovati
      */
-    public Vector<String> selectGeonameIdQuery(String searchingId, String table, Statement stmt){       
+    public Vector<String> selectGeonameIdQuery(String searchingId, String table){       
         //----------------------------------------------------------------
    	 Vector<String> stringResult = new Vector<String>();
 
@@ -730,46 +725,14 @@ public class Score {
         return result;
     }
     
-    
-    /**
-     * Metodo ceh accede al DataBase per prelevare l'ID (geonameId) della
-     * stringa ricevuta come parametro
-     * @param continentCode : codice del continente
-     * @param stmt : Statemente necessario per l'esecuzione delle query sul DataBase
-     * @return il nome e l'ID del continente trovato
-     */
-    public Vector<String> selectContinentCodesQuery(String continentCode, Statement stmt){        
-        Vector<String> continentGeonameId = new Vector<String>();
-        
-        try {
-            // Eseguo la query reperendo tutte le info
-            ResultSet result = stmt.executeQuery("SELECT name, geonameid FROM continentcodes" +
-                    " WHERE code='" + continentCode + "'");
-
-            while (result.next()) { // process results one row at a time
-                continentGeonameId.add(result.getString(1)); //Name                
-                continentGeonameId.add(result.getString(2)); //Geonameid
-            }
-
-            result.close();
-         
-        } catch (SQLException ex) {
-            Logger.getLogger(Score.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        return continentGeonameId;
-    }
-    
-    
     /**
      * Interrogazione della tabella "geoname" e reperimento dei nomi (name, asciiname e alternatenames)
      * della zona ricevuta come parametro.
      * @param searchingName : nome della zona di interesse
      * @param geonameid : id della zona di interesse
-     * @param stmt : Statemente necessario per l'esecuzione delle query sul DataBase
      * @return
      */
-    public Vector<String> selectGeonameQuery(String searchingName, String geonameid, Statement stmt){
+    public Vector<String> selectGeonameQuery(String searchingName, String geonameid){
         //----------------------------------------------------------------
     	 Vector<String> stringResult = new Vector<String>();
 
@@ -853,10 +816,9 @@ public class Score {
      * Esecuzione di una query di tipo select sulla tabella "admin1codesascii" e 
      * reperimento dei nomi della regione
      * @param searchingName : nome della zona di interesse
-     * @param stmt : Statemente necessario per l'esecuzione delle query sul DataBase
      * @return
      */
-    public Vector<String> selectAdmin1CodesQuery(String searchingName, Statement stmt){
+    public Vector<String> selectAdmin1CodesQuery(String searchingName){
   
 
             // Eseguo la qeury reperendo tutte le info
@@ -905,47 +867,13 @@ public class Score {
         return stringResult;
     }
     
-
-    
-    /**
-     * Esecuzione di una query di tipo SELECT per trovare i nomi alternativi 
-     * a partire da un alternatename ricevuto come parametro
-     * @param searchingName : nome della zona di interesse
-     * @param stmt : Statemente necessario per l'esecuzione delle query sul DataBase
-     * @return
-     */
-    public Vector<String> selectAlternateNameQuery(String searchingName, Statement stmt){
-        Vector<String> stringResult = new Vector<String>();
-        
-        try {
-            // Eseguo la qeury reperendo tutte le info
-            ResultSet result = stmt.executeQuery("SELECT alternatename, asciialternatename FROM alternatename" +
-                    " WHERE alternatename='" + searchingName + "' OR asciialternatename='" + searchingName + "'");
-
-            while (result.next()) { // process results one row at a time
-                stringResult.add(result.getString(1)); // AlternateName          
-                stringResult.add(result.getString(2)); // AsciiAlternateName      
-            }
-
-            result.close();
-
-         
-        } catch (SQLException ex) {
-            Logger.getLogger(Score.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        return stringResult;
-    }
-
-    
     /**
      * Metodo che interroga il DataBase sulla tabella "featurecodes" ed estrae il NOME e
      * la DESCRIZIONE della zona geografica.
      * @param code : codice della nazione
-     * @param stmt : Statemente necessario per l'esecuzione delle query sul DataBase
      * @return
      */
-    public Vector<String> selectFeatureQuery(String code, Statement stmt){ 
+    public Vector<String> selectFeatureQuery(String code){ 
     	Vector<String> stringResult = new Vector<String>();
 
         try {

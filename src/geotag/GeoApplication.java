@@ -24,18 +24,10 @@ import geotag.parser.DocumentWrapper;
 import geotag.parser.DocumentWrapper.UnsupportedFileException;
 import geotag.search.ContentSearcher;
 import geotag.search.DistanceSearcher;
-import geotag.visualization.CountryItemListener;
-import geotag.visualization.GeoWordsTable;
-import geotag.visualization.MarkerChart;
-import geotag.visualization.ResultsTable;
 import geotag.words.GeoRefDoc;
 import geotag.words.GeographicWord;
 import geotag.words.StringOperation;
 import geotag.words.Word;
-import java.awt.Desktop;
-import java.awt.Toolkit;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -230,9 +222,6 @@ public final class GeoApplication implements Runnable{
                             
                             System.out.println("\n  File name: " + documentName);
                             
-                            //DatabaseGazetteerConnection dbConnection = new DatabaseGazetteerConnection(DRIVER_CLASS_NAME, USER_NAME, PASSWORD, DB_CONN_STRING);
-                            Statement stmt = null;//dbConnection.getStatement();
-                            
                             if(!alreadyIndexed){
                             	
                             	//TODO verificare il comportamento con file con lo stesso nome
@@ -249,7 +238,7 @@ public final class GeoApplication implements Runnable{
 
                                     // Fase di GEO-VALUTAZIONE                                                                                   
                                     GeoCandidateIdentification geoAnalysis = new GeoCandidateIdentification();                            
-                                    geoWordVector = geoAnalysis.analyzing(filterWordVector, wordVector, documentContent, importanceValue, stmt, upperDateLine);
+                                    geoWordVector = geoAnalysis.analyze(filterWordVector, wordVector, documentContent, importanceValue, upperDateLine);
 
                                     //Tra elementi con uguale geonameid ne prendo solo 1 con peso e importanza maggiore 
                                     finalGeoWordVector = importanceControl(geoWordVector, finalGeoWordVector); 
@@ -266,8 +255,7 @@ public final class GeoApplication implements Runnable{
                                 
                                     // Fase di SCORING   
                                     Score newScore = new Score();
-                                    finalGeoWordVector = newScore.updateGeoScore(finalGeoWordVector, finalWordVector, swLanguage, finalFilterWordVector, stmt);
-                                    //stmt.close();
+                                    finalGeoWordVector = newScore.updateGeoScore(finalGeoWordVector, finalWordVector, swLanguage, finalFilterWordVector);
                                     
                                     //Elimino le GeoWord con peso sotto lo 0.6
                                     finalGeoWordVector = selectGeoWords(finalGeoWordVector);
@@ -543,7 +531,7 @@ public final class GeoApplication implements Runnable{
             results = grLoc.mergeLocation(results, location);
 
             DistanceSearcher distanceSorter = new DistanceSearcher();
-            distanceSorter.createDistanceRanking(results, grLoc.getGeoLocation(location, null));
+            distanceSorter.createDistanceRanking(results, grLoc.getGeoLocation(location));
             
             cachedUnsortedResults.put(Tuple.from(keyWords, location), results);
         }
