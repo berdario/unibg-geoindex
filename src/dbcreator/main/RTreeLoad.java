@@ -1,7 +1,14 @@
 package dbcreator.main;
 
-// NOTE: Please read README.txt before browsing this code.
+/* NOTE: Pagliacci e/o Spelgatti hanno copiato questo codice da:
+ * http://svn2.assembla.com/svn/kump/R_Tree_For_MusicDB/regressiontest/
+ * per questo prendete con le pinze i commenti e la logica (quella che non è stata modificata s'intende)
+ * lascio comunque i commenti (come quello sulla page size) perchè possono venire utili in futuro
+ */
 
+import dbcreator.ricercapernome.Compara;
+import dbcreator.ricercapernome.Serial;
+import dbcreator.ricercapernome.Serializ;
 import java.io.*;
 import java.util.*;
 
@@ -9,28 +16,21 @@ import jdbm.RecordManager;
 import jdbm.RecordManagerFactory;
 import jdbm.btree.BTree;
 
-import principale.Spatialindex.IData;
-import principale.Spatialindex.INode;
-import principale.Spatialindex.ISpatialIndex;
-import principale.Spatialindex.IVisitor;
 
-import principale.Spatialindex.Region;
+//import principale.storagemanager.IStorageManager;
 
-import principale.r_tree.RTree;
-import dbcreator.ricercapernome.Compara;
-import dbcreator.ricercapernome.Serial;
-import dbcreator.ricercapernome.Serializ;
+import spatialindex.storagemanager.DiskStorageManager;
+import spatialindex.storagemanager.IStorageManager;
+import spatialindex.storagemanager.RandomEvictionsBuffer;
+import spatialindex.storagemanager.IBuffer;
+import spatialindex.ISpatialIndex;
+import spatialindex.rtree.RTree;
+import spatialindex.storagemanager.PropertySet;
+import spatialindex.Region;
+import spatialindex.IVisitor;
+import spatialindex.IData;
+import spatialindex.INode;
 
-import principale.storagemanager.DiskStorageManager;
-import principale.storagemanager.IBuffer;
-import principale.storagemanager.IStorageManager;
-import principale.storagemanager.PropertySet;
-import principale.storagemanager.RandomEvictionsBuffer;
-/*
-import spatialindex.spatialindex.*;
-import spatialindex.storagemanager.*;
-import spatialindex.rtree.*;
-*/
 public class RTreeLoad
 {
 	private formdicaricamento frame;
@@ -95,23 +95,19 @@ public class RTreeLoad
 			}
 
 			// Create a disk based storage manager.
-			PropertySet ps = new PropertySet();
-
+			
 			Boolean b = new Boolean(true);
-			ps.setProperty("Overwrite", b);
-				//overwrite the file if it exists.
 			System.out.println(dbpath+File.separator+"datiscritti");
-			ps.setProperty("FileName", dbpath+File.separator+"datiscritti");
-				// .idx and .dat extensions will be added.
+			
+			Integer pageSize = new Integer(args[2]);//8k
+			pageSize=12+pageSize*40+pageSize*20;
 
-			Integer i = new Integer(args[2]);//8k
-			i=12+i*40+i*20;
-			ps.setProperty("PageSize", i);
-				// specify the page size. Since the index may also contain user defined data
-				// there is no way to know how big a single node may become. The storage manager
-				// will use multiple pages per node if needed. Off course this will slow down performance.
 
-			IStorageManager diskfile = new DiskStorageManager(ps);
+			IStorageManager diskfile = new DiskStorageManager(dbpath+File.separator+"datiscritti",pageSize);
+                        // .idx and .dat extensions will be added.
+			// specify the page size. Since the index may also contain user defined data
+			// there is no way to know how big a single node may become. The storage manager
+			// will use multiple pages per node if needed. Off course this will slow down performance.
 
 			IBuffer file = new RandomEvictionsBuffer(diskfile, 10, false);
 
@@ -120,13 +116,13 @@ public class RTreeLoad
 			Double f = new Double(0.7);
 			ps2.setProperty("FillFactor", f);
 
-			i = new Integer(args[2]);
-			ps2.setProperty("IndexCapacity", i);
-			ps2.setProperty("LeafCapacity", i);
+			pageSize = new Integer(args[2]);
+			ps2.setProperty("IndexCapacity", pageSize);
+			ps2.setProperty("LeafCapacity", pageSize);
 				// Index capacity and leaf capacity may be different.
 
-			i = new Integer(2);
-			ps2.setProperty("Dimension", i);
+			pageSize = new Integer(2);
+			ps2.setProperty("Dimension", pageSize);
 
 			ISpatialIndex tree = new RTree(ps2, file);
 

@@ -13,20 +13,21 @@ import java.util.Vector;
 import jdbm.RecordManager;
 import jdbm.RecordManagerFactory;
 import jdbm.btree.BTree;
-import principale.Spatialindex.IData;
-import principale.Spatialindex.INode;
-import principale.Spatialindex.ISpatialIndex;
-import principale.Spatialindex.IVisitor;
-import principale.Spatialindex.Region;
-import principale.r_tree.RTree;
+
 import dbcreator.ricercapernome.Compara;
 import dbcreator.ricercapernome.Serial;
 import dbcreator.ricercapernome.Serializ;
-import principale.storagemanager.DiskStorageManager;
-import principale.storagemanager.IBuffer;
-import principale.storagemanager.IStorageManager;
-import principale.storagemanager.PropertySet;
-import principale.storagemanager.RandomEvictionsBuffer;
+import spatialindex.storagemanager.DiskStorageManager;
+import spatialindex.storagemanager.IStorageManager;
+import spatialindex.storagemanager.RandomEvictionsBuffer;
+import spatialindex.storagemanager.IBuffer;
+import spatialindex.ISpatialIndex;
+import spatialindex.rtree.RTree;
+import spatialindex.storagemanager.PropertySet;
+import spatialindex.Region;
+import spatialindex.IVisitor;
+import spatialindex.IData;
+import spatialindex.INode;
 
 public class readgazetteer {
 
@@ -62,9 +63,7 @@ public class readgazetteer {
 		float peso=file.length();
 		float peso_decrementato=peso;
 		//---------------------------APERTURA R-TREE------------------------------//
-		PropertySet ps = new PropertySet();        
-		ps.setProperty("FileName", path+"db"+File.separator+"datiscritti");
-		IStorageManager diskfile = new DiskStorageManager(ps);
+		IStorageManager diskfile = new DiskStorageManager(path+"db"+File.separator+"datiscritti");
 		IBuffer filebuffer = new RandomEvictionsBuffer(diskfile, 10, false);
 		PropertySet ps2 = new PropertySet();
 		Integer i = new Integer(1);
