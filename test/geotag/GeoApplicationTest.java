@@ -87,29 +87,43 @@ public class GeoApplicationTest {
     @Test
     public void testIndexing() {
         String[] args = {configfile, "--index"};
-        GeoApplication.main(args);
+        GeoApplication app = new GeoApplication(configfile);
+        app.createIndex();
         assertTrue("L'indice non è stato creato!", index.exists());
     }
 
     @Test
     public void testQuery() {
+
+        /*TODO: fixare, questi for/println non hanno molto senso
+         *prima veniva fatto il test sul main, l'idea sarebbe quella di portare il test sul metodo search interno
+         *(come testsearch), a meno che testare il main() non abbia effettivamente un'utilità
+         */
+
         String expectedOutput;
-        String[] args = {configfile, "Rules", "Milano"};
-        GeoApplication.main(args);
+        String[] args = {"Rules", "Milano"};
+        GeoApplication app = new GeoApplication(configfile);
+        for (GeoRefDoc doc: app.search(args[0],args[1])){
+            System.out.println(doc);
+        }
         expectedOutput = "679f7a6192c3612d90f5376d455340cf";
         assertTrue("risultato non trovato!", outContent.toString().contains(expectedOutput));
         expectedOutput = "7cb05c1a428df429a30e549c3a45d30d";
         assertTrue("risultato non trovato!", outContent.toString().contains(expectedOutput));
         outContent.reset();
 
-        args[1] = "SQL";
-        GeoApplication.main(args);
+        args[0] = "SQL";
+        for (GeoRefDoc doc: app.search(args[0],args[1])){
+            System.out.println(doc);
+        }
         expectedOutput = "7cb05c1a428df429a30e549c3a45d30d";
         assertTrue("risultato non trovato!", outContent.toString().contains(expectedOutput));
         outContent.reset();
 
-        args[2] = "Torino";
-        GeoApplication.main(args);
+        args[1] = "Torino";
+        for (GeoRefDoc doc: app.search(args[0],args[1])){
+            System.out.println(doc);
+        }
         expectedOutput = "7cb05c1a428df429a30e549c3a45d30d";
         assertTrue("risultato non trovato!", outContent.toString().contains(expectedOutput));
         outContent.reset();
