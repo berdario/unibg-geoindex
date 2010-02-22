@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0_13" class="java.beans.XMLDecoder"> 
+ <object class="com.jformdesigner.model.FormModel"> 
+  <void property="contentType"> 
+   <string>form/swing</string> 
+  </void> 
+  <void property="root"> 
+   <object class="com.jformdesigner.model.FormRoot"> 
+    <void method="add"> 
+     <object class="com.jformdesigner.model.FormWindow"> 
+      <string>javax.swing.JFrame</string> 
+      <object class="com.jformdesigner.model.FormLayoutManager"> 
+       <class>org.jdesktop.layout.GroupLayout</class> 
+       <void method="setProperty"> 
+        <string>$horizontalGroup</string> 
+        <string>par l {seq l {space :p:38:p, par t {comp carica_gaz::::269:x, comp gazpop::l::269:x, comp carica_alter::::269:x, comp carica_osm::l::269:x:1, comp carica_Rtree::l::269:x:1, comp cartellafile::l::269:x, comp caricadb::t::269:x}, space :p:18:p, par l {comp label3::l:p:75:p:1, comp caricafile::t:::x:1, par t:l::p {comp label1::l:::x:1, comp label6::l:p::p:1}, comp label5::::75:x:1, comp label2:::p::p:1, comp label4:::p:75:p:1}, space :::p}}</string> 
+       </void> 
+       <void method="setProperty"> 
+        <string>$verticalGroup</string> 
+        <string>par l {seq l {space :p:19:p, par b {comp cartellafile::b:p:24:p, comp caricafile::b:p:29:p}, space :::p, par t {comp carica_osm:::p:50:p, comp label1::::51:x}, space s:::p, par b {comp carica_Rtree::b:p:50:p:1, comp label2::b:p::p:1}, space s:::p, par b {comp gazpop::b:p:50:p, comp label6::b:p:30:p}, space :p:16:p, par b {comp label3::b:p:47:p:1, comp carica_gaz::b:p:50:p:1}, space s:::p, par b {comp carica_alter::b:p:50:p:1, comp label4::b:p::p:1}, space :p:15:p, par b {comp caricadb::b:p:50:p:1, comp label5::b:p::p:1}, space :::p}}</string> 
+       </void> 
+      </object> 
+      <void method="setProperty"> 
+       <string>title</string> 
+       <string>Menu</string> 
+      </void> 
+      <void method="setProperty"> 
+       <string>$locationPolicy</string> 
+       <int>0</int> 
+      </void> 
+      <void method="add"> 
+       <object class="com.jformdesigner.model.FormComponent"> 
+        <string>javax.swing.JButton</string> 
+        <void method="setProperty"> 
+         <string>text</string> 
+         <string>Caricamento r-tree</string> 
+        </void> 
+        <void method="setProperty"> 
+         <string>enabled</string> 
+         <boolean>false</boolean> 
+        </void> 
+        <void property="name"> 
+         <string>carica_Rtree</string> 
+        </void> 
+        <void method="addEvent"> 
+         <object class="com.jformdesigner.model.FormEvent"> 
+          <string>java.awt.event.ActionListener</string> 
+          <string>actionPerformed</string> 
+          <string>carica_RtreeActionPerformed</string> 
+          <boolean>true</boolean> 
+         </object> 
+        </void> 
+       </object> 
+      </void> 
+      <void method="add"> 
+       <object class="com.jformdesigner.model.FormComponent"> 
+        <string>javax.swing.JButton</string> 
+        <void method="setProperty"> 
+         <string>text</string> 
+         <string>Caricamento OSM</string> 
+        </void> 
+        <void method="setProperty"> 
+         <string>enabled</string> 
+         <boolean>false</boolean> 
+        </void> 
+        <void property="name"> 
+         <string>carica_osm</string> 
+        </void> 
+        <void method="addEvent"> 
+         <object class="com.jformdesigner.model.FormEvent"> 
+          <string>java.awt.event.ActionListener</string> 
+          <string>actionPerformed</string> 
+          <string>carica_osmActionPerformed</string> 
+          <boolean>true</boolean> 
+         </object> 
+        </void> 
+       </object> 
+      </void> 
+      <void method="add"> 
+       <object class="com.jformdesigner.model.FormComponent"> 
+        <string>javax.swing.JTextField</string> 
+        <void property="name"> 
+         <string>cartellafile</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void method="add"> 
+       <object class="com.jformdesigner.model.FormComponent"> 
+        <string>javax.swing.JButton</string> 
+        <void method="setProperty"> 
+         <string>text</string> 
+         <string>caricafile</string> 
+        </void> 
+        <void property="name"> 
+         <string>caricafile</string> 
+        </void> 
+        <void method="addEvent"> 
+         <object class="com.jformdesigner.model.FormEvent"> 
+          <string>java.awt.event.ActionListener</string> 
+          <string>actionPerformed</string> 
+          <string>caricafileActionPerformed</string> 
+          <boolean>true</boolean> 
+         </object> 
+        </void> 
+       </object> 
+      </void> 
+      <void method="add"> 
+       <object class="com.jformdesigner.model.FormComponent"> 
+        <string>javax.swing.JButton</string> 
+        <void method="setProperty"> 
+         <string>text</string> 
+         <string>Caricamento Gazetteer</string> 
+        </void> 
+        <void method="setProperty"> 
+         <string>enabled</string> 
+         <boolean>false</boolean> 
+        </void> 
+        <void property="name"> 
+         <string>carica_gaz</string> 
+        </void> 
+        <void method="addEvent"> 
+         <object class="com.jformdesigner.model.FormEvent"> 
+          <string>java.awt.event.ActionListener</string> 
+          <string>actionPerformed</string> 
+          <string>carica_gazActionPerformed</string> 
+          <boolean>true</boolean> 
+         </object> 
+        </void> 
+       </object> 
+      </void> 
+      <void method="add"> 
+       <object class="com.jformdesigner.model.FormComponent"> 
+        <string>javax.swing.JButton</string> 
+        <void method="setProperty"> 
+         <string>text</string> 
+         <string>Caricamento AlternateNames</string> 
+        </void> 
+        <void method="setProperty"> 
+         <string>enabled</string> 
+         <boolean>false</boolean> 
+        </void> 
+        <void property="name"> 
+         <string>carica_alter</string> 
+        </void> 
+        <void method="addEvent"> 
+         <object class="com.jformdesigner.model.FormEvent"> 
+          <string>java.awt.event.ActionListener</string> 
+          <string>actionPerformed</string> 
+          <string>carica_alterActionPerformed</string> 
+          <boolean>true</boolean> 
+         </object> 
+        </void> 
+       </object> 
+      </void> 
+      <void method="add"> 
+       <object class="com.jformdesigner.model.FormComponent"> 
+        <string>javax.swing.JButton</string> 
+        <void method="setProperty"> 
+         <string>text</string> 
+         <string>Carica DataBase restanti</string> 
+        </void> 
+        <void method="setProperty"> 
+         <string>enabled</string> 
+         <boolean>false</boolean> 
+        </void> 
+        <void property="name"> 
+         <string>caricadb</string> 
+        </void> 
+        <void method="addEvent"> 
+         <object class="com.jformdesigner.model.FormEvent"> 
+          <string>java.awt.event.ActionListener</string> 
+          <string>actionPerformed</string> 
+          <string>caricadbActionPerformed</string> 
+          <boolean>true</boolean> 
+         </object> 
+        </void> 
+       </object> 
+      </void> 
+      <void method="add"> 
+       <object class="com.jformdesigner.model.FormComponent"> 
+        <string>javax.swing.JLabel</string> 
+        <void method="setProperty"> 
+         <string>text</string> 
+         <string>Manca</string> 
+        </void> 
+        <void method="setProperty"> 
+         <string>font</string> 
+         <object class="com.jformdesigner.model.SwingDerivedFont"> 
+          <null/> 
+          <int>0</int> 
+          <int>10</int> 
+          <boolean>false</boolean> 
+         </object> 
+        </void> 
+        <void method="setProperty"> 
+         <string>foreground</string> 
+         <object class="java.awt.Color" field="red"/> 
+        </void> 
+        <void property="name"> 
+         <string>label1</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void method="add"> 
+       <object class="com.jformdesigner.model.FormComponent"> 
+        <string>javax.swing.JLabel</string> 
+        <void method="setProperty"> 
+         <string>text</string> 
+         <string>Manca</string> 
+        </void> 
+        <void method="setProperty"> 
+         <string>font</string> 
+         <object class="com.jformdesigner.model.SwingDerivedFont"> 
+          <null/> 
+          <int>0</int> 
+          <int>10</int> 
+          <boolean>false</boolean> 
+         </object> 
+        </void> 
+        <void method="setProperty"> 
+         <string>foreground</string> 
+         <object class="java.awt.Color" field="red"/> 
+        </void> 
+        <void property="name"> 
+         <string>label2</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void method="add"> 
+       <object class="com.jformdesigner.model.FormComponent"> 
+        <string>javax.swing.JLabel</string> 
+        <void method="setProperty"> 
+         <string>text</string> 
+         <string>Manca</string> 
+        </void> 
+        <void method="setProperty"> 
+         <string>foreground</string> 
+         <object class="java.awt.Color" field="red"/> 
+        </void> 
+        <void method="setProperty"> 
+         <string>font</string> 
+         <object class="com.jformdesigner.model.SwingDerivedFont"> 
+          <null/> 
+          <int>0</int> 
+          <int>10</int> 
+          <boolean>false</boolean> 
+         </object> 
+        </void> 
+        <void property="name"> 
+         <string>label3</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void method="add"> 
+       <object class="com.jformdesigner.model.FormComponent"> 
+        <string>javax.swing.JLabel</string> 
+        <void method="setProperty"> 
+         <string>text</string> 
+         <string>Manca</string> 
+        </void> 
+        <void method="setProperty"> 
+         <string>foreground</string> 
+         <object class="java.awt.Color" field="red"/> 
+        </void> 
+        <void method="setProperty"> 
+         <string>font</string> 
+         <object class="com.jformdesigner.model.SwingDerivedFont"> 
+          <null/> 
+          <int>0</int> 
+          <int>10</int> 
+          <boolean>false</boolean> 
+         </object> 
+        </void> 
+        <void property="name"> 
+         <string>label4</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void method="add"> 
+       <object class="com.jformdesigner.model.FormComponent"> 
+        <string>javax.swing.JLabel</string> 
+        <void method="setProperty"> 
+         <string>text</string> 
+         <string>Manca</string> 
+        </void> 
+        <void method="setProperty"> 
+         <string>foreground</string> 
+         <object class="java.awt.Color" field="red"/> 
+        </void> 
+        <void method="setProperty"> 
+         <string>font</string> 
+         <object class="com.jformdesigner.model.SwingDerivedFont"> 
+          <null/> 
+          <int>0</int> 
+          <int>10</int> 
+          <boolean>false</boolean> 
+         </object> 
+        </void> 
+        <void property="name"> 
+         <string>label5</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void method="add"> 
+       <object class="com.jformdesigner.model.FormComponent"> 
+        <string>javax.swing.JButton</string> 
+        <void method="setProperty"> 
+         <string>text</string> 
+         <string>Caricamento popolazione</string> 
+        </void> 
+        <void method="setProperty"> 
+         <string>enabled</string> 
+         <boolean>false</boolean> 
+        </void> 
+        <void property="name"> 
+         <string>gazpop</string> 
+        </void> 
+        <void method="addEvent"> 
+         <object class="com.jformdesigner.model.FormEvent"> 
+          <string>java.awt.event.ActionListener</string> 
+          <string>actionPerformed</string> 
+          <string>gazpopActionPerformed</string> 
+          <boolean>true</boolean> 
+         </object> 
+        </void> 
+       </object> 
+      </void> 
+      <void method="add"> 
+       <object class="com.jformdesigner.model.FormComponent"> 
+        <string>javax.swing.JLabel</string> 
+        <void method="setProperty"> 
+         <string>text</string> 
+         <string>Manca</string> 
+        </void> 
+        <void method="setProperty"> 
+         <string>font</string> 
+         <object class="com.jformdesigner.model.SwingDerivedFont"> 
+          <null/> 
+          <int>0</int> 
+          <int>10</int> 
+          <boolean>false</boolean> 
+         </object> 
+        </void> 
+        <void method="setProperty"> 
+         <string>foreground</string> 
+         <object class="java.awt.Color" field="red"/> 
+        </void> 
+        <void property="name"> 
+         <string>label6</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void property="name"> 
+       <string>this</string> 
+      </void> 
+     </object> 
+     <object class="com.jformdesigner.model.FormLayoutConstraints"> 
+      <null/> 
+      <void method="setProperty"> 
+       <string>location</string> 
+       <object class="java.awt.Point"> 
+        <int>40</int> 
+        <int>0</int> 
+       </object> 
+      </void> 
+      <void method="setProperty"> 
+       <string>size</string> 
+       <object class="java.awt.Dimension"> 
+        <int>420</int> 
+        <int>490</int> 
+       </object> 
+      </void> 
+     </object> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+</java> 
