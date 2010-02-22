@@ -81,19 +81,16 @@ public class DocumentWrapper {
 
         try {
             HTMLParser htmlFileParser = new HTMLParser(docURL);
-            content = htmlFileParser.parsingHTMLFile();
+            content = htmlFileParser.getContent();
 
             //Document title
             title = htmlFileParser.getTitle();
-            String t = title;
 
             //Document description
             description = htmlFileParser.getMetaValue("description");
-            String s = description;
 
             //Document keywords
             keywords = htmlFileParser.getMetaValue("keywords");
-            String k = keywords;
 
         } catch (IOException ex) {
             ex.printStackTrace();

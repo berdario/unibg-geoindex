@@ -32,6 +32,7 @@ import geotag.words.GeographicWord;
 import geotag.words.Word;
 import java.util.ArrayList;
 import java.util.Arrays;
+import jdbm.RecordManagerOptions;
 
 /**
  * Classe che ha il compito di incrementare il peso geografico delle GeoWord reperite 
@@ -48,6 +49,7 @@ import java.util.Arrays;
  */
 public class Score {
     Vector<GeographicWord> geoAdminZones = new Vector<GeographicWord>();
+    Properties options = new Properties();
     double constantDist = 0.0;
     
     int shifFeature = 5;
@@ -66,17 +68,19 @@ public class Score {
     MyStandardAnalyzer myStdAnalyzer;
     ArrayList<String> geoStopwords = new ArrayList();
 
+    BTree featureCodes;
+
     /**
      * Costruttore della classe
      */
     public Score(){
-        this.path=GeoApplication.getPath();
-        this.slash=File.separator;
-        this.dbpath=path+"db"+slash;
+        this.path = GeoApplication.getPath();
+        this.slash = File.separator;
+        this.dbpath = path + "db" + slash;
+        options.setProperty(RecordManagerOptions.DISABLE_TRANSACTIONS, "");
         try {
             BufferedReader geoStopwordFile = new BufferedReader(new FileReader(new File(GeoApplication.getPath() + "geoStopwords.txt")));
             String line = "";
-
             while ((line = geoStopwordFile.readLine()) != null) {
                 geoStopwords.addAll(Arrays.asList(line.split(",")));
             }
@@ -84,6 +88,13 @@ public class Score {
         } catch (IOException ex) {
             System.err.println("Errore nell'apertura del file geoStopwords.txt");
             ex.printStackTrace();
+        }
+        try {
+            featureCodes = new BTree();
+            RecordManager mydbfeaturecodes = RecordManagerFactory.createRecordManager(dbpath + "albero_featurecodes", options);
+            featureCodes = loadOrCreateBTree(mydbfeaturecodes, "featurecodes", new Serial());
+        } catch (IOException ex) {
+            Logger.getLogger(Score.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -585,7 +596,7 @@ public class Score {
             String dati[]=new String[4];
             RecordManager mydbCountryInfo;
             BTree tContryInfo=new BTree();
-            mydbCountryInfo=RecordManagerFactory.createRecordManager(dbpath+"albero_countryInfo", new Properties());
+            mydbCountryInfo=RecordManagerFactory.createRecordManager(dbpath+"albero_countryInfo", options);
             tContryInfo=loadOrCreateBTree(mydbCountryInfo, "country", a);
             Object results=tContryInfo.find(searchingName);
             if(results!=null){
@@ -630,7 +641,7 @@ public class Score {
             BTree talternatenamesId=new BTree();
             //Input GeoID
             //Output name
-            mydbalternatenamesId=RecordManagerFactory.createRecordManager(dbpath+"albero_alternatenameId", new Properties());
+            mydbalternatenamesId=RecordManagerFactory.createRecordManager(dbpath+"albero_alternatenameId", options);
             talternatenamesId=loadOrCreateBTree(mydbalternatenamesId, "alternatenameId", a);
             Object results=talternatenamesId.find(searchingId);
             
@@ -746,7 +757,7 @@ public class Score {
              BTree talternatenamesId=new BTree();
              //Input GeoID
              //Output name
-             mydbalternatenamesId=RecordManagerFactory.createRecordManager(dbpath+"albero_alternatenameId", new Properties());
+             mydbalternatenamesId=RecordManagerFactory.createRecordManager(dbpath+"albero_alternatenameId", options);
              talternatenamesId=loadOrCreateBTree(mydbalternatenamesId, "alternatenameId", a);
              Object results=talternatenamesId.find(geonameid);
              
@@ -764,7 +775,7 @@ public class Score {
              //Input Alternate
              //output 
              
-             mydbalternatenames=RecordManagerFactory.createRecordManager(dbpath+"albero_alternatename", new Properties());
+             mydbalternatenames=RecordManagerFactory.createRecordManager(dbpath+"albero_alternatename", options);
              talternatenames=loadOrCreateBTree(mydbalternatenames, "alternatename", a);
              Object results1=talternatenames.find(searchingName);
              if(results1!=null){
@@ -833,7 +844,7 @@ public class Score {
                 String dati[]=new String[4];
                 RecordManager mydbadmin1;
                 BTree tadmin1=new BTree();
-                mydbadmin1=RecordManagerFactory.createRecordManager(dbpath+"albero_admin1codeascii", new Properties());
+                mydbadmin1=RecordManagerFactory.createRecordManager(dbpath+"albero_admin1codeascii", options);
                 tadmin1=loadOrCreateBTree(mydbadmin1, "admin1", a);
                 Object results=tadmin1.find(searchingName);
                 if(results!=null){
@@ -874,35 +885,41 @@ public class Score {
      * @return
      */
     public Vector<String> selectFeatureQuery(String code){ 
-    	Vector<String> stringResult = new Vector<String>();
-
+        Vector<String> stringResult = new Vector<String>();
         try {
-           
-            Serial a=new Serial();
-            String dati[];
-            RecordManager mydbfeaturecodes;
-            BTree tfeaturecodes=new BTree();
-            //Input GeoID
-            //Output name
-            mydbfeaturecodes=RecordManagerFactory.createRecordManager(dbpath+"albero_featurecodes", new Properties());
-            tfeaturecodes=loadOrCreateBTree(mydbfeaturecodes, "featurecodes", a);
-            Object results=tfeaturecodes.find(code);
-            
-            if(results!=null){
-            	dati=((String)results).split("�#");
-            		stringResult.add(dati[1]);//name
-            		stringResult.add(dati[2]);//description
+            Object results = featureCodes.find(code);
+            String[] dati;
+            if (results != null) {
+                dati = ((String) results).split("�#");
+                stringResult.add(dati[0]); //name
+                stringResult.add(dati[1]); //description
             }
-            mydbfeaturecodes.close();
-         
+        } catch (IOException ex) {
+            Logger.getLogger(Score.class.getName()).log(Level.SEVERE, null, ex);
+        }
 //        } catch (SQLException ex) {
 //            Logger.getLogger(Score.class.getName()).log(Level.SEVERE, null, ex);
-       }
-    catch (Exception e) {
-		// TODO: handle exception
-	}    
-    
-       return stringResult;  
+        return stringResult;
+//        Vector<String> stringResult = new Vector<String>();
+//
+//        try {
+//            // Eseguo la query reperendo tutte le info
+//            ResultSet result = stmt.executeQuery("SELECT * FROM featurecodes " +
+//                    "WHERE code='" + code + "'");
+//
+//            while (result.next()) { // process results one row at a time
+//                stringResult.add(result.getString(2)); //name
+//                stringResult.add(result.getString(3)); //description
+//            }
+//
+//            result.close();
+//
+//        } catch (SQLException ex) {
+//            Logger.getLogger(Score.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//
+//        return stringResult;
+
 //        Vector<String> stringResult = new Vector<String>();
 //
 //        try {

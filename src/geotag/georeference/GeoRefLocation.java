@@ -34,6 +34,7 @@ import geotag.words.GeographicWord;
 import java.io.FileReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
+import jdbm.RecordManagerOptions;
 
 /**
  * Classe che ha il compito di georeferenziare la Locazione, ovvero la zona ricevuta
@@ -100,13 +101,15 @@ public class GeoRefLocation {
             Serial a = new Serial();
             RecordManager mydbinter;
             BTree tinter = new BTree();
-            mydbinter = RecordManagerFactory.createRecordManager(dbpath + "albero_Btree_Intermedio", new Properties()); //occhio: qui c'erano 2 separator
+            Properties options = new Properties();
+            options.setProperty(RecordManagerOptions.DISABLE_TRANSACTIONS, "");
+            mydbinter = RecordManagerFactory.createRecordManager(dbpath + "albero_Btree_Intermedio", options); //occhio: qui c'erano 2 separator
             tinter = loadOrCreateBTree(mydbinter, "intermedio", a);
             BTree tgaz;
             Serial a1 = new Serial();
             RecordManager mydbgaz;
             tgaz = new BTree();
-            mydbgaz = RecordManagerFactory.createRecordManager(dbpath + "albero_Btree_Gazetteer", new Properties()); //occhio: qui c'erano 2 separator
+            mydbgaz = RecordManagerFactory.createRecordManager(dbpath + "albero_Btree_Gazetteer", options); //occhio: qui c'erano 2 separator
             tgaz = loadOrCreateBTree(mydbgaz, "gazetteer", a1);
             Object results = tinter.find(searchingName);
             String[] dati;

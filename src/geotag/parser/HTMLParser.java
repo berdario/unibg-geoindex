@@ -13,6 +13,7 @@ import au.id.jericho.lib.html.StartTag;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 
 /**
  * Classe che esegue il parsing del file in formato HTML.
@@ -23,32 +24,52 @@ import java.net.URL;
  * @author Giorgio Ghisalberti
  */
 public class HTMLParser {
-    Source source = null;
-    Element titleElement = null;
-    
+    String body, title = null;
+    HashMap<String,String> meta = new HashMap<String,String>();
+
     /**
      * Costruttore della classe
      */
     public HTMLParser(String docURL) throws MalformedURLException, IOException{
-        if (docURL.indexOf(':') == -1) 
+        if (docURL.indexOf(':') == -1) {
             docURL = "file:" + docURL;
+        }
 
-       source = new Source(new URL(docURL));
+       Source source = new Source(new URL(docURL));
+
+       // Call fullSequentialParse manually as most of the source will be parsed.
+       source.fullSequentialParse();
+
+       //Tutto il testo del documento, escluso quello dentro SCRIPT and STYLE
+       body = source.getTextExtractor().setIncludeAttributes(true).toString();
+
+       Element titleElement = source.findNextElement(0,HTMLElementName.TITLE);
+       if (titleElement != null){// TITLE element never contains other tags so just decode it collapsing whitespace:
+           title = CharacterReference.decodeCollapseWhiteSpace(titleElement.getContent());
+       }
+
+       String[] interestingKeys = {"description","keywords"};
+
+        for (String key : interestingKeys) {
+            for (int pos = 0; pos < source.length();) {
+                StartTag startTag = source.findNextStartTag(pos, "name", key, false);
+                if (startTag == null){
+                    break;
+                }
+                if (startTag.getName().equals(HTMLElementName.META)) {
+                    meta.put(key, startTag.getAttributeValue("content")); // Attribute values are automatically decoded
+                    break;
+                }
+                pos = startTag.getEnd();
+            }
+        }
     }
     
     /**
      * Metodo che legge il contenuto del campo "body" del file HTML e ne restituisce il risultato
      * @return la stringa di testo reperita
      */
-    public String parsingHTMLFile() {
-        String body = "";
-        
-        // Call fullSequentialParse manually as most of the source will be parsed.
-        source.fullSequentialParse();
-
-        //Tutto il testo del documento, escluso quello dentro SCRIPT and STYLE 
-        body = source.getTextExtractor().setIncludeAttributes(true).toString();
-
+    public String getContent() {
         return body;
     }
     
@@ -58,13 +79,7 @@ public class HTMLParser {
      * @return la stringa di testo reperita
      */
     public String getTitle() {        
-        titleElement = source.findNextElement(0,HTMLElementName.TITLE);
-        
-        if (titleElement == null)
-            return null;
-        
-        // TITLE element never contains other tags so just decode it collapsing whitespace:
-        return CharacterReference.decodeCollapseWhiteSpace(titleElement.getContent());
+        return title;
     }
     
     
@@ -74,14 +89,7 @@ public class HTMLParser {
      * @return la stringa di testo reperita
      */
     public String getMetaValue(String key) {
-        for (int pos=0; pos<source.length();) {
-            StartTag startTag=source.findNextStartTag(pos,"name",key,false);
-            if (startTag==null) return null;
-            if (startTag.getName().equals(HTMLElementName.META))
-                    return startTag.getAttributeValue("content"); // Attribute values are automatically decoded
-            pos=startTag.getEnd();
-        }
-        return null;
+        return meta.get(key);
     }
     
     

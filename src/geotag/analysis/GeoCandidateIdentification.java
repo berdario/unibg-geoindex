@@ -27,6 +27,7 @@ import geotag.words.StringOperation;
 import geotag.words.GeoWordsOperation;
 import geotag.words.GeographicWord;
 import geotag.words.Word;
+import jdbm.RecordManagerOptions;
 
 /**
  * Classe fondamentale dell'applicazione.
@@ -36,7 +37,7 @@ import geotag.words.Word;
  * @author Giorgio Ghisalberti
  */
 public class GeoCandidateIdentification {
-    RecordManager mydbinter = null, mydbgaz = null;
+    BTree tinter, tgaz;
     
     Vector<Word> filterWordVector = new Vector<Word>(); 
     Vector<Word> allWordVector = new Vector<Word>(); 
@@ -52,16 +53,22 @@ public class GeoCandidateIdentification {
     /**
      * Costruttore della classe
      */
-    public GeoCandidateIdentification(){
-    	this.path=GeoApplication.getPath();
-    	this.slash=File.separator;
-    	this.dbpath=path+"db"+slash;
-		try {
-			mydbinter = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_Intermedio", new Properties());
-    		mydbgaz = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_Gazetteer", new Properties());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+    public GeoCandidateIdentification() {
+        this.path = GeoApplication.getPath();
+        this.slash = File.separator;
+        this.dbpath = path + "db" + slash;
+        try {
+            Properties options = new Properties();
+            options.setProperty(RecordManagerOptions.DISABLE_TRANSACTIONS, "");
+            RecordManager mydbinter = RecordManagerFactory.createRecordManager(dbpath + "albero_Btree_Intermedio", options);
+            RecordManager mydbgaz = RecordManagerFactory.createRecordManager(dbpath + "albero_Btree_Gazetteer", options);
+            tinter = new BTree();
+            tgaz = new BTree();
+            tinter = loadOrCreateBTree(mydbinter, "intermedio", new Serial());
+            tgaz = loadOrCreateBTree(mydbgaz, "gazetteer", new Serial());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     /**
@@ -404,17 +411,6 @@ public class GeoCandidateIdentification {
              ricerca di un singolo termine.
              Quando trovo un match nel DB mi fermo e restituisco il risultato.
             */
-        	
-        	Serial a=new Serial();
-    		BTree tinter=new BTree();
-    		tinter = loadOrCreateBTree(mydbinter, "intermedio", a );
-    		
-    		BTree tgaz;
-    		Serial a1=new Serial();
-    		tgaz = new BTree();
-    		tgaz = loadOrCreateBTree(mydbgaz, "gazetteer", a1 );
-    		
-        	
         	//DO While finisce al primo gruppo di termini trovati !wordVectorResult.isEmpty()
             while(wordVectorResult.isEmpty() && shift1 > 0 && shift2 > 0){
                 //Creo Word formata da + termini            

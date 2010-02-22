@@ -68,7 +68,8 @@ import org.apache.commons.io.FileUtils;
  * @author  giorgio
  */
 public final class GeoApplication {
-    
+
+    Logger logger = Logger.getLogger(this.getClass().getName());
 
     private int maxCachedResults = 300;
     CacheHashMap<Triple<String,String,Double>,Vector<GeoRefDoc>> cachedResults = new CacheHashMap<Triple<String, String, Double>, Vector<GeoRefDoc>>(maxCachedResults);
@@ -85,6 +86,8 @@ public final class GeoApplication {
     
     private static String path,dbpath,cachepath,configfile,slash;
     private ArrayList<File> indexDirs;
+
+    GeoCandidateIdentification geoAnalysis;
 	
 	public String createIndex(File curDir){
         String errortext="";
@@ -168,8 +171,7 @@ public final class GeoApplication {
                                     Filter myFilter = new Filter();
                                     filterWordVector = myFilter.filtering(wordVector, documentContent, upperDateLine);
 
-                                    // Fase di GEO-VALUTAZIONE                                                                                   
-                                    GeoCandidateIdentification geoAnalysis = new GeoCandidateIdentification();                            
+                                    // Fase di GEO-VALUTAZIONE                                                                                                               
                                     geoWordVector = geoAnalysis.analyze(filterWordVector, wordVector, documentContent, importanceValue, upperDateLine);
 
                                     //Tra elementi con uguale geonameid ne prendo solo 1 con peso e importanza maggiore 
@@ -212,16 +214,17 @@ public final class GeoApplication {
                                     for(int ind = 0; ind < finalGeoWordVector.size(); ind++){
                                         GeographicWord gw = finalGeoWordVector.elementAt(ind);                                    
                                         // cerco nell'r-tree
-                                        System.out.print(finalGeoWordVector.elementAt(ind).getName() + " - geoscore: "
+                                        logger.log(Level.FINER,finalGeoWordVector.elementAt(ind).getName() + " - geoscore: "
                                                 + formatter.format(finalGeoWordVector.elementAt(ind).getGeoScore()) + " - georefvalue: "
-                                                + formatter.format(scores.get(gw))+" - codici: ");
+                                                + formatter.format(scores.get(gw)));
+                                        logger.log(Level.FINEST," codici: ");
                                         
                                         ArrayList<Pair<String,String>> codici = rtree.query(gw.getmbr_x1(), gw.getmbr_y1(),gw.getmbr_x2(), gw.getmbr_y2());
                                         boolean trovato=false;
                                         for(int trovati=0;trovati<codici.size();trovati++)
                                         {
                                             String codice = Tuple.get1(codici.get(trovati));
-                                            System.out.print(codice+" ");
+                                            logger.log(Level.FINEST,codice+" ");
                                         	File file = new File(dbpath+(Integer.parseInt(codice)/1000)+slash+codice);
                                         	if (file.exists()){
 
@@ -521,6 +524,8 @@ public final class GeoApplication {
         } catch (IOException ex) {
             Logger.getLogger(GeoApplication.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        geoAnalysis = new GeoCandidateIdentification();
     }
 	
 	public void loadConfiguration(){
