@@ -17,6 +17,7 @@ import jdbm.btree.BTree;
 import dbcreator.ricercapernome.Compara;
 import dbcreator.ricercapernome.Serial;
 import dbcreator.ricercapernome.Serializ;
+import geotag.GeoApplication;
 import spatialindex.storagemanager.DiskStorageManager;
 import spatialindex.storagemanager.IStorageManager;
 import spatialindex.storagemanager.RandomEvictionsBuffer;
@@ -39,12 +40,19 @@ public class readgazetteer {
 	private formdicaricamento frame;
 	private BTree tgaz;
 	private BTree tcountryInfo;
+
+        Properties options;
+        String dbpath;
 	
-	public readgazetteer(){}
+	public readgazetteer(){
+            options = GeoApplication.getDefaultRecordManagerOptions();
+            dbpath = Dbcreator.getDBPath();
+        }
 	
 	public readgazetteer(formdicaricamento frame)
 	{
-		this.frame=frame;
+            this();
+            this.frame=frame;
 	}
 	public void carica(String path) throws IOException {
 		// TODO Auto-generated method stub		
@@ -74,39 +82,39 @@ public class readgazetteer {
 		Serial a=new Serial();
 		RecordManager mydbgaz;
 		tgaz = new BTree();
-		mydbgaz = RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_Btree_Gazetteer", new Properties());
+		mydbgaz = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_Gazetteer", options);
 		tgaz = loadOrCreateBTree(mydbgaz, "gazetteer", a );
 
 		//-------------------  APERTURA FILE B-TREE DEL DB INTERMEDIO -------------------//
 		RecordManager mydbinter;
 		BTree tinter=new BTree();
-		mydbinter = RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_Btree_Intermedio", new Properties());
+		mydbinter = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_Intermedio", options);
 		tinter = loadOrCreateBTree(mydbinter, "intermedio", a );
 
 		//---------APERTURA FILE PER IL B-TREE OSM ------------------------------------//
 		RecordManager mydbosm;
 		BTree tosm=new BTree();
 		
-		mydbosm = RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_Btree_osm", new Properties());
+		mydbosm = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_osm", options);
 		
 		tosm = loadOrCreateBTree(mydbosm, "osm", a );
 		//---------APERTURA FILE PER IL B-TREE countryInfo ------------------------------------//
 		RecordManager mydbcountryInfo;
 		tcountryInfo = new BTree();
-		mydbcountryInfo = RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_countryInfo", new Properties());
+		mydbcountryInfo = RecordManagerFactory.createRecordManager(dbpath+"albero_countryInfo", options);
 		tcountryInfo = loadOrCreateBTree(mydbcountryInfo, "country", a );
 		
 		//-------------------  APERTURA FILE B-TREE DEL GAZETTEER POPULATION -------------------//
 		RecordManager mydbgazpop;
 		BTree tgazpop = new BTree();
-		mydbgazpop = RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_Btree_population", new Properties());
+		mydbgazpop = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_population", options);
 		tgazpop = loadOrCreateBTree(mydbgazpop, "population", a );
 
 		//-------------------  APERTURA FILE B-TREE DEL GAZETTEER POPULATION2-------------------//
 
 		RecordManager mydbgazpop2;
 		BTree tgazpop2 = new BTree();
-		mydbgazpop2 = RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_Btree_population2", new Properties());
+		mydbgazpop2 = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_population2", options);
 		tgazpop2 = loadOrCreateBTree(mydbgazpop2, "population2", a );
 
 		//------------------- FINE CREAZIONE ALBERO B-TREE -------------------------//

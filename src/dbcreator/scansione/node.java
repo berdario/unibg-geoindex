@@ -44,10 +44,11 @@ public class node {
 		try
  	{	
 		this.relativePath=relativePath;
-		Properties props = new Properties();
-        props.put( RecordManagerOptions.CACHE_SIZE, "1000" );
+		Properties options = new Properties();
+                options.put( RecordManagerOptions.CACHE_SIZE, "1000" );
+                options.setProperty(RecordManagerOptions.DISABLE_TRANSACTIONS, "");
 
-		mydb = RecordManagerFactory.createRecordManager(relativePath+"/node", props);
+		mydb = RecordManagerFactory.createRecordManager(relativePath+"/node", options);
  		tn = ScanXML.loadOrCreateBTree(mydb, "Node", a );
  	}
  	catch (java.io.IOException e)

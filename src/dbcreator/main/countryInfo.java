@@ -12,6 +12,7 @@ import jdbm.btree.BTree;
 import dbcreator.ricercapernome.Compara;
 import dbcreator.ricercapernome.Serial;
 import dbcreator.ricercapernome.Serializ;
+import geotag.GeoApplication;
 
 public class countryInfo {
 
@@ -21,11 +22,12 @@ public class countryInfo {
 	 */
 	public static void carica(String path) throws IOException {
 		// TODO Auto-generated method stub
-		
+                String dbpath = Dbcreator.getDBPath();
+
 		Serial a=new Serial();
 		RecordManager mydbcountryInfo;
 		BTree tcountryInfo=new BTree();
-		mydbcountryInfo = RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_countryInfo", new Properties());
+		mydbcountryInfo = RecordManagerFactory.createRecordManager(dbpath+"albero_countryInfo", GeoApplication.getDefaultRecordManagerOptions());
 		tcountryInfo = loadOrCreateBTree(mydbcountryInfo, "country", a );
 		
 		LineNumberReader lr = null;

@@ -15,6 +15,7 @@ import jdbm.btree.BTree;
 import dbcreator.ricercapernome.Compara;
 import dbcreator.ricercapernome.Serial;
 import dbcreator.ricercapernome.Serializ;
+import geotag.GeoApplication;
 
 public class read_alternateNames {
 
@@ -23,12 +24,18 @@ public class read_alternateNames {
 	 * @throws IOException 
 	 */
 	private formdicaricamento frame;
-	
-	public read_alternateNames(){}
+	Properties options;
+        String dbpath;
+
+	public read_alternateNames(){
+            options = GeoApplication.getDefaultRecordManagerOptions();
+            dbpath = Dbcreator.getDBPath();
+        }
 	
 	public read_alternateNames(formdicaricamento frame)
 	{
-		this.frame=frame;
+            this();
+            this.frame=frame;
 	}
 	public void carica(String path) throws IOException {
 		// TODO Auto-generated method stub
@@ -43,19 +50,19 @@ public class read_alternateNames {
 		Serial a=new Serial();
 		RecordManager mydbinter;
 		BTree tinter=new BTree();
-		mydbinter = RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_Btree_Intermedio", new Properties());
+		mydbinter = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_Intermedio", options);
 		tinter = loadOrCreateBTree(mydbinter, "intermedio", a );
 		
 		//-------------------  APERTURA FILE B-TREE ALTERNATENAMESID ------------------
 		RecordManager mydbalternatenamesId;
 		BTree talternatenamesId=new BTree();
-		mydbalternatenamesId = RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_alternatenamesId", new Properties());
+		mydbalternatenamesId = RecordManagerFactory.createRecordManager(dbpath+"albero_alternatenamesId", options);
 		talternatenamesId = loadOrCreateBTree(mydbalternatenamesId, "alternatenamesId", a );
 
 		//-------------------  APERTURA FILE B-TREE ALTERNATENAMES ------------------
 		RecordManager mydbalternatenames;
 		BTree talternatenames=new BTree();
-		mydbalternatenames = RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_alternatenames", new Properties());
+		mydbalternatenames = RecordManagerFactory.createRecordManager(dbpath+"albero_alternatenames", options);
 		talternatenames = loadOrCreateBTree(mydbalternatenames, "alternatenames", a );
 		
 		

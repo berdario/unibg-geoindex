@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,6 +53,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import jdbm.RecordManagerOptions;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.queryParser.ParseException;
@@ -76,6 +78,8 @@ public final class GeoApplication {
     CacheHashMap<Pair<String,String>,Vector<GeoRefDoc>> cachedUnsortedResults = new CacheHashMap<Pair<String, String>, Vector<GeoRefDoc>>(maxCachedResults);
 
     public static RTreeReader rtree;
+
+    private static Properties defaultRecordManagerOptions = new Properties();
 
     private String swLanguage;
     
@@ -482,9 +486,14 @@ public final class GeoApplication {
 	public static String getPath(){
 		return path;
 	}
+
+        public static Properties getDefaultRecordManagerOptions(){
+            return defaultRecordManagerOptions;
+        }
 	
     public GeoApplication(String cfgpath) {
         slash = System.getProperty("file.separator");
+        defaultRecordManagerOptions.setProperty(RecordManagerOptions.DISABLE_TRANSACTIONS, "");
 
         if (cfgpath != null) {
             configfile = cfgpath;

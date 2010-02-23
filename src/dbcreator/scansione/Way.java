@@ -1,6 +1,7 @@
 package dbcreator.scansione;
 
 //import java.util.ArrayList;
+import geotag.GeoApplication;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
@@ -69,7 +70,7 @@ public Way(String relativePath){
 		Properties props = new Properties();
         props.put( RecordManagerOptions.CACHE_SIZE, "1000" );
 
-		mydb = RecordManagerFactory.createRecordManager(relativePath+"/Way", new Properties());
+		mydb = RecordManagerFactory.createRecordManager(relativePath+"/Way", GeoApplication.getDefaultRecordManagerOptions());
  		tw = ScanXML.loadOrCreateBTree(mydb, "Way-LonMin", a );
  	}
 	catch (java.io.IOException e)

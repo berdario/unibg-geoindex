@@ -14,6 +14,7 @@ import jdbm.btree.BTree;
 import dbcreator.ricercapernome.Compara;
 import dbcreator.ricercapernome.Serial;
 import dbcreator.ricercapernome.Serializ;
+import geotag.GeoApplication;
 
 public class readpopulation {
 
@@ -22,12 +23,18 @@ public class readpopulation {
 	 * @throws IOException 
 	 */
 	private formdicaricamento frame;
+        Properties options;
+        String dbpath;
 	
-	public readpopulation(){}
+	public readpopulation(){
+            options = GeoApplication.getDefaultRecordManagerOptions();
+            dbpath = Dbcreator.getDBPath();
+        }
 	
 	public readpopulation(formdicaricamento frame)
 	{
-		this.frame=frame;
+            this();
+            this.frame=frame;
 	}
 	public void carica(String path) throws IOException {
 		// TODO Auto-generated method stub
@@ -46,14 +53,14 @@ public class readpopulation {
 		Serial a=new Serial();
 		RecordManager mydbgazpop;
 		BTree tgazpop = new BTree();
-		mydbgazpop = RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_Btree_population", new Properties());
+		mydbgazpop = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_population", options);
 		tgazpop = loadOrCreateBTree(mydbgazpop, "population", a );
 
 		//-------------------  APERTURA FILE B-TREE DEL GAZETTEER POPULATION2-------------------//
 
 		RecordManager mydbgazpop2;
 		BTree tgazpop2 = new BTree();
-		mydbgazpop2 = RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_Btree_population2", new Properties());
+		mydbgazpop2 = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_population2", options);
 		tgazpop2 = loadOrCreateBTree(mydbgazpop2, "population2", a );
 
 		

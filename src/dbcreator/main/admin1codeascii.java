@@ -12,6 +12,7 @@ import jdbm.btree.BTree;
 import dbcreator.ricercapernome.Compara;
 import dbcreator.ricercapernome.Serial;
 import dbcreator.ricercapernome.Serializ;
+import geotag.GeoApplication;
 
 public class admin1codeascii {
 
@@ -21,10 +22,11 @@ public class admin1codeascii {
 	 */
 	public static void carica(String path) throws IOException {
 		// TODO Auto-generated method stub
+                String dbpath = Dbcreator.getDBPath();
 		Serial a=new Serial();
 		RecordManager mydbadmin1;
 		BTree tadmin1=new BTree();
-		mydbadmin1 = RecordManagerFactory.createRecordManager(path+"db"+File.separator+"albero_admin1codeascii", new Properties());
+		mydbadmin1 = RecordManagerFactory.createRecordManager(dbpath+"albero_admin1codeascii", GeoApplication.getDefaultRecordManagerOptions());
 		tadmin1 = loadOrCreateBTree(mydbadmin1, "admin1", a );
 		
 		LineNumberReader lr = null;
