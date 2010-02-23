@@ -22,11 +22,23 @@ public class menu extends JFrame {
 	//public menu(Thread a,Thread b,avviocaricamento_osm avvio,avviocaricamento_Rtree avvio2) {
 	private String path;
 	public menu() {
-		initComponents();
+            initComponents();
 		//this.a=a;
 		//this.b=b;
 		//this.avvio=avvio;
 		//this.avvio2=avvio2;
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            Dimension frameSize = getSize();
+
+            if (frameSize.height > screenSize.height) {
+                frameSize.height = screenSize.height;
+            }
+            if (frameSize.width > screenSize.width) {
+                frameSize.width = screenSize.width;
+            }
+            setLocation((screenSize.width - frameSize.width) / 2, (screenSize.height - frameSize.height) / 2);
+            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            setVisible(true);
 	}
 	public void verifica(){
 		System.out.print(path);

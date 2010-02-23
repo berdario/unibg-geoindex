@@ -3,18 +3,6 @@ import java.lang.reflect.Array;
 
 public class metrica {
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		String s="comune dalmine";
-		String t="dalmine";
-		double distance=metric(s,t);
-		System.out.print(distance);
-		
-		
-	}
 	public static double metric(String s,String t){
 		int h;
 		s=s.toLowerCase();

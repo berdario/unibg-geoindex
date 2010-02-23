@@ -532,7 +532,7 @@ public final class GeoApplication {
 		File cfgfile=new File(configfile);
 		if (!cfgfile.exists()){
 			System.out.println("Missing configuration file, please run Dbcreator first");
-			System.exit(0);
+			throw new ConfigFileNotFoundException() ;
 		}
 		PropertiesConfiguration config;
 		try {
@@ -601,7 +601,9 @@ public final class GeoApplication {
         Collections.sort(results,Collections.reverseOrder());
         
         return results;
-    }	
+    }
 
+    class ConfigFileNotFoundException extends RuntimeException{
+    }
 
 }

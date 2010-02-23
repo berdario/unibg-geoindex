@@ -19,53 +19,53 @@ public class Dbcreator {
 	File requiredFiles[];
 	public int step=0;
 	
-	public Dbcreator(String configpath){
-		//set default paths
-		String os=System.getProperty("os.name");
-		String homepath=System.getProperty("user.home");
-		slash=System.getProperty("file.separator");
-		if (os.startsWith("Linux")){
-			path=System.getenv("XDG_DATA_HOME");
-			if (path==null){
-				path=homepath+"/.local/share/";
-			}
-			path+="geosearch/";
-			
-			configfile=System.getenv("XDG_CONFIG_HOME");
-			if (configfile==null){
-				configfile=homepath+"/.config/";
-			}
-			configfile+="geosearch/config";
-			
-			cachepath=System.getenv("XDG_CACHE_HOME");
-			if (cachepath==null){
-				cachepath=homepath+"/.cache/";
-			}
-			cachepath+="geosearch/";
-			
-		} else if (os.startsWith("Windows")){
-			path=System.getenv("APPDATA")+slash+"geosearch"+slash;
-			configfile=path+"config";
-			cachepath=path+"cache"+slash;
-		} else if (os.startsWith("Mac")){
-			path=homepath+"/Library/Application Support/geosearch/";
-			configfile=path+"config";
-			cachepath=path+"cache/";
-		} else {
-			path=System.getProperty("user.dir")+"geosearch"+slash;
-			configfile=path+"config";
-			cachepath=path+"cache"+slash;
-		}
-		dbpath=path+"db"+slash;
-		
-		if (configpath!=null){
-			configfile=configpath;
-		}
-		
-		loadConfiguration();
-	}
-	
-	public void loadConfiguration(){
+    public Dbcreator(String configpath) {
+        
+        //set default paths
+        String os = System.getProperty("os.name");
+        String homepath = System.getProperty("user.home");
+        slash = System.getProperty("file.separator");
+        if (os.startsWith("Linux")) {
+            path = System.getenv("XDG_DATA_HOME");
+            if (path == null) {
+                path = homepath + "/.local/share/";
+            }
+            path += "geosearch/";
+
+            configfile = System.getenv("XDG_CONFIG_HOME");
+            if (configfile == null) {
+                configfile = homepath + "/.config/";
+            }
+            configfile += "geosearch/config";
+
+            cachepath = System.getenv("XDG_CACHE_HOME");
+            if (cachepath == null) {
+                cachepath = homepath + "/.cache/";
+            }
+            cachepath += "geosearch/";
+
+        } else if (os.startsWith("Windows")) {
+            path = System.getenv("APPDATA") + slash + "geosearch" + slash;
+            configfile = path + "config";
+            cachepath = path + "cache" + slash;
+        } else if (os.startsWith("Mac")) {
+            path = homepath + "/Library/Application Support/geosearch/";
+            configfile = path + "config";
+            cachepath = path + "cache/";
+        } else {
+            path = System.getProperty("user.dir") + "geosearch" + slash;
+            configfile = path + "config";
+            cachepath = path + "cache" + slash;
+        }
+        dbpath = path + "db" + slash;
+        if (configpath != null) {
+            configfile = configpath;
+        }
+
+        loadConfiguration();
+    }
+
+	public void loadConfiguration(){//TODO: originalmente dbcreator e geoapplication erano in 2 progetti separati, ma ora che sono nello stesso sarebbe conveniente unire questa funzione in una sola
 		File cfgfile=new File(configfile);
 		if (!cfgfile.exists()){
 			createDefaultConfiguration();
@@ -93,7 +93,6 @@ public class Dbcreator {
 			requiredFiles=innerRequiredFiles;
 			
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -162,75 +161,53 @@ public class Dbcreator {
 
 	}
 
-	public boolean verificaFile(){
-		boolean flag=true;
-		
-		File basepath = new File(path);
-		if (!basepath.exists()){
-			basepath.mkdirs();
-			System.out.println("Per favore inserisci i file necessari in "+path);
-			System.exit(1);
-		} else{
-			System.out.println("Verifica presenza strutture dati:");
-			try {
-				for (File f : requiredFiles) {
-					System.out.println(f.getCanonicalPath() + ": "+ (f.exists() ? "OK" : "MANCA"));
-					if (!f.exists()) {
-						flag = false;
-					}
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		if (!flag){//se bisogna creare il database, allora controllo che ci siano tutti i file necessari
+    public boolean checkExistingDb() {
+        boolean flag = true;
 
-			//TODO per ora sono fissi: eventualmente parametrizzare/inserire in un file di configurazione e permettere di caricare stopwords in lingua diversa o comunque altri file... it.txt e alterNames dovrebbero poter venire accettati anche zippati...
-			String[] originFilenames={"stopWords","stopWords"+slash+"englishSW.txt","admin1CodesASCII.txt","allCountries.zip","alternateNames.txt","iso-languagecodes.txt","countryInfo.txt","featureCodes.txt","geoStopwords.txt","IT.txt","italy.osm.bz2","street.txt"};
-			
-			boolean originFilesFlag=true;
-			String warning="";
+        File basepath = new File(path);
+        if (!basepath.exists()) {
+            basepath.mkdirs();
+            System.out.println("Per favore inserisci i file necessari in " + path);
+            System.exit(1);
+        } else {
+            System.out.println("Verifica presenza strutture dati:");
+            try {
+                for (File f : requiredFiles) {
+                    System.out.println(f.getCanonicalPath() + ": " + (f.exists() ? "OK" : "MANCA"));
+                    if (!f.exists()) {
+                        flag = false;
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return flag;
+    }
 
-			for (String f : originFilenames){
-				if (!(new File(path+f)).exists()){
-					if (originFilesFlag){
-						originFilesFlag=false;
-						warning+="\nPlease insert into "+path+" the following files:\n";
-					}
-					warning+=f+"\n";
-				}
-			}
-			
-			if (!warning.equals("")){
-				System.out.println(warning);
-				System.exit(1);
-			}
-		}
-		
-		return flag;
-		
-		/*File verificar_tree1=new File(dbpath+"datiscritti.dat");
-        File verificar_tree2=new File(dbpath+"datiscritti.idx");
-        File verificar_tree3=new File(dbpath+"albero_Btree_osm.db");
-        
-        File verificapop1=new File(dbpath+"albero_Btree_population.db");
-        File verificapop2=new File(dbpath+"albero_Btree_population2.db");
-        
-        
-        File verificagaz1=new File(dbpath+"albero_Btree_Gazetteer.db");
-        File verificagaz2=new File(dbpath+"albero_Btree_Intermedio.db");
-        
-        File verificaalter1=new File(dbpath+"albero_alternatenames.db");
-        File verificaalter2=new File(dbpath+"albero_alternatenamesId.db");
-    
-        File verificaresto1=new File(dbpath+"albero_admin1codeascii.db");    
-        File verificaresto2=new File(dbpath+"albero_countryInfo.db");
-        File verificaresto3=new File(dbpath+"albero_featurecodes.db");*/
-		
-		
-	}
-	
+    public void checkNeededFiles() {
+        //TODO per ora sono fissi: eventualmente parametrizzare/inserire in un file di configurazione e permettere di caricare stopwords in lingua diversa o comunque altri file... it.txt e alterNames dovrebbero poter venire accettati anche zippati...
+        String[] originFilenames = {"stopWords", "stopWords" + slash + "englishSW.txt", "admin1CodesASCII.txt", "allCountries.zip", "alternateNames.txt", "iso-languagecodes.txt", "countryInfo.txt", "featureCodes.txt", "geoStopwords.txt", "IT.txt", "italy.osm.bz2", "street.txt"};
+
+        boolean originFilesFlag = true;
+        String warning = "";
+
+        for (String f : originFilenames) {
+            if (!(new File(path + f)).exists()) {
+                if (originFilesFlag) {
+                    originFilesFlag = false;
+                    warning += "\nPlease insert into " + path + " the following files:\n";
+                }
+                warning += f + "\n";
+            }
+        }
+
+        if (!warning.equals("")) {
+            System.out.println(warning);
+            System.exit(1);
+        }
+    }
+
 	public void createDB(int step){
 		
 		switch (step) {
@@ -256,6 +233,7 @@ public class Dbcreator {
 	}
 	
 	public void createDB(boolean interactive){
+            checkNeededFiles();
 		if (interactive){
 			BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
 			String[] step={"OSM","Rtree","dati popolazione","gazetteer","alternames","file restanti"};
@@ -330,13 +308,13 @@ public class Dbcreator {
 		
 	}
 	
-	private void CaricaRtree(){
-		
-			
-			RTreeLoad Rtree =new RTreeLoad();
-	        Rtree.carica();
-		
-	}
+    private void CaricaRtree() {
+        //TODO: fare attenzione: dopo alcune modifiche potrebbe darsi che l'rtree non venga sovrascritto se già esiste... testare
+
+        RTreeLoad Rtree = new RTreeLoad();
+        Rtree.carica();
+
+    }
 
 	private void CaricaPopulation(){
 		

@@ -1,5 +1,7 @@
 package geotag;
 
+import dbcreator.main.Dbcreator;
+import dbcreator.main.menu;
 import geotag.words.GeoRefDoc;
 import java.io.BufferedReader;
 import java.io.File;
@@ -31,47 +33,63 @@ public class Main {
         options.addOption("g", "gui", false, "starts with the gui");
         options.addOption("h", "help", false, "print this message");
         options.addOption("c", "config", true, "loads the provided config file");
+        options.addOption("a", "interactive", false, "ask confirmation before each step (works only for the db initialization)");
+	options.addOption("f","forceinit",false, "force the creation of the db, even if it already exists");
         options.addOption(OptionBuilder.withLongOpt("index").hasOptionalArg().withDescription("indexes the documents on the given path or reindex everything if without argument").create("i"));
         String usage = "\n" + programName + " [--config configfile] --index [path]\n" +
                 programName + " [--config configfile] keyword place\n" +
-                programName + " [--config configfile]";
+                programName + " [--config configfile]\n" +
+                programName + " [--config configfile] [--forceinit] [--interactive]";
         HelpFormatter usagehelp = new HelpFormatter();
         String cfgpath = null;
         try {
             CommandLine cmd = parser.parse(options, args);
             args = cmd.getArgs();
-
-            if (cmd.hasOption("help")) {
-                usagehelp.printHelp(usage, options);
-            } else if (cmd.hasOption("gui")) {
-                java.awt.EventQueue.invokeLater(new GeoApplicationGui());
-            } else {
-                if (cmd.hasOption("config")) {
-                    cfgpath = cmd.getOptionValue("config");
-                }
-                mainApp = new GeoApplication(cfgpath);
-
-                if (cmd.hasOption("index")) {
-                    String inputpath = cmd.getOptionValue("index");
-                    mainApp.updateIndexConfig(inputpath);
-
-                    if (inputpath != null) {
-                        String errortext = mainApp.createIndex(new File(
-                                inputpath));
-                        System.out.println(errortext);
-                    } else {
-                        String errortext = mainApp.createIndex();
-                        System.out.println(errortext);
-                    }
-                } else if (args.length == 2) {
-                    Vector<GeoRefDoc> results = mainApp.search(args[0], args[1]);
-                    for (GeoRefDoc doc : results) {
-                        System.out.println(doc);
-                    }
-                } else if (args.length == 0) {
-                    commandLine();
-                } else {
+            boolean interactive = cmd.hasOption("interactive");
+            if (cmd.hasOption("config")) {
+                cfgpath = cmd.getOptionValue("config");
+            }
+            if (cmd.hasOption("forceinit")) {
+                Dbcreator creator = new Dbcreator(cfgpath);
+                creator.createDB(interactive);
+            }
+            try {
+                if (cmd.hasOption("help")) {
                     usagehelp.printHelp(usage, options);
+                } else if (cmd.hasOption("gui")) {
+                    new menu();
+                    java.awt.EventQueue.invokeLater(new GeoApplicationGui());
+                } else {
+
+                    mainApp = new GeoApplication(cfgpath);
+
+                    if (cmd.hasOption("index")) {
+                        String inputpath = cmd.getOptionValue("index");
+                        mainApp.updateIndexConfig(inputpath);
+
+                        if (inputpath != null) {
+                            String errortext = mainApp.createIndex(new File(
+                                    inputpath));
+                            System.out.println(errortext);
+                        } else {
+                            String errortext = mainApp.createIndex();
+                            System.out.println(errortext);
+                        }
+                    } else if (args.length == 2) {
+                        Vector<GeoRefDoc> results = mainApp.search(args[0], args[1]);
+                        for (GeoRefDoc doc : results) {
+                            System.out.println(doc);
+                        }
+                    } else if (args.length == 0) {
+                        commandLine();
+                    } else {
+                        usagehelp.printHelp(usage, options);
+                    }
+                }
+            } catch (GeoApplication.ConfigFileNotFoundException e) {
+                Dbcreator creator = new Dbcreator(cfgpath);
+                if (!creator.checkExistingDb()) {
+                    creator.createDB(interactive);
                 }
             }
         } catch (org.apache.commons.cli.ParseException e) {
