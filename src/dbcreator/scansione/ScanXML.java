@@ -107,11 +107,15 @@ public class ScanXML implements ContentHandler {
  	    aRecordManager.setNamedObject( aName, tree.getRecid() );
  	   
  	  }
- 	  else
- 	  { 
- 	    tree = BTree.load( aRecordManager, recordID );
+            else {
+                try {
+                    tree = BTree.load(aRecordManager, recordID);
+                } catch (RuntimeException e) {
+                    System.out.println("Error while opening the db, have you tried deleting the old one and then recreate it?");
+                    System.exit(0);
+                }
 
- 	  }
+            }
  	  return tree;
  	} 
 
