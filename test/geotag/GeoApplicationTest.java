@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
 public class GeoApplicationTest {
 
     String basepath,dbpath,slash,cachepath,indexpath;
-    final String configfile="/home/dario/geosearch/config";
+    final String configfile="/home/dario/.config/geosearch/config";
     File index;
     private final ByteArrayOutputStream outContent=new ByteArrayOutputStream();
 

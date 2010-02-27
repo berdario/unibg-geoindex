@@ -107,7 +107,8 @@ public class PDFParser {
             if (titleElement == null){
                 return null;
             }
-            title= titleElement.getElementsByTagName("rdf:li").item(0).getFirstChild().getNodeValue();//TODO, sistemare per bene... occhio ai controlli
+            title = titleElement.getElementsByTagName("rdf:li").item(0).getFirstChild().getNodeValue();//TODO, sistemare per bene... occhio ai controlli
+            title = title.replaceAll("\n", " ").trim();
             
         } catch (SAXException ex) {
             Logger.getLogger(PDFParser.class.getName()).log(Level.SEVERE, null, ex);

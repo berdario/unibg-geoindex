@@ -152,7 +152,9 @@ public final class GeoApplication {
                         Date start = new Date();
                                 
                         try {
-                        	hash = DigestUtils.md5Hex(nameFiles[i].toURI().toString());
+                        	hash = DigestUtils.md5Hex("file://"+nameFiles[i].toString());
+                                //non uso più .toURI() per fare in modo che il numero di slash dopo "file:" sia consistente con lo standard freedesktop
+                                //TODO: eventualmente cambiare in futuro... 
                         	
                         	//Controllo se il file è già stato indicizzato                              
 
