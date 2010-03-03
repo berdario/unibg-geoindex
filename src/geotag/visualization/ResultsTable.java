@@ -53,7 +53,7 @@ public class ResultsTable {
         for(int i = 0; i < results.size(); i++){
             GeoRefDoc doc = results.elementAt(i);
             row = new Vector<String>();
-            String name = doc.getNomeDoc();
+            String name = doc.id;
             String textScore = formatter.format(doc.getTextScore());
             String distanceScore = formatter.format(doc.getDistanceScore());
             

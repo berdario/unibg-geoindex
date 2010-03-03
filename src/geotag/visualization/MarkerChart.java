@@ -133,7 +133,7 @@ public class MarkerChart extends ApplicationFrame {
         for(int i = 0; i < results.size(); i++){
             GeoRefDoc doc = results.elementAt(i);
             values.add(doc.getDistanceScore(), doc.getTextScore());
-            values.setDescription(doc.getNomeDoc());
+            values.setDescription(doc.id);
         }
         
         return values;

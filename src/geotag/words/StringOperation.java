@@ -64,8 +64,7 @@ public class StringOperation {
         String[] words = null;
         String[] wordsApostrophe = null;
         
-        source=source.replaceAll("(^ +)|( +$)", "");//remove leading and trailing whitespaces
-        words = source.split(" ");
+        words = source.trim().split(" ");
         
         for(int i = 0; i < words.length; i++){
             

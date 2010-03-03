@@ -39,7 +39,7 @@ public class GeoWordsTable {
         
         for(int i = 0; i < results.size(); i++){
             GeoRefDoc doc = results.elementAt(i);
-            if(doc.getNomeDoc().equalsIgnoreCase(docName)){                
+            if(doc.id.equalsIgnoreCase(docName)){
                 if(doc.getScores() != null){
                     HashMap<GeographicWord, Double> hash = doc.getScores();
                     Iterator keyList = hash.keySet().iterator();

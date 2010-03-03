@@ -18,6 +18,7 @@ public class DocumentWrapper {
     public String description = "";
     public String dateline = "";
     public String keywords = "";
+    public String url, extension;
 
     /**
      * Costruttore
@@ -31,7 +32,7 @@ public class DocumentWrapper {
      */
     public DocumentWrapper(File fileName, String documentExtension) throws UnsupportedFileException {
         String content = "";
-        if (documentExtension.equalsIgnoreCase("pdf")) {
+        if (documentExtension.equalsIgnoreCase("pdf")) {//TODO: sarebbe meglio usare dei mimetype?
             openPDFDocument(fileName.toString());
         } else if (documentExtension.equalsIgnoreCase("html") || documentExtension.equalsIgnoreCase("htm")) {
             openHTMLDocument(fileName.toString());
@@ -40,6 +41,9 @@ public class DocumentWrapper {
         } else {
             throw new UnsupportedFileException();
         }
+
+        url = fileName.toURI().toString();
+        extension = documentExtension;
     }
 
     /**

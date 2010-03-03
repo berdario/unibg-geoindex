@@ -64,7 +64,7 @@ public class ContentSearcher {
      * @throws java.io.IOException
      * @throws org.apache.lucene.queryParser.ParseException
      */
-    public Vector<GeoRefDoc> createTextualRankig(String keyWords){
+    public Vector<GeoRefDoc> createTextualRanking(String keyWords){
         String text;
         Vector<GeoRefDoc> docs = new Vector<GeoRefDoc>();
 
@@ -75,7 +75,7 @@ public class ContentSearcher {
             WildcardQuery wildcardQuery = new WildcardQuery(new Term("content", keyWords));
             Query query = qp.parse(wildcardQuery.toString());
             //Ordinati in base al peso, al contenuto e al nome del file
-            Sort sort = new Sort(new SortField[]{SortField.FIELD_SCORE, new SortField("fileName")}); //Nome del documento
+            Sort sort = new Sort(new SortField[]{SortField.FIELD_SCORE, new SortField("id")}); //Nome del documento
             //FilterIndexReader reader = new FilterIndexReader(IndexReader.open(contentIndexPath));
             //query = query.rewrite(IndexReader.open(contentIndexPath)); //necessario per l'highlighting dello snippet
             Hits hits = searcher.search(query, sort);
@@ -88,11 +88,13 @@ public class ContentSearcher {
                     Document doc = hits.doc(i);
                     //Popolo documento
                     GeoRefDoc newDoc = new GeoRefDoc();
-                    newDoc.setNomeDoc(doc.get("fileName"));
-                    newDoc.docTitle = doc.get("title");
-                    newDoc.docDescription = doc.get("description");
-                    newDoc.docKeyWords = doc.get("keywords");
-                    newDoc.docDateLine = doc.get("dateline");
+                    newDoc.id = doc.get("id");
+                    newDoc.title = doc.get("title");
+                    newDoc.description = doc.get("description");
+                    newDoc.keywords = doc.get("keywords");
+                    newDoc.dateline = doc.get("dateline");
+                    newDoc.url = doc.get("url");
+                    newDoc.extension = doc.get("extension");
                     
                     text = doc.get("content");
                     TokenStream tokenStream = TokenSources.getAnyTokenStream(searcher.getIndexReader(), hits.id(i), "content", new StandardAnalyzer());

@@ -69,9 +69,9 @@ public class ContentIndexer {
 		try {
 			KeywordAnalyzer kwAnalyzer = new KeywordAnalyzer();
 
-			QueryParser qp = new QueryParser("fileName", kwAnalyzer);
+			QueryParser qp = new QueryParser("id", kwAnalyzer);
 
-			TermQuery termQuery = new TermQuery(new Term("fileName", "\""
+			TermQuery termQuery = new TermQuery(new Term("id", "\""
 					+ fileName + "\""));
 			Query query = qp.parse(termQuery.toString());
 
@@ -100,7 +100,7 @@ public class ContentIndexer {
      * @param geoDoc : documento contente altri valori da indicizzare (titolo, descrizione, keyword...)
      * @param fileName: nome del file in esame
      */
-    public void indexing(String docContent, GeoRefDoc geoDoc, String fileName){
+    public void indexing(String docContent, GeoRefDoc geoDoc, String hash){
         
         try {
 			index.setUseCompoundFile(true);
@@ -108,19 +108,22 @@ public class ContentIndexer {
 
 			Document doc = new Document(); 
 			doc.add(new Field("content", docContent, Field.Store.YES, Field.Index.TOKENIZED));
-			doc.add(new Field("fileName", fileName, Field.Store.YES, Field.Index.UN_TOKENIZED));
-                        if (geoDoc.docTitle != null){
-                            doc.add(new Field("title", geoDoc.docTitle, Field.Store.YES, Field.Index.UN_TOKENIZED));
+			doc.add(new Field("id", hash, Field.Store.YES, Field.Index.UN_TOKENIZED));
+                        if (geoDoc.title != null){
+                            doc.add(new Field("title", geoDoc.title, Field.Store.YES, Field.Index.UN_TOKENIZED));
                         }
-                        if (geoDoc.docDescription!= null){
-                            doc.add(new Field("description", geoDoc.docDescription, Field.Store.YES, Field.Index.UN_TOKENIZED));
+                        if (geoDoc.description!= null){
+                            doc.add(new Field("description", geoDoc.description, Field.Store.YES, Field.Index.UN_TOKENIZED));
                         }
-                        if (geoDoc.docDateLine != null){
-                            doc.add(new Field("dateline", geoDoc.docDateLine, Field.Store.YES, Field.Index.UN_TOKENIZED));
+                        if (geoDoc.dateline != null){
+                            doc.add(new Field("dateline", geoDoc.dateline, Field.Store.YES, Field.Index.UN_TOKENIZED));
                         }
-                        if (geoDoc.docKeyWords != null){
-                            doc.add(new Field("keywords", geoDoc.docKeyWords, Field.Store.YES, Field.Index.UN_TOKENIZED));
+                        if (geoDoc.keywords != null){
+                            doc.add(new Field("keywords", geoDoc.keywords, Field.Store.YES, Field.Index.UN_TOKENIZED));
                         }
+                        doc.add(new Field("url", geoDoc.url, Field.Store.YES, Field.Index.UN_TOKENIZED));
+                        doc.add(new Field("extension", geoDoc.extension, Field.Store.YES, Field.Index.UN_TOKENIZED));
+
 			index.addDocument(doc);
 		} catch (IOException e) {
 			closeIndex();

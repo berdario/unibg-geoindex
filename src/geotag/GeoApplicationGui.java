@@ -766,7 +766,7 @@ public class GeoApplicationGui extends javax.swing.JFrame implements Runnable{
 	            	//resultsmerge.clear();
 	                // --> Creazione del RANKING testuale
 	                ContentSearcher content = new ContentSearcher();
-	                lastresults = content.createTextualRankig(keyWords);
+	                lastresults = content.createTextualRanking(keyWords);
 
 
 

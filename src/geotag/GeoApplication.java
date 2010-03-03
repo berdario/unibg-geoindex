@@ -125,17 +125,15 @@ public final class GeoApplication {
                     documentName = nameFiles[i].getName().substring(0, nameFiles[i].getName().lastIndexOf('.'));
 
                     DocumentWrapper doc;
-                    GeoRefDoc geoDoc = new GeoRefDoc();
+                    
                     try {
                         doc = new DocumentWrapper(nameFiles[i], documentExtension);
-                        documentContent = doc.content;
-                        geoDoc.docTitle = doc.title;
-                        geoDoc.docDescription=doc.description;
-                        geoDoc.docDateLine=doc.dateline;
-                        geoDoc.docKeyWords=doc.keywords;
                     } catch (UnsupportedFileException ex) {
                         Logger.getLogger(GeoApplication.class.getName()).log(Level.INFO, nameFiles[i].getName() + " is not a supported file", ex);
+                        continue;
                     }
+                    documentContent = doc.content;
+                    GeoRefDoc geoDoc = new GeoRefDoc(doc);
 
 
                         //errortext+=""
@@ -466,7 +464,7 @@ public final class GeoApplication {
         if (results == null){
 
             ContentSearcher content = new ContentSearcher();
-            results = content.createTextualRankig(keyWords);
+            results = content.createTextualRanking(keyWords);
 
             GeoRefLocation grLoc = new GeoRefLocation();
             results = grLoc.mergeLocation(results, location);

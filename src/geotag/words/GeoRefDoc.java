@@ -5,6 +5,7 @@
 
 package geotag.words;
 
+import geotag.parser.DocumentWrapper;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,13 +19,13 @@ import java.util.Vector;
  * @author Giorgio Ghisalberti
  */
 public class GeoRefDoc implements Comparable {
-    private String nomeDoc = "";
+    public String id = "";
     private double textScore = 0.0;
     private double distanceScore = 0.0;
     private HashMap<GeographicWord, Double> scores = null;//il secondo campo è il vecchio geoRefScore normalizzato
     private boolean geoRef = false;//TODO probabilmente inutile: basta controllare se geoWord è null
     private Double sortScore = 0.0;
-    public String docTitle, docDescription, docDateLine, docKeyWords, htmlSnippet;
+    public String title, description, dateline, keywords, htmlSnippet, url, extension;
     
     /**
      * Costruttore della classe
@@ -33,16 +34,25 @@ public class GeoRefDoc implements Comparable {
         
     }
 
+    public GeoRefDoc(DocumentWrapper doc) {
+        title = doc.title;
+        description = doc.description;
+        dateline = doc.dateline;
+        keywords = doc.keywords;
+        url = doc.url;
+        extension = doc.extension;
+    }
+
     @Override
     public String toString() {
-        return "documento: " + nomeDoc +
+        return "documento: " + id +
                "\ntextscore: " + textScore +
                "\nsortscore: " + sortScore +
                "\ndistancescore: " + distanceScore +
-               "\ntitle: " + docTitle +
-               "\ndescription: " + docDescription +
-               "\nkeywords: " + docKeyWords +
-               "\ndateline: " + docDateLine + "\n";
+               "\ntitle: " + title +
+               "\ndescription: " + description +
+               "\nkeywords: " + keywords +
+               "\ndateline: " + dateline + "\n";
     }
 
     /**
@@ -90,22 +100,6 @@ public class GeoRefDoc implements Comparable {
             this.scores=new HashMap<GeographicWord, Double>();
         }
         this.scores.put(geoWord, geoRefValue);
-    }
-
-    /**
-     * Restituisce il nome del documento
-     * @return nome del documento
-     */
-    public String getNomeDoc() {
-        return nomeDoc;
-    }
-
-    /**
-     * Setta il nome del documento
-     * @param nomeDoc : stringa che verrà associata al nome del documento
-     */
-    public void setNomeDoc(String nomeDoc) {
-        this.nomeDoc = nomeDoc;
     }
 
     /**

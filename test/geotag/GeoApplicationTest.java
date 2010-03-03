@@ -140,7 +140,7 @@ public class GeoApplicationTest {
         result=app.search("SQL","Milano");
         boolean flag=false;
         for (GeoRefDoc doc : result){
-            if (doc.getNomeDoc().equals("7cb05c1a428df429a30e549c3a45d30d")){
+            if (doc.id.equals("7cb05c1a428df429a30e549c3a45d30d")){
                 flag=true;
                 break;
             }

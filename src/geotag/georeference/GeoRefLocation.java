@@ -304,7 +304,7 @@ public class GeoRefLocation {
                     numeroresults = 0;
                     //for(int numeroresults=0;numeroresults<results.size();numeroresults++)
                     while (numeroresults < results.size() && documentotrovato == false) {
-                        if (results.elementAt(numeroresults).getNomeDoc().equalsIgnoreCase(data[0])) {
+                        if (results.elementAt(numeroresults).id.equalsIgnoreCase(data[0])) {
                             documentoref = results.elementAt(numeroresults);
                             if (paeselocalizzato == false) {
                                 try {
@@ -318,7 +318,7 @@ public class GeoRefLocation {
                             cerca = 0;
                             //for(int cerca=0;cerca<resultsmerge.size();cerca++)
                             while (cerca < resultsmerge.size() && trova == false) {
-                                if (resultsmerge.elementAt(cerca).getNomeDoc().equalsIgnoreCase(data[0])) {
+                                if (resultsmerge.elementAt(cerca).id.equalsIgnoreCase(data[0])) {
                                     resultsmerge.elementAt(cerca).addGeoWord(geoLocation,new Double(data[2]));
                                     resultsmerge.elementAt(cerca).setHaveGeoRef(true);
                                     trova = true;
