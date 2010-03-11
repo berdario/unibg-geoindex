@@ -46,7 +46,7 @@ public class PDFParserTest {
     @Test
     public void testGetTitle() {
         try {
-            PDFParser instance = new PDFParser("/home/dario/Scrivania/prova2/Professional Oracle Programming (2005).pdf");
+            PDFParser instance = new PDFParser("/home/dario/Scrivania/prova/Professional Oracle Programming (2005).pdf");
             String expResult = "Professional Oracle Programming";
             String result = instance.getTitle();
             assertEquals(expResult, result);

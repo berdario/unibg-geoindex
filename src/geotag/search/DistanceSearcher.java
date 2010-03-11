@@ -30,12 +30,23 @@ public class DistanceSearcher {
     /**
      * Metodo responsabile del calcolo del ranking spaziale. Gestisce l'intera fase
      * di calcolo e assegnazione al documento dello spatialScore
-     * @param results : elenco di documenti 
+     * @param results : elenco di documenti
      * @param geoLocation : entità geografica da prendere come riferimento per il calcolo della distanza spaziale
      */
     public void createDistanceRanking(Vector<GeoRefDoc> results, GeographicWord geoLocation) {
+        createDistanceRanking(results, geoLocation.getLatitude(), geoLocation.getLongitude());
+    }
+
+    /**
+     * Metodo responsabile del calcolo del ranking spaziale. Gestisce l'intera fase
+     * di calcolo e assegnazione al documento dello spatialScore
+     * @param results : elenco di documenti 
+     * @param latitude : latitudine dell' entità geografica da prendere come riferimento per il calcolo della distanza spaziale
+     * @param longitude : longitudine dell' entità geografica da prendere come riferimento per il calcolo della distanza spaziale
+     */
+    public void createDistanceRanking(Vector<GeoRefDoc> results, double latitude, double longitude ) {
         
-        GeoDistance deoDist = new GeoDistance();              
+        GeoDistance deoDist = new GeoDistance();
         double distMin = 0.1; //Non posso usare 0 km come distanza minima, perciò metto 0.1 km come minimo
         
         
@@ -51,7 +62,7 @@ public class DistanceSearcher {
                 int i=0;
                 while (keyList.hasNext()){
                     GeographicWord gw = (GeographicWord) keyList.next();
-                    dist[i] = deoDist.calculateDistance(gw.getLatitude(), gw.getLongitude(), geoLocation.getLatitude(), geoLocation.getLongitude(), 'K');
+                    dist[i] = deoDist.calculateDistance(gw.getLatitude(), gw.getLongitude(), latitude, longitude, 'K');
                     i++;
                 }
 
@@ -80,7 +91,7 @@ public class DistanceSearcher {
                 Iterator keyList = scores.keySet().iterator();
 
                 //Per prima cosa devo calcolare le DISTANZE NORMALIZZATE tra le gw del doc e la geoLocation
-                distNorm = calculateDistance(doc, geoLocation, distMin);
+                distNorm = calculateDistance(doc, latitude, longitude, distMin);
 
                 //Calcolo il valore relativo al MERGE tra il geoRiferimento e la distNormalizzata
                 int j=0;
@@ -111,10 +122,11 @@ public class DistanceSearcher {
     /**
      * Metodo che calcola la distanza tra le GeoWrods del documento e la locazione
      * @param doc : documento comprensivo delle GeoWord
-     * @param geoLocation : GeoWord corrispondente alla locazione
+     * @param latitude : latitudine della locazione
+     * @param longitude : longitudine della locazione
      * @return
      */
-    public double[] calculateDistance(GeoRefDoc doc, GeographicWord geoLocation, double distMin) {
+    public double[] calculateDistance(GeoRefDoc doc, double latitude, double longitude, double distMin) {
         double[] dist = new double[doc.getScores().size()];
         double[] distNorm = new double[doc.getScores().size()];
         GeoDistance deoDist = new GeoDistance();
@@ -126,7 +138,7 @@ public class DistanceSearcher {
         while (keyList.hasNext()){
             GeographicWord gw = (GeographicWord) keyList.next();
             
-            dist[i] = deoDist.calculateDistance(gw.getLatitude(), gw.getLongitude(), geoLocation.getLatitude(), geoLocation.getLongitude(), 'K');
+            dist[i] = deoDist.calculateDistance(gw.getLatitude(), gw.getLongitude(), latitude, longitude, 'K');
             i++;
         }
 

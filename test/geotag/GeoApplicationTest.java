@@ -50,7 +50,7 @@ public class GeoApplicationTest {
             String[] indexDirs = config.getStringArray("indexdirs");
             boolean testDirExists = false;
             for (String i : indexDirs) {
-                if (i.equals("/home/dario/Scrivania/prova2")) {
+                if (i.equals("/home/dario/Scrivania/prova")) {
                     testDirExists = true;
                     break;
                 }
@@ -71,7 +71,7 @@ public class GeoApplicationTest {
             FileUtils.moveDirectory(index, new File(indexpath + "2"));
         }
 
-        testIndexing();
+        testCreateIndex();
     }
 
     @After
@@ -85,9 +85,9 @@ public class GeoApplicationTest {
     }
 
     @Test
-    public void testIndexing() {
-        String[] args = {configfile, "--index"};
+    public void testCreateIndex() {
         GeoApplication app = new GeoApplication(configfile);
+        app.updateIndexConfig(null);
         app.createIndex();
         assertTrue("L'indice non è stato creato!", index.exists());
     }

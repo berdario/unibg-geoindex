@@ -260,9 +260,6 @@ public class GeoRefLocation {
      * @return vettore di GeoRefDoc
      */
     public Vector<GeoRefDoc> mergeLocation(Vector<GeoRefDoc> results, String location) {
-        try {
-            Vector<GeoRefDoc> resultsmerge = new Vector<GeoRefDoc>();
-
             GeographicWord geoLocation;
             geoLocation = getGeoLocation(location);
 
@@ -270,14 +267,23 @@ public class GeoRefLocation {
             // più risultati bisogna allargare l'mbr.
 
             double allarga = 0;
-            int cerca = 0;
-            boolean paeselocalizzato = false;
-            boolean documentotrovato = false;
-
-            int numeroresults = 0;
+            
             ArrayList<Pair<String,String>> codici = rtree.query(geoLocation.getmbr_x1() + allarga, geoLocation.getmbr_y1() + allarga, geoLocation.getmbr_x2() - allarga, geoLocation.getmbr_y2() - allarga);
 
-            for (int trovati = 0; trovati < codici.size(); trovati++) {
+            return innerMerge(codici,results);
+            
+
+    }
+        
+    public Vector<GeoRefDoc> innerMerge(ArrayList<Pair<String,String>> codici, Vector<GeoRefDoc> results){
+        Vector<GeoRefDoc> newresults = new Vector<GeoRefDoc>();
+        boolean paeselocalizzato = false;
+        boolean documentotrovato = false;
+        int numeroresults = 0;
+        int cerca = 0;
+        GeographicWord geoLocation = null;
+        try{
+        for (int trovati = 0; trovati < codici.size(); trovati++) {
 
                 //TODO estrarre questi pezzi in una funzione di query sull'indice geografico apposta
                 String line = null;
@@ -317,17 +323,17 @@ public class GeoRefLocation {
                             boolean trova = false;
                             cerca = 0;
                             //for(int cerca=0;cerca<resultsmerge.size();cerca++)
-                            while (cerca < resultsmerge.size() && trova == false) {
-                                if (resultsmerge.elementAt(cerca).id.equalsIgnoreCase(data[0])) {
-                                    resultsmerge.elementAt(cerca).addGeoWord(geoLocation,new Double(data[2]));
-                                    resultsmerge.elementAt(cerca).setHaveGeoRef(true);
+                            while (cerca < newresults.size() && trova == false) {
+                                if (newresults.elementAt(cerca).id.equalsIgnoreCase(data[0])) {
+                                    newresults.elementAt(cerca).addGeoWord(geoLocation,new Double(data[2]));
+                                    newresults.elementAt(cerca).setHaveGeoRef(true);
                                     trova = true;
                                 }
                                 cerca++;
                             }
                             if (trova == false) {
                                 documentoref.addGeoWord(geoLocation,new Double(data[2]));
-                                resultsmerge.add(documentoref);
+                                newresults.add(documentoref);
                             }
                         }
                         numeroresults++;
@@ -339,14 +345,10 @@ public class GeoRefLocation {
                 if (fileletto != null) {
                     fileletto.close();
                 }
-            }
-            results = resultsmerge;
-        } catch (IOException e1) {
+            } } catch (IOException e1) {
             e1.printStackTrace();
         }
-
-        return results;
-
+        return newresults;
     }
     
 }

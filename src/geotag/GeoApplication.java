@@ -482,6 +482,25 @@ public final class GeoApplication {
 
         return results;
     }
+
+    public Vector<GeoRefDoc> search(String keyWords, double lat, double lon, double weigth){
+        double delta = 0.10;
+        //TODO visto che non possiamo ottenere facilmente una sola GeoLocation univoca dalle coordinate
+        //per ora non è possibile il caching dei risultati...
+        ArrayList<Pair<String,String>> codes = rtree.query(lat + delta, lon + delta, lat - delta, lon - delta);
+
+        ContentSearcher content = new ContentSearcher();
+        Vector<GeoRefDoc> results = content.createTextualRanking(keyWords);
+
+        GeoRefLocation grLoc = new GeoRefLocation();
+        results = grLoc.innerMerge(codes, results);
+
+        DistanceSearcher distanceSorter = new DistanceSearcher();
+        distanceSorter.createDistanceRanking(results, lat, lon);
+        results = createRanking(results, weigth);
+        
+        return results;
+    }
 	
 	public static String getPath(){
 		return path;
