@@ -98,11 +98,14 @@ public class ContentSearcher {
                     
                     text = doc.get("content");
                     TokenStream tokenStream = TokenSources.getAnyTokenStream(searcher.getIndexReader(), hits.id(i), "content", new StandardAnalyzer());
-                    TextFragment[] frag = highlighter.getBestTextFragments(tokenStream, text, false, 10);
+                    TextFragment[] frag = highlighter.getBestTextFragments(tokenStream, text, false, 3);
                     text = "";
                     for (int j = 0; j < frag.length; j++) {
                         if ((frag[j] != null) && (frag[j].getScore() > 0)) {
-                            text += frag[j].toString()+"\n";
+                            text += frag[j].toString();
+                            if (j != frag.length){
+                                text+=" ... ";
+                            }
                         }
                     }
                     newDoc.htmlSnippet=text;

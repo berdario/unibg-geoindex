@@ -2,9 +2,9 @@ package geotag.parser;
 
 import java.io.File;
 import java.io.IOException;
+import org.apache.pdfbox.exceptions.CryptographyException;
+import org.apache.pdfbox.exceptions.InvalidPasswordException;
 import org.jdom.JDOMException;
-import org.pdfbox.exceptions.CryptographyException;
-import org.pdfbox.exceptions.InvalidPasswordException;
 
 /**
  *
