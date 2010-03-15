@@ -15,6 +15,7 @@ import jdbm.btree.BTree;
 import dbcreator.ricercapernome.Compara;
 import dbcreator.ricercapernome.Serial;
 import dbcreator.ricercapernome.Serializ;
+import geotag.Configuration;
 import geotag.GeoApplication;
 
 public class read_alternateNames {
@@ -29,7 +30,7 @@ public class read_alternateNames {
 
 	public read_alternateNames(){
             options = GeoApplication.getDefaultRecordManagerOptions();
-            dbpath = Dbcreator.getDBPath();
+            dbpath = Configuration.getDbPath();
         }
 	
 	public read_alternateNames(formdicaricamento frame)

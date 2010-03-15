@@ -25,7 +25,7 @@ import jdbm.RecordManagerFactory;
 import jdbm.btree.BTree;
 
 import bTree.*;
-import geotag.GeoApplication;
+import geotag.Configuration;
 import geotag.words.StringOperation;
 import geotag.indices.AnalyzerUtils;
 import geotag.words.GeographicWord;
@@ -74,12 +74,10 @@ public class Score {
      * Costruttore della classe
      */
     public Score(){
-        this.path = GeoApplication.getPath();
-        this.slash = File.separator;
-        this.dbpath = path + "db" + slash;
+        this.dbpath = Configuration.getDbPath();
         options.setProperty(RecordManagerOptions.DISABLE_TRANSACTIONS, "");
         try {
-            BufferedReader geoStopwordFile = new BufferedReader(new FileReader(new File(GeoApplication.getPath() + "geoStopwords.txt")));
+            BufferedReader geoStopwordFile = new BufferedReader(new FileReader(new File(Configuration.getPath() + "geoStopwords.txt")));
             String line = "";
             while ((line = geoStopwordFile.readLine()) != null) {
                 geoStopwords.addAll(Arrays.asList(line.split(",")));

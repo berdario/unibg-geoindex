@@ -9,6 +9,7 @@ package dbcreator.main;
 import dbcreator.ricercapernome.Compara;
 import dbcreator.ricercapernome.Serial;
 import dbcreator.ricercapernome.Serializ;
+import geotag.Configuration;
 import geotag.GeoApplication;
 import java.io.*;
 import java.util.*;
@@ -40,8 +41,8 @@ public class RTreeLoad
 	RecordManager mydbn;
 	
 	public RTreeLoad(){
-		path=Dbcreator.getPath();
-		dbpath=Dbcreator.getDBPath();
+		path = Configuration.getPath();
+		dbpath = Configuration.getDbPath();
 		try {
 			mydbn = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_osm", GeoApplication.getDefaultRecordManagerOptions());
 		} catch (IOException e) {

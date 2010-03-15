@@ -14,6 +14,7 @@ import jdbm.btree.BTree;
 import dbcreator.ricercapernome.Compara;
 import dbcreator.ricercapernome.Serial;
 import dbcreator.ricercapernome.Serializ;
+import geotag.Configuration;
 import geotag.GeoApplication;
 
 public class readpopulation {
@@ -28,7 +29,7 @@ public class readpopulation {
 	
 	public readpopulation(){
             options = GeoApplication.getDefaultRecordManagerOptions();
-            dbpath = Dbcreator.getDBPath();
+            dbpath = Configuration.getDbPath();
         }
 	
 	public readpopulation(formdicaricamento frame)

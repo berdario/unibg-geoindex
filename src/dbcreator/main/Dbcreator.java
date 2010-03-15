@@ -28,7 +28,7 @@ public class Dbcreator {
 
         File cfgfile = new File(paths[0]);
         if (!cfgfile.exists()) {
-            Configuration.createDefaultConfiguration(paths[0], paths[1], paths[3]);
+            Configuration.createConfiguration(paths[0], paths[1], paths[3]);
         }
         config = new Configuration(paths[0]);
 
@@ -236,14 +236,6 @@ public class Dbcreator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-	
-	public static String getPath(){
-		return path;
-	}
-	
-	public static String getDBPath(){
-		return dbpath;
 	}
 	
 	public static int pid() {

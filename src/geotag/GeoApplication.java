@@ -510,10 +510,6 @@ public final class GeoApplication {
         
         return results;
     }
-	
-	public static String getPath(){ //TODO: questo metodo fa solo da proxy, rimuoverlo
-		return Configuration.getPath();
-	}
 
         public static Properties getDefaultRecordManagerOptions(){
             return defaultRecordManagerOptions;

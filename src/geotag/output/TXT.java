@@ -5,6 +5,7 @@
 
 package geotag.output;
 
+import geotag.Configuration;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -14,7 +15,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Vector;
 
-import geotag.GeoApplication;
 import geotag.words.GeographicWord;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,15 +26,11 @@ import java.util.Iterator;
  */
 public class TXT {
     NumberFormat formatter = new DecimalFormat("#0.00");  //Formatto il numero a 2 cifre decimali
-    private String path, slash;
     
     /**
      * Costruttore della classe
      */
     public TXT(){
-    	path = GeoApplication.getPath();
-    	slash=File.separator;
-
     }
     
     /**
@@ -45,7 +41,7 @@ public class TXT {
      */
     public void create(HashMap<GeographicWord, Double> scores, String nomeFile) throws IOException{
         Iterator scoreList = scores.keySet().iterator();
-        File indexDir = new File(path+"output"+slash+"txt");
+        File indexDir = new File(Configuration.getOutputPath() + "txt");
         if(!indexDir.isDirectory()){
             // Create one directory
             if(!indexDir.mkdir()){

@@ -5,8 +5,6 @@
 
 package geotag.analysis;
 
-import geotag.GeoApplication;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -23,6 +21,7 @@ import jdbm.btree.BTree;
 
 import bTree.Serial;
 import bTree.Serializ;
+import geotag.Configuration;
 import geotag.words.StringOperation;
 import geotag.words.GeoWordsOperation;
 import geotag.words.GeographicWord;
@@ -48,15 +47,13 @@ public class GeoCandidateIdentification {
     int newPos = 0; //Nuova posizione di ricerca (usata per saltare termini formati da più parole)
     boolean isMultiWord = false;    
     boolean englishLanguage = false;
-    String path,dbpath,slash;
+    String dbpath;
     
     /**
      * Costruttore della classe
      */
     public GeoCandidateIdentification() {
-        this.path = GeoApplication.getPath();
-        this.slash = File.separator;
-        this.dbpath = path + "db" + slash;
+        this.dbpath = Configuration.getDbPath();
         try {
             Properties options = new Properties();
             options.setProperty(RecordManagerOptions.DISABLE_TRANSACTIONS, "");
@@ -300,7 +297,7 @@ public class GeoCandidateIdentification {
         boolean equal = false;
         
         try {
-            File fileName = new File(GeoApplication.getPath()+"street.txt");
+            File fileName = new File(Configuration.getPath()+"street.txt");
             //Apertura file
             FileReader fr = new FileReader(fileName);
             BufferedReader streetFile = new BufferedReader(fr); 

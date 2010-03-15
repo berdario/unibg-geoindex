@@ -25,6 +25,7 @@ import bTree.Serial;
 import bTree.Serializ;
 import com.mallardsoft.tuple.Pair;
 import com.mallardsoft.tuple.Tuple;
+import geotag.Configuration;
 import geotag.GeoApplication;
 import geotag.RTreeReader;
 import geotag.words.GeoRefDoc;
@@ -42,15 +43,13 @@ import jdbm.RecordManagerOptions;
  * @author Giorgio Ghisalberti
  */
 public class GeoRefLocation {
-    String path,dbpath,slash;
+    String dbpath,slash;
     RTreeReader rtree;
     /**
      * Costruttore della classe
      */
     public GeoRefLocation(){
-        this.path=GeoApplication.getPath();
-        this.slash=File.separator;
-        this.dbpath=path+"db"+slash;
+        this.dbpath=Configuration.getDbPath();
         this.rtree=GeoApplication.rtree;
     }
 

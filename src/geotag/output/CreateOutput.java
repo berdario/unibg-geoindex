@@ -5,12 +5,12 @@
 
 package geotag.output;
 
+import geotag.Configuration;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Vector;
 
-import geotag.GeoApplication;
 import geotag.words.GeoRefDoc;
 import geotag.words.GeographicWord;
 import java.util.HashMap;
@@ -38,7 +38,7 @@ public class CreateOutput {
         double minLat = 0.0;
         double minLong = 0.0;
         
-        String path=GeoApplication.getPath()+"output";
+        String path=Configuration.getOutputPath();
         File outputdir=new File(path);
         
         if (!outputdir.exists()){

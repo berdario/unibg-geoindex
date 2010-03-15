@@ -5,6 +5,7 @@
 
 package geotag.output;
 
+import geotag.Configuration;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -13,7 +14,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Vector;
 
-import geotag.GeoApplication;
 import geotag.words.GeographicWord;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,7 +29,7 @@ import org.jdom.output.XMLOutputter;
 public class KML {
     NumberFormat formatter = new DecimalFormat("#0.00");  //Formatto il numero a 2 cifre decimali
     //Gamma di colori, varie tonalità di rosso
-    private String path,slash;
+    private String outputpath;
     private String[] colors = { "7d000078", "7d0000a0", "7d0000c8", "7d0000eb", "7d0000ff",
                                 "7d3c3cff", "7d6464ff", "7d8c8cff", "7db4b4ff", "7ddcdcff", "7dffffff"};
     
@@ -37,8 +37,7 @@ public class KML {
      * Costruttore della classe
      */
     public KML(){
-    	path = GeoApplication.getPath();
-        slash = File.separator;
+    	outputpath = Configuration.getOutputPath();
     }
     
     /**
@@ -111,7 +110,7 @@ public class KML {
         documento.setRootElement(gpx);
                
          // Create file
-        File indexDir = new File(path+"output"+slash+"kml");
+        File indexDir = new File(outputpath+"kml");
         if(!indexDir.isDirectory()){
             // Create one directory
             if(!indexDir.mkdir()){

@@ -17,6 +17,7 @@ import jdbm.btree.BTree;
 import dbcreator.ricercapernome.Compara;
 import dbcreator.ricercapernome.Serial;
 import dbcreator.ricercapernome.Serializ;
+import geotag.Configuration;
 import geotag.GeoApplication;
 import spatialindex.storagemanager.DiskStorageManager;
 import spatialindex.storagemanager.IStorageManager;
@@ -46,7 +47,7 @@ public class readgazetteer {
 	
 	public readgazetteer(){
             options = GeoApplication.getDefaultRecordManagerOptions();
-            dbpath = Dbcreator.getDBPath();
+            dbpath = Configuration.getDbPath();
         }
 	
 	public readgazetteer(formdicaricamento frame)

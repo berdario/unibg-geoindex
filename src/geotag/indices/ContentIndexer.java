@@ -5,7 +5,7 @@
 
 package geotag.indices;
 
-import geotag.GeoApplication;
+import geotag.Configuration;
 
 import geotag.words.GeoRefDoc;
 import java.io.File;
@@ -41,7 +41,7 @@ public class ContentIndexer {
      * @throws IOException 
      */
     public ContentIndexer() {   
-		indexDir = new File(GeoApplication.getPath() + File.separator
+		indexDir = new File(Configuration.getPath() + File.separator
 				+ "contentIndex");
 
 		try {

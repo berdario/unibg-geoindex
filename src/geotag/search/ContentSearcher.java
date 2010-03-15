@@ -5,11 +5,11 @@
 
 package geotag.search;
 
+import geotag.Configuration;
 import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
 
-import geotag.GeoApplication;
 import geotag.words.GeoRefDoc;
 import geotag.words.GeographicWord;
 import java.util.logging.Level;
@@ -53,8 +53,7 @@ public class ContentSearcher {
      * Costruttore della classe
      */
     public ContentSearcher(){
-    	String path=GeoApplication.getPath();
-    	this.contentIndexPath=path+"contentIndex";
+    	this.contentIndexPath=Configuration.getLuceneDir();
     }
     
     /**

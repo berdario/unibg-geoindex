@@ -23,6 +23,8 @@ public class Configuration {
     private static String slash = null;
     private static String cachepath = null;
     private static String language = null;
+    private static String lucenedir = null;
+    private static String outputpath = null;
 
     private ArrayList<File> indexDirs;
 
@@ -67,13 +69,15 @@ public class Configuration {
             }
             requiredFiles = innerRequiredFiles;
             neededFiles = config.getStringArray("neededfiles");
+            lucenedir = path + config.getString("luceneindex_directory");
+            outputpath = path + config.getString("outputdir") + slash;
 
         } catch (ConfigurationException e) {
             e.printStackTrace();
         }
     }
 
-    public static void createDefaultConfiguration(String configfile, String path, String cachepath) {
+    public static void createConfiguration(String configfile, String path, String cachepath) {
         String input = null, inputCachepath = "";
 
         File cfgfile = new File(configfile);
@@ -125,10 +129,12 @@ public class Configuration {
                 }
             }
             config.setProperty("dbdirectory", "db");
+            config.setProperty("luceneindex_directory", "index" + slash + "contentIndex");
             config.setProperty("requiredfiles", "coordinate.txt");
             config.setProperty("requireddbfiles", filenames);
             config.setProperty("neededfiles", neededFiles);
             config.setProperty("languagefile", "englishSW.txt");
+            config.setProperty("outputdir", "output");
 
             config.save();
         } catch (ConfigurationException e) {
@@ -244,6 +250,14 @@ public class Configuration {
 
     public static String[] getNeededFiles(){
         return neededFiles;
+    }
+
+    public static String getLuceneDir(){
+        return lucenedir;
+    }
+
+    public static String getOutputPath(){
+        return outputpath;
     }
 
     class ConfigFileNotFoundException extends RuntimeException{
