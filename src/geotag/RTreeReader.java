@@ -19,6 +19,7 @@ import spatialindex.Region;
 import spatialindex.IVisitor;
 import spatialindex.IData;
 import spatialindex.INode;
+import spatialindex.Point;
 
 public class RTreeReader {
 
@@ -47,6 +48,20 @@ public class RTreeReader {
         ArrayList<Pair<String, String>> codes = new ArrayList<Pair<String, String>>();
         double f1[] = {c, d}, f2[] = {a, b};
         tree.containmentQuery(new Region(f1, f2), visitor);
+
+        for (int num = 0; num < visitor.visited.size(); num++) {
+
+            IData dati_rtree = ((IData) visitor.visited.elementAt(num));
+            codes.add(Tuple.from(String.valueOf((dati_rtree.getIdentifier())), new String(dati_rtree.getData())));
+        }
+        return codes;
+    }
+
+    public ArrayList<Pair<String, String>> query(double a, double b) {
+
+        ArrayList<Pair<String, String>> codes = new ArrayList<Pair<String, String>>();
+        double point[] = {a, b};
+        tree.pointLocationQuery(new Point(point), visitor);
 
         for (int num = 0; num < visitor.visited.size(); num++) {
 

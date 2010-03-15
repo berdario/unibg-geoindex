@@ -484,10 +484,8 @@ public final class GeoApplication {
     }
 
     public Vector<GeoRefDoc> search(String keyWords, double lat, double lon, double weigth){
-        double delta = 0.10;
-        //TODO visto che non possiamo ottenere facilmente una sola GeoLocation univoca dalle coordinate
-        //per ora non è possibile il caching dei risultati...
-        ArrayList<Pair<String,String>> codes = rtree.query(lat + delta, lon + delta, lat - delta, lon - delta);
+        
+        ArrayList<Pair<String,String>> codes = rtree.query(lat, lon);
 
         ContentSearcher content = new ContentSearcher();
         Vector<GeoRefDoc> results = content.createTextualRanking(keyWords);
