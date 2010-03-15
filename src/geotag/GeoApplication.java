@@ -61,8 +61,6 @@ import org.jdom.JDOMException;
 //import org.apache.commons.configuration.Configuration;
 //import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -72,6 +70,8 @@ import org.apache.commons.io.FileUtils;
 public final class GeoApplication {
 
     Logger logger = Logger.getLogger(this.getClass().getName());
+
+    Configuration config;
 
     private int maxCachedResults = 300;
     CacheHashMap<Triple<String,String,Double>,Vector<GeoRefDoc>> cachedResults = new CacheHashMap<Triple<String, String, Double>, Vector<GeoRefDoc>>(maxCachedResults);
@@ -88,12 +88,12 @@ public final class GeoApplication {
     double goodGeoScore = 0.65; //0.65   
     double uniqueGWScore = 0.2;
     
-    private static String path,dbpath,cachepath,configfile,slash;
+    private static String path,dbpath,cachepath,slash;
     private ArrayList<File> indexDirs;
 
     GeoCandidateIdentification geoAnalysis;
 	
-	public String createIndex(File curDir){
+	public String innerCreateIndex(File curDir){
         String errortext="";
         String documentContent = "";   
         String documentExtension = "";
@@ -294,15 +294,21 @@ public final class GeoApplication {
 		return errortext;
 		
 	}
-	
-	public String createIndex() {
-		String errortext="";
-		for (File f:indexDirs){
-			errortext+=createIndex(f);
-			//ContentIndexer.closeIndex();
-		}
-		return errortext;
-	}
+
+        public String createIndex(String indexpath){
+            indexDirs = config.updateIndexConfig(indexpath);
+            return innerCreateIndex(new File(indexpath));
+        }
+
+    public String createIndex() {
+        indexDirs = config.updateIndexConfig(null);
+        String errortext = "";
+        for (File f : indexDirs) {
+            errortext += innerCreateIndex(f);
+            //ContentIndexer.closeIndex();
+        }
+        return errortext;
+    }
 
 	public Vector<Word>  update (Vector<Word> finalWordVector, Vector<Word> wordVector){
 	    
@@ -484,7 +490,12 @@ public final class GeoApplication {
     }
 
     public Vector<GeoRefDoc> search(String keyWords, double lat, double lon, double weigth){
-        
+
+        //TODO: trovare un modo per il caching dei risultati
+        //usare una coppia di double come chiave non mi pare una grande idea
+        //forse però non è necessario: questa ricerca in teoria potrebbe essere meno onerosa, non dovendo chiamare
+        //getGeoLocation per ottenere i codici, con qualche ottimizzazione potrebbe non averne bisogno
+
         ArrayList<Pair<String,String>> codes = rtree.query(lat, lon);
 
         ContentSearcher content = new ContentSearcher();
@@ -500,8 +511,8 @@ public final class GeoApplication {
         return results;
     }
 	
-	public static String getPath(){
-		return path;
+	public static String getPath(){ //TODO: questo metodo fa solo da proxy, rimuoverlo
+		return Configuration.getPath();
 	}
 
         public static Properties getDefaultRecordManagerOptions(){
@@ -509,34 +520,18 @@ public final class GeoApplication {
         }
 	
     public GeoApplication(String cfgpath) {
-        slash = System.getProperty("file.separator");
+
         defaultRecordManagerOptions.setProperty(RecordManagerOptions.DISABLE_TRANSACTIONS, "");
 
-        if (cfgpath != null) {
-            configfile = cfgpath;
-        } else {
-            // set default config path
+        config = new Configuration(cfgpath);
 
-            String os = System.getProperty("os.name");
-            String homepath = System.getProperty("user.home");
-            if (os.startsWith("Linux")) {
+        path = Configuration.getPath();
+        dbpath = Configuration.getDbPath();
+        cachepath = Configuration.getCachePath();
+        slash = Configuration.getSeparator();
+        swLanguage = Configuration.getSWLanguage();
 
-                configfile = System.getenv("XDG_CONFIG_HOME");
-                if (configfile == null) {
-                    configfile = homepath + "/.config/";
-                }
-                configfile += "geosearch/config";
-
-            } else if (os.startsWith("Windows")) {
-                configfile = System.getenv("APPDATA") + slash + "geosearch" + slash + "config";
-            } else if (os.startsWith("Mac")) {
-                configfile = homepath + "/Library/Application Support/geosearch/" + "config";
-            } else {
-                configfile = System.getProperty("user.dir") + "geosearch" + slash + "config";
-            }
-        }
-
-        loadConfiguration();
+        
         try {
             rtree = new RTreeReader(dbpath);
         } catch (SecurityException ex) {
@@ -554,61 +549,6 @@ public final class GeoApplication {
         geoAnalysis = new GeoCandidateIdentification();
     }
 	
-	public void loadConfiguration(){
-		File cfgfile=new File(configfile);
-		if (!cfgfile.exists()){
-			System.out.println("Missing configuration file, please run Dbcreator first");
-			throw new ConfigFileNotFoundException() ;
-		}
-		PropertiesConfiguration config;
-		try {
-			config = new PropertiesConfiguration(configfile);
-			path=config.getString("basepath");
-			dbpath=path+config.getString("dbdirectory")+slash;
-			cachepath=config.getString("cachepath");
-			swLanguage=path+"stopWords"+slash+config.getString("languagefile");
-		} catch (ConfigurationException e) {		
-			e.printStackTrace();
-		}
-	}
-	
-	public void updateIndexConfig(String inputpath) {//da aggiungere controllo? permette di aggiungere in continuazione lo stesso path
-		try {
-			PropertiesConfiguration config = new PropertiesConfiguration(configfile);
-			ArrayList<File> innerIndexDirs=getIndexedDirs();
-			
-			if (inputpath!=null){
-				File inputfile=new File(inputpath);
-				if (!innerIndexDirs.contains(inputfile)){
-					innerIndexDirs.add(new File(inputpath));
-					config.setProperty("indexdirs", innerIndexDirs);
-					config.save();
-				}
-			}
-			
-			indexDirs = innerIndexDirs;
-		} catch (ConfigurationException e) {		
-			e.printStackTrace();
-		}
-	}
-	
-	private ArrayList<File> getIndexedDirs() {
-		try {
-			PropertiesConfiguration config = new PropertiesConfiguration(configfile);
-			String[] indexDirPaths=config.getStringArray("indexdirs");
-			ArrayList<File> innerIndexDirs=new ArrayList<File>();
-			
-			for (String indf:indexDirPaths){
-				innerIndexDirs.add(new File(indf));
-			}
-			return innerIndexDirs;
-				
-		} catch (ConfigurationException e) {		
-			e.printStackTrace();
-			return null;
-		}
-	}
-
     /**
      * Metodo che ordina il vettore dei documenti reperiti rispetto al campo "sortScore"
      * @param results : vettore dei documenti
@@ -627,9 +567,6 @@ public final class GeoApplication {
         Collections.sort(results,Collections.reverseOrder());
         
         return results;
-    }
-
-    class ConfigFileNotFoundException extends RuntimeException{
     }
 
 }

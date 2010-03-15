@@ -733,7 +733,7 @@ public class GeoApplicationGui extends javax.swing.JFrame implements Runnable{
 	        startGeoRefButton.setEnabled(false);
 	        startGeoRefButton.setFocusable(false);
 
-	        String errortext=mainApp.createIndex(curDir);
+	        String errortext=mainApp.innerCreateIndex(curDir);
 
 	        if (!errortext.equals("")){
 	        	errorLabel.setText(errortext);

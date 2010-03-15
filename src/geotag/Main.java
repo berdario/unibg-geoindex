@@ -68,11 +68,9 @@ public class Main {
 
                     if (cmd.hasOption("index")) {
                         String inputpath = cmd.getOptionValue("index");
-                        mainApp.updateIndexConfig(inputpath);
 
                         if (inputpath != null) {
-                            String errortext = mainApp.createIndex(new File(
-                                    inputpath));
+                            String errortext = mainApp.createIndex(inputpath);
                             System.out.println(errortext);
                         } else {
                             String errortext = mainApp.createIndex();
@@ -89,7 +87,7 @@ public class Main {
                         usagehelp.printHelp(usage, options);
                     }
                 }
-            } catch (GeoApplication.ConfigFileNotFoundException e) {
+            } catch (Configuration.ConfigFileNotFoundException e) {
                 Dbcreator creator = new Dbcreator(cfgpath);
                 if (!creator.checkExistingDb()) {
                     creator.createDB(interactive);

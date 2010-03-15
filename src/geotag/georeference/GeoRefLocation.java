@@ -270,7 +270,7 @@ public class GeoRefLocation {
             
             ArrayList<Pair<String,String>> codici = rtree.query(geoLocation.getmbr_x1() + allarga, geoLocation.getmbr_y1() + allarga, geoLocation.getmbr_x2() - allarga, geoLocation.getmbr_y2() - allarga);
 
-            return innerMerge(codici,results);
+            return innerMerge(codici, results);
             
 
     }
