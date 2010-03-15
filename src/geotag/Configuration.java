@@ -27,6 +27,7 @@ public class Configuration {
     private ArrayList<File> indexDirs;
 
     static File requiredFiles[];
+    static String neededFiles[];
 
     PropertiesConfiguration config;
 
@@ -65,6 +66,7 @@ public class Configuration {
                 i++;
             }
             requiredFiles = innerRequiredFiles;
+            neededFiles = config.getStringArray("neededfiles");
 
         } catch (ConfigurationException e) {
             e.printStackTrace();
@@ -86,6 +88,9 @@ public class Configuration {
             "albero_alternatenames.db", "albero_alternatenamesId.db",
             "albero_admin1codeascii.db", "albero_countryInfo.db",
             "albero_featurecodes.db"};
+        String neededFiles[] = {"stopWords", "stopWords" + slash + "englishSW.txt", "admin1CodesASCII.txt",
+        "allCountries.zip", "alternateNames.txt", "iso-languagecodes.txt", "countryInfo.txt",
+        "featureCodes.txt", "geoStopwords.txt", "IT.txt", "italy.osm.bz2", "street.txt"};
         try {//fare attenzione: tutte le funzioni interne si aspettano path, assoluti... TODO sanitarizzare
             System.out.println("Missing configuration file, do you want to create one? [Y/n]");
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -122,6 +127,7 @@ public class Configuration {
             config.setProperty("dbdirectory", "db");
             config.setProperty("requiredfiles", "coordinate.txt");
             config.setProperty("requireddbfiles", filenames);
+            config.setProperty("neededfiles", neededFiles);
             config.setProperty("languagefile", "englishSW.txt");
 
             config.save();
@@ -234,6 +240,10 @@ public class Configuration {
 
     public static File[] getRequiredFiles(){
         return requiredFiles;
+    }
+
+    public static String[] getNeededFiles(){
+        return neededFiles;
     }
 
     class ConfigFileNotFoundException extends RuntimeException{

@@ -62,13 +62,10 @@ public class Dbcreator {
     }
 
     public void checkNeededFiles() {
-        //TODO per ora sono fissi: eventualmente parametrizzare/inserire in un file di configurazione e permettere di caricare stopwords in lingua diversa o comunque altri file... it.txt e alterNames dovrebbero poter venire accettati anche zippati...
-        String[] originFilenames = {"stopWords", "stopWords" + slash + "englishSW.txt", "admin1CodesASCII.txt", "allCountries.zip", "alternateNames.txt", "iso-languagecodes.txt", "countryInfo.txt", "featureCodes.txt", "geoStopwords.txt", "IT.txt", "italy.osm.bz2", "street.txt"};
-
         boolean originFilesFlag = true;
         String warning = "";
 
-        for (String f : originFilenames) {
+        for (String f : Configuration.getNeededFiles()) {
             if (!(new File(path + f)).exists()) {
                 if (originFilesFlag) {
                     originFilesFlag = false;
