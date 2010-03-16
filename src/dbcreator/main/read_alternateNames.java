@@ -16,7 +16,6 @@ import dbcreator.ricercapernome.Compara;
 import dbcreator.ricercapernome.Serial;
 import dbcreator.ricercapernome.Serializ;
 import geotag.Configuration;
-import geotag.GeoApplication;
 
 public class read_alternateNames {
 
@@ -29,7 +28,7 @@ public class read_alternateNames {
         String dbpath;
 
 	public read_alternateNames(){
-            options = GeoApplication.getDefaultRecordManagerOptions();
+            options = Configuration.getDefaultRecordManagerOptions();
             dbpath = Configuration.getDbPath();
         }
 	

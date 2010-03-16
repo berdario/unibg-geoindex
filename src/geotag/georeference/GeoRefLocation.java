@@ -43,14 +43,16 @@ import jdbm.RecordManagerOptions;
  * @author Giorgio Ghisalberti
  */
 public class GeoRefLocation {
-    String dbpath,slash;
+    String dbpath, indexpath, slash;
     RTreeReader rtree;
     /**
      * Costruttore della classe
      */
     public GeoRefLocation(){
-        this.dbpath=Configuration.getDbPath();
-        this.rtree=GeoApplication.rtree;
+        this.dbpath = Configuration.getDbPath();
+        this.indexpath = Configuration.getIndexPath();
+        this.slash = Configuration.getSeparator();
+        this.rtree = GeoApplication.rtree;
     }
 
 
@@ -100,8 +102,7 @@ public class GeoRefLocation {
             Serial a = new Serial();
             RecordManager mydbinter;
             BTree tinter = new BTree();
-            Properties options = new Properties();
-            options.setProperty(RecordManagerOptions.DISABLE_TRANSACTIONS, "");
+            Properties options = Configuration.getDefaultRecordManagerOptions();
             mydbinter = RecordManagerFactory.createRecordManager(dbpath + "albero_Btree_Intermedio", options); //occhio: qui c'erano 2 separator
             tinter = loadOrCreateBTree(mydbinter, "intermedio", a);
             BTree tgaz;
@@ -291,11 +292,12 @@ public class GeoRefLocation {
 
                 try {
                     String codice = Tuple.get1(codici.get(trovati));
-                    fileletto = new FileReader(dbpath + (Integer.parseInt(codice) / 1000) + slash + codice);
+                    fileletto = new FileReader(indexpath + (Integer.parseInt(codice) / 1000) + slash + codice);
                     // file.write(nameFiles[i].getName()+"�#"+gw.getGeoScore()+"\r\n");
                     lr = new LineNumberReader(fileletto);
                     line = lr.readLine();
                 } catch (IOException e) {
+                    e.printStackTrace();
                 }
 
                 paeselocalizzato = false;

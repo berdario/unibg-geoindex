@@ -15,7 +15,6 @@ import dbcreator.ricercapernome.Compara;
 import dbcreator.ricercapernome.Serial;
 import dbcreator.ricercapernome.Serializ;
 import geotag.Configuration;
-import geotag.GeoApplication;
 
 public class readpopulation {
 
@@ -28,7 +27,7 @@ public class readpopulation {
         String dbpath;
 	
 	public readpopulation(){
-            options = GeoApplication.getDefaultRecordManagerOptions();
+            options = Configuration.getDefaultRecordManagerOptions();
             dbpath = Configuration.getDbPath();
         }
 	

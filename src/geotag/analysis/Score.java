@@ -75,7 +75,7 @@ public class Score {
      */
     public Score(){
         this.dbpath = Configuration.getDbPath();
-        options.setProperty(RecordManagerOptions.DISABLE_TRANSACTIONS, "");
+        options = Configuration.getDefaultRecordManagerOptions();
         try {
             BufferedReader geoStopwordFile = new BufferedReader(new FileReader(new File(Configuration.getPath() + "geoStopwords.txt")));
             String line = "";

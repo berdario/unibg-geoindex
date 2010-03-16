@@ -15,7 +15,7 @@ import geotag.Configuration;
 
 public class Dbcreator {
     Configuration config;
-    private static String path, dbpath, slash;
+    private static String path;
     public int step = 0;
 	
     public Dbcreator(String configpath) {
@@ -33,8 +33,6 @@ public class Dbcreator {
         config = new Configuration(paths[0]);
 
         path = Configuration.getPath();
-        dbpath = Configuration.getDbPath();
-        slash = Configuration.getSeparator();
     }
 
     public boolean checkExistingDb() {

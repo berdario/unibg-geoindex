@@ -18,7 +18,6 @@ import dbcreator.ricercapernome.Compara;
 import dbcreator.ricercapernome.Serial;
 import dbcreator.ricercapernome.Serializ;
 import geotag.Configuration;
-import geotag.GeoApplication;
 import spatialindex.storagemanager.DiskStorageManager;
 import spatialindex.storagemanager.IStorageManager;
 import spatialindex.storagemanager.RandomEvictionsBuffer;
@@ -46,7 +45,7 @@ public class readgazetteer {
         String dbpath;
 	
 	public readgazetteer(){
-            options = GeoApplication.getDefaultRecordManagerOptions();
+            options = Configuration.getDefaultRecordManagerOptions();
             dbpath = Configuration.getDbPath();
         }
 	
@@ -56,7 +55,6 @@ public class readgazetteer {
             this.frame=frame;
 	}
 	public void carica(String path) throws IOException {
-		// TODO Auto-generated method stub		
 		
 		System.out.println("Inizio lettura gazetteer");
 		LineNumberReader lr = null;
@@ -72,7 +70,7 @@ public class readgazetteer {
 		float peso=file.length();
 		float peso_decrementato=peso;
 		//---------------------------APERTURA R-TREE------------------------------//
-		IStorageManager diskfile = new DiskStorageManager(path+"db"+File.separator+"datiscritti");
+		IStorageManager diskfile = new DiskStorageManager(dbpath + "datiscritti");
 		IBuffer filebuffer = new RandomEvictionsBuffer(diskfile, 10, false);
 		PropertySet ps2 = new PropertySet();
 		Integer i = new Integer(1);

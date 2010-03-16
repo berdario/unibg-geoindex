@@ -13,21 +13,15 @@ import dbcreator.ricercapernome.Compara;
 import dbcreator.ricercapernome.Serial;
 import dbcreator.ricercapernome.Serializ;
 import geotag.Configuration;
-import geotag.GeoApplication;
 
 public class admin1codeascii {
 
-	/**
-	 * @param args
-	 * @throws IOException 
-	 */
 	public static void carica(String path) throws IOException {
-		// TODO Auto-generated method stub
                 String dbpath = Configuration.getDbPath();
 		Serial a=new Serial();
 		RecordManager mydbadmin1;
 		BTree tadmin1=new BTree();
-		mydbadmin1 = RecordManagerFactory.createRecordManager(dbpath+"albero_admin1codeascii", GeoApplication.getDefaultRecordManagerOptions());
+		mydbadmin1 = RecordManagerFactory.createRecordManager(dbpath+"albero_admin1codeascii", Configuration.getDefaultRecordManagerOptions());
 		tadmin1 = loadOrCreateBTree(mydbadmin1, "admin1", a );
 		
 		LineNumberReader lr = null;

@@ -33,9 +33,9 @@ public class RTreeReader {
 	 * @throws NullPointerException 
 	 * @throws SecurityException 
     */
-    public RTreeReader(String dbpath) throws SecurityException, NullPointerException, FileNotFoundException, IllegalArgumentException, IOException {
+    public RTreeReader() throws SecurityException, NullPointerException, FileNotFoundException, IllegalArgumentException, IOException {
         //---------------------------APERTURA R-TREE------------------------------//
-        IStorageManager diskfile = new DiskStorageManager(dbpath+ "datiscritti");
+        IStorageManager diskfile = new DiskStorageManager(Configuration.getDbPath()+ "datiscritti");
         IBuffer filebuffer = new RandomEvictionsBuffer(diskfile, 10, false);
         PropertySet ps2 = new PropertySet();
         ps2.setProperty("IndexIdentifier", 1);

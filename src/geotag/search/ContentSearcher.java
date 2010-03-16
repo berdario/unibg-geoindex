@@ -53,7 +53,7 @@ public class ContentSearcher {
      * Costruttore della classe
      */
     public ContentSearcher(){
-    	this.contentIndexPath=Configuration.getLuceneDir();
+    	this.contentIndexPath=Configuration.getLucenePath();
     }
     
     /**

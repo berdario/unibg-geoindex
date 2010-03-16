@@ -3,6 +3,7 @@ package dbcreator.scansione;
 //import java.io.FileWriter;
 //import java.io.PrintWriter;
 //import java.util.ArrayList;
+import geotag.Configuration;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
@@ -44,9 +45,8 @@ public class node {
 		try
  	{	
 		this.relativePath=relativePath;
-		Properties options = new Properties();
+		Properties options = Configuration.getDefaultRecordManagerOptions();
                 options.put( RecordManagerOptions.CACHE_SIZE, "1000" );
-                options.setProperty(RecordManagerOptions.DISABLE_TRANSACTIONS, "");
 
 		mydb = RecordManagerFactory.createRecordManager(relativePath+"/node", options);
  		tn = ScanXML.loadOrCreateBTree(mydb, "Node", a );

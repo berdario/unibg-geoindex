@@ -41,7 +41,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Properties;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,7 +52,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import jdbm.RecordManagerOptions;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.queryParser.ParseException;
@@ -79,8 +77,6 @@ public final class GeoApplication {
 
     public static RTreeReader rtree;
 
-    private static Properties defaultRecordManagerOptions = new Properties();
-
     private String swLanguage;
     
     NumberFormat formatter = new DecimalFormat("#0.00");  //Formatto il numero a 2 cifre decimali
@@ -88,10 +84,11 @@ public final class GeoApplication {
     double goodGeoScore = 0.65; //0.65   
     double uniqueGWScore = 0.2;
     
-    private static String path,dbpath,cachepath,slash;
+    private static String cachepath,slash;
     private ArrayList<File> indexDirs;
 
     GeoCandidateIdentification geoAnalysis;
+    private final String indexpath;
 	
 	public String innerCreateIndex(File curDir){
         String errortext="";
@@ -229,7 +226,7 @@ public final class GeoApplication {
                                         {
                                             String codice = Tuple.get1(codici.get(trovati));
                                             logger.log(Level.FINEST,codice+" ");
-                                        	File file = new File(dbpath+(Integer.parseInt(codice)/1000)+slash+codice);
+                                        	File file = new File(indexpath+(Integer.parseInt(codice)/1000)+slash+codice);
                                         	if (file.exists()){
 
                                         		FileReader reader=new FileReader(file);
@@ -248,7 +245,7 @@ public final class GeoApplication {
                                         	}
                                         	
                                         	if(trovato==false){
-                                        		FileWriter file2=new FileWriter(dbpath+(Integer.parseInt(codice)/1000)+slash+codice,true);
+                                        		FileWriter file2=new FileWriter(indexpath+(Integer.parseInt(codice)/1000)+slash+codice,true);
                                         		file2.write(hash+"�#"+gw.getGeoScore()+"�#"+scores.get(gw)+"\r\n");
                                         		file2.close();
                                         	}
@@ -510,26 +507,19 @@ public final class GeoApplication {
         
         return results;
     }
-
-        public static Properties getDefaultRecordManagerOptions(){
-            return defaultRecordManagerOptions;
-        }
 	
     public GeoApplication(String cfgpath) {
 
-        defaultRecordManagerOptions.setProperty(RecordManagerOptions.DISABLE_TRANSACTIONS, "");
-
         config = new Configuration(cfgpath);
 
-        path = Configuration.getPath();
-        dbpath = Configuration.getDbPath();
         cachepath = Configuration.getCachePath();
+        indexpath = Configuration.getIndexPath();
         slash = Configuration.getSeparator();
         swLanguage = Configuration.getSWLanguage();
 
         
         try {
-            rtree = new RTreeReader(dbpath);
+            rtree = new RTreeReader();
         } catch (SecurityException ex) {
             Logger.getLogger(GeoApplication.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NullPointerException ex) {

@@ -10,6 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Properties;
+import jdbm.RecordManagerOptions;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 
@@ -23,13 +25,16 @@ public class Configuration {
     private static String slash = null;
     private static String cachepath = null;
     private static String language = null;
-    private static String lucenedir = null;
+    private static String lucenepath = null;
+    private static String indexpath = null;
     private static String outputpath = null;
 
     private ArrayList<File> indexDirs;
 
     static File requiredFiles[];
     static String neededFiles[];
+
+    private static Properties defaultRecordManagerOptions = new Properties();
 
     PropertiesConfiguration config;
 
@@ -69,12 +74,16 @@ public class Configuration {
             }
             requiredFiles = innerRequiredFiles;
             neededFiles = config.getStringArray("neededfiles");
-            lucenedir = path + config.getString("luceneindex_directory");
+            lucenepath = config.getString("luceneindex_directory");
+            indexpath = config.getString("geoindex_directory");
             outputpath = path + config.getString("outputdir") + slash;
 
         } catch (ConfigurationException e) {
             e.printStackTrace();
         }
+
+        defaultRecordManagerOptions.setProperty(RecordManagerOptions.DISABLE_TRANSACTIONS, "");
+
     }
 
     public static void createConfiguration(String configfile, String path, String cachepath) {
@@ -95,7 +104,7 @@ public class Configuration {
         String neededFiles[] = {"stopWords", "stopWords" + slash + "englishSW.txt", "admin1CodesASCII.txt",
         "allCountries.zip", "alternateNames.txt", "iso-languagecodes.txt", "countryInfo.txt",
         "featureCodes.txt", "geoStopwords.txt", "IT.txt", "italy.osm.bz2", "street.txt"};
-        try {//fare attenzione: tutte le funzioni interne si aspettano path, assoluti... TODO sanitarizzare
+        try {
             System.out.println("Missing configuration file, do you want to create one? [Y/n]");
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while (true) {
@@ -129,7 +138,8 @@ public class Configuration {
                 }
             }
             config.setProperty("dbdirectory", "db");
-            config.setProperty("luceneindex_directory", "index" + slash + "contentIndex");
+            config.setProperty("luceneindex_directory", path + "index" + slash + "contentIndex" + slash);
+            config.setProperty("geoindex_directory", path + "index" + slash);
             config.setProperty("requiredfiles", "coordinate.txt");
             config.setProperty("requireddbfiles", filenames);
             config.setProperty("neededfiles", neededFiles);
@@ -252,12 +262,20 @@ public class Configuration {
         return neededFiles;
     }
 
-    public static String getLuceneDir(){
-        return lucenedir;
+    public static String getLucenePath(){
+        return lucenepath;
+    }
+
+    public static String getIndexPath(){
+        return indexpath;
     }
 
     public static String getOutputPath(){
         return outputpath;
+    }
+
+    public static Properties getDefaultRecordManagerOptions() {
+        return defaultRecordManagerOptions;
     }
 
     class ConfigFileNotFoundException extends RuntimeException{

@@ -13,7 +13,6 @@ import dbcreator.ricercapernome.Compara;
 import dbcreator.ricercapernome.Serial;
 import dbcreator.ricercapernome.Serializ;
 import geotag.Configuration;
-import geotag.GeoApplication;
 
 public class countryInfo {
 
@@ -27,7 +26,7 @@ public class countryInfo {
 		Serial a=new Serial();
 		RecordManager mydbcountryInfo;
 		BTree tcountryInfo=new BTree();
-		mydbcountryInfo = RecordManagerFactory.createRecordManager(dbpath + "albero_countryInfo", GeoApplication.getDefaultRecordManagerOptions());
+		mydbcountryInfo = RecordManagerFactory.createRecordManager(dbpath + "albero_countryInfo", Configuration.getDefaultRecordManagerOptions());
 		tcountryInfo = loadOrCreateBTree(mydbcountryInfo, "country", a );
 		
 		LineNumberReader lr = null;

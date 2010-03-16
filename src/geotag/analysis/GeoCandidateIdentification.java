@@ -55,8 +55,7 @@ public class GeoCandidateIdentification {
     public GeoCandidateIdentification() {
         this.dbpath = Configuration.getDbPath();
         try {
-            Properties options = new Properties();
-            options.setProperty(RecordManagerOptions.DISABLE_TRANSACTIONS, "");
+            Properties options = Configuration.getDefaultRecordManagerOptions();
             RecordManager mydbinter = RecordManagerFactory.createRecordManager(dbpath + "albero_Btree_Intermedio", options);
             RecordManager mydbgaz = RecordManagerFactory.createRecordManager(dbpath + "albero_Btree_Gazetteer", options);
             tinter = new BTree();
