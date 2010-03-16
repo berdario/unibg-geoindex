@@ -5,7 +5,7 @@
 
 package geotag.words;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * Classe che contiene tutte le operazioni svolte sulle GeoWord, come l'eliminaizone 
@@ -26,27 +26,27 @@ public class GeoWordsOperation {
      * @param finalWordVector : vettore con le GeoWord
      * @return vettore con le GeoWord tutte diverse
      */
-    public static Vector<GeographicWord> eraseEquals(Vector<GeographicWord> finalWordVector){
-        Vector<GeographicWord> newWordVector = new Vector<GeographicWord>();
-        Vector<GeographicWord> appWordVector = new Vector<GeographicWord>();
+    public static ArrayList<GeographicWord> eraseEquals(ArrayList<GeographicWord> finalWordVector){
+        ArrayList<GeographicWord> newWordVector = new ArrayList<GeographicWord>();
+        ArrayList<GeographicWord> appWordVector = new ArrayList<GeographicWord>();
         appWordVector = finalWordVector; //vettore di appoggio utile per l'analisi dei termini uguali
-        Vector<GeographicWord> nomeGiaEsistente = new Vector<GeographicWord>(); //vettore con i nomi doppi
+        ArrayList<GeographicWord> nomeGiaEsistente = new ArrayList<GeographicWord>(); //vettore con i nomi doppi
         
         for(int i = 0; i < finalWordVector.size(); i++){
-            String wordName = finalWordVector.elementAt(i).getName();
-            int geonameId = finalWordVector.elementAt(i).getGeonameid();
+            String wordName = finalWordVector.get(i).getName();
+            int geonameId = finalWordVector.get(i).getGeonameid();
             
             if(uguale(geonameId, appWordVector)){ //Se nel vettore in analisi c'è un elemento con lo stesso geonameid               
                 if(!uguale(geonameId, nomeGiaEsistente)){ //se il nome è già nel vettore con i nomi doppi
                                                           // lo inserisco nel vettore dei nomi doppi e in quello finale
-                    nomeGiaEsistente.add(finalWordVector.elementAt(i));
-                    int currentFrequency = finalWordVector.elementAt(i).getFrequency();
+                    nomeGiaEsistente.add(finalWordVector.get(i));
+                    int currentFrequency = finalWordVector.get(i).getFrequency();
                     
-                    newWordVector.add(finalWordVector.elementAt(i)); 
+                    newWordVector.add(finalWordVector.get(i));
                 }
             }
             else //Se NON c'è un elemento con lo stesso nome
-                newWordVector.add(finalWordVector.elementAt(i)); 
+                newWordVector.add(finalWordVector.get(i));
         }
         
         return newWordVector;
@@ -59,13 +59,13 @@ public class GeoWordsOperation {
      * @param vettore
      * @return
      */
-    public static boolean uguale(int geonameid, Vector<GeographicWord> vettore){
+    public static boolean uguale(int geonameid, ArrayList<GeographicWord> vettore){
         boolean result = false;
         
         for(int i = 0; i < vettore.size(); i++){
-            String wordName = vettore.elementAt(i).getName();
+            String wordName = vettore.get(i).getName();
             
-            if(geonameid == vettore.elementAt(i).getGeonameid()) 
+            if(geonameid == vettore.get(i).getGeonameid())
                 result = true;
         }
                 

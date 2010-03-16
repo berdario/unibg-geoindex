@@ -766,7 +766,7 @@ public class GeoApplicationGui extends javax.swing.JFrame implements Runnable{
 	            	//resultsmerge.clear();
 	                // --> Creazione del RANKING testuale
 	                ContentSearcher content = new ContentSearcher();
-	                lastresults = content.createTextualRanking(keyWords);
+	                lastresults = new Vector(content.createTextualRanking(keyWords));
 
 
 
@@ -809,7 +809,7 @@ public class GeoApplicationGui extends javax.swing.JFrame implements Runnable{
 	                        gMapsPanel.setVisible(true);
 
 
-	                    lastresults=mainApp.search(keyWords, location);
+	                    lastresults=new Vector(mainApp.search(keyWords, location));
 
 	                    // --> Creazione del RANKING geografico
 	                    // Se il documento non è georeferenziato ritorna ZERO come distanceScore

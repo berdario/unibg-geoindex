@@ -33,7 +33,6 @@ public class GeographicWord extends Word {
     private double geoScore = 0;
     private boolean adminZone = false;
     private String zoneDocName = null;
-    private double importance = 0.0; 
     private boolean location = false;
     private boolean maxPop = false;
     private boolean multiLow = false;
@@ -234,10 +233,6 @@ public class GeographicWord extends Word {
 
     public double getImportance() {
         return importance;
-    }
-
-    public void setImportance(double importance) {
-        this.importance = importance;
     }
 
     public boolean isLocation() {

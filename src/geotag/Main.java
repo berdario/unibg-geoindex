@@ -7,7 +7,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Vector;
+import java.util.ArrayList;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -77,7 +77,7 @@ public class Main {
                             System.out.println(errortext);
                         }
                     } else if (args.length == 2) {
-                        Vector<GeoRefDoc> results = mainApp.search(args[0], args[1]);
+                        ArrayList<GeoRefDoc> results = mainApp.search(args[0], args[1]);
                         for (GeoRefDoc doc : results) {
                             System.out.println(doc);
                         }

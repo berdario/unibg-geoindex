@@ -41,7 +41,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
@@ -67,13 +66,13 @@ import org.apache.commons.io.FileUtils;
  */
 public final class GeoApplication {
 
-    Logger logger = Logger.getLogger(this.getClass().getName());
+    public static Logger logger;
 
     Configuration config;
 
     private int maxCachedResults = 300;
-    CacheHashMap<Triple<String,String,Double>,Vector<GeoRefDoc>> cachedResults = new CacheHashMap<Triple<String, String, Double>, Vector<GeoRefDoc>>(maxCachedResults);
-    CacheHashMap<Pair<String,String>,Vector<GeoRefDoc>> cachedUnsortedResults = new CacheHashMap<Pair<String, String>, Vector<GeoRefDoc>>(maxCachedResults);
+    CacheHashMap<Triple<String,String,Double>,ArrayList<GeoRefDoc>> cachedResults = new CacheHashMap<Triple<String, String, Double>, ArrayList<GeoRefDoc>>(maxCachedResults);
+    CacheHashMap<Pair<String,String>,ArrayList<GeoRefDoc>> cachedUnsortedResults = new CacheHashMap<Pair<String, String>, ArrayList<GeoRefDoc>>(maxCachedResults);
 
     public static RTreeReader rtree;
 
@@ -92,12 +91,9 @@ public final class GeoApplication {
 	
 	public String innerCreateIndex(File curDir){
         String errortext="";
-        String documentContent = "";   
         String documentExtension = "";
         String documentName = "";
-        double importanceValue = 0.0;  //E' un valore che indica l'importanza di un termine nel doc
-        //non trattando più come prima titoli, descrizioni e keyword, non ne si ricerca la presenza di geoword all'interno
-        //TODO valutare se è ancora utile (probabilmente no)
+        
         String hash;
         ContentIndexer contInd = new ContentIndexer();
         
@@ -106,14 +102,13 @@ public final class GeoApplication {
             File[] nameFiles = curDir.listFiles();           
             for (int i = 0; i < nameFiles.length; i++){
                 if (!nameFiles[i].isDirectory()) {
-                    Vector<Word> wordVector = new Vector<Word>();
-                    Vector<Word> filterWordVector = new Vector<Word>();
-                    Vector<GeographicWord> geoWordVector = new Vector<GeographicWord>();
-                    Vector<GeographicWord> finalGeoWordVector = new Vector<GeographicWord>();
-                    Vector<Word> finalWordVector = new Vector<Word>();
-                    Vector<Word> finalFilterWordVector = new Vector<Word>();
+                    ArrayList<Word> wordVector = new ArrayList<Word>();
+                    ArrayList<Word> filterWordVector = new ArrayList<Word>();
+                    ArrayList<GeographicWord> geoWordVector = new ArrayList<GeographicWord>();
+                    ArrayList<GeographicWord> finalGeoWordVector = new ArrayList<GeographicWord>();
+                    ArrayList<Word> finalWordVector = new ArrayList<Word>();
+                    ArrayList<Word> finalFilterWordVector = new ArrayList<Word>();
                     boolean alreadyIndexed = false;
-                    boolean upperDateLine = false;
 
                     // Gestione di ogni file contenuto nella directory
                     String name = nameFiles[i].getName();
@@ -129,7 +124,6 @@ public final class GeoApplication {
                         Logger.getLogger(GeoApplication.class.getName()).log(Level.INFO, nameFiles[i].getName() + " is not a supported file", ex);
                         continue;
                     }
-                    documentContent = doc.content;
                     GeoRefDoc geoDoc = new GeoRefDoc(doc);
 
 
@@ -156,7 +150,7 @@ public final class GeoApplication {
                         	
                             alreadyIndexed = contInd.control(hash);
                             
-                            System.out.println("\n  File name: " + documentName);
+                            logger.log(Level.INFO,"\nFile name: " + documentName);
                             
                             if(!alreadyIndexed){
                             	
@@ -165,15 +159,15 @@ public final class GeoApplication {
                             	
                                 
                                     // Estrazione delle Word candidate                                    
-                                    WordAnalyzer generator = new WordAnalyzer(); 
-                                    wordVector = generator.getWordVector(documentContent, swLanguage); 
+                                    WordAnalyzer generator = new WordAnalyzer(swLanguage);
+                                    wordVector = generator.getWordVector(doc); 
 
                                     // Fase di FILTRO
                                     Filter myFilter = new Filter();
-                                    filterWordVector = myFilter.filtering(wordVector, documentContent, upperDateLine);
+                                    filterWordVector = myFilter.filter(wordVector);
 
                                     // Fase di GEO-VALUTAZIONE                                                                                                               
-                                    geoWordVector = geoAnalysis.analyze(filterWordVector, wordVector, documentContent, importanceValue, upperDateLine);
+                                    geoWordVector = geoAnalysis.analyze(filterWordVector, wordVector, doc);
 
                                     //Tra elementi con uguale geonameid ne prendo solo 1 con peso e importanza maggiore 
                                     finalGeoWordVector = importanceControl(geoWordVector, finalGeoWordVector); 
@@ -181,13 +175,8 @@ public final class GeoApplication {
                                     finalFilterWordVector = update(finalFilterWordVector, filterWordVector);
                                     
                                     //Indicizzo il contenuto del file 
-                                    //PRIMA ERA COMMENTATO
-                                     contInd.indexing(documentContent, geoDoc, hash);
-                                                                        
+                                     contInd.indexing(doc, hash);
                                     
-                                 
-                                
-                                
                                     // Fase di SCORING   
                                     Score newScore = new Score();
                                     finalGeoWordVector = newScore.updateGeoScore(finalGeoWordVector, finalWordVector, swLanguage, finalFilterWordVector);
@@ -213,10 +202,10 @@ public final class GeoApplication {
 
                                     //INIZIO MODIFICA
                                     for(int ind = 0; ind < finalGeoWordVector.size(); ind++){
-                                        GeographicWord gw = finalGeoWordVector.elementAt(ind);                                    
+                                        GeographicWord gw = finalGeoWordVector.get(ind);
                                         // cerco nell'r-tree
-                                        logger.log(Level.FINER,finalGeoWordVector.elementAt(ind).getName() + " - geoscore: "
-                                                + formatter.format(finalGeoWordVector.elementAt(ind).getGeoScore()) + " - georefvalue: "
+                                        logger.log(Level.FINER,finalGeoWordVector.get(ind).getName() + " - geoscore: "
+                                                + formatter.format(finalGeoWordVector.get(ind).getGeoScore()) + " - georefvalue: "
                                                 + formatter.format(scores.get(gw)));
                                         logger.log(Level.FINEST," codici: ");
                                         
@@ -282,7 +271,7 @@ public final class GeoApplication {
                     
                         //ORA di fine dell'elaborazione
                         Date end = new Date();
-                        System.out.print("Time: " + (end.getTime() - start.getTime()) / 1000 + " seconds");                    
+                        logger.log(Level.INFO,"Time: " + (end.getTime() - start.getTime()) / 1000 + " seconds");
                         
                 }
             }
@@ -307,18 +296,18 @@ public final class GeoApplication {
         return errortext;
     }
 
-	public Vector<Word>  update (Vector<Word> finalWordVector, Vector<Word> wordVector){
+	public ArrayList<Word>  update (ArrayList<Word> finalWordVector, ArrayList<Word> wordVector){
 	    
 	    if(finalWordVector.size() == 0){
 	        for(int i = 0; i < wordVector.size(); i++){
-	            finalWordVector.add(wordVector.elementAt(i));
+	            finalWordVector.add(wordVector.get(i));
 	        }
 	    }else{
 	        for(int i = 0; i < finalWordVector.size(); i++){
-	            Word gw1 = finalWordVector.elementAt(i);
+	            Word gw1 = finalWordVector.get(i);
 	            
 	            for(int j = 0; j < wordVector.size(); j++){
-	                Word gw2 = wordVector.elementAt(j);
+	                Word gw2 = wordVector.get(j);
 	                if(gw1.getGeonameid() == gw2.getGeonameid()) 
 	                    gw1.setFrequency(gw1.getFrequency() + 1);
 	                else
@@ -337,22 +326,22 @@ public final class GeoApplication {
 	 * @param finalGeoWordVector : vettore delle GeoWord
 	 * @return il vettore delle GeoWord senza zone doppie
 	 */
-	public Vector<GeographicWord>  importanceControl (Vector<GeographicWord> geoWordVector, Vector<GeographicWord> finalGeoWordVector){
-	    Vector<GeographicWord> newGeoWordVector = new Vector<GeographicWord>();
+	public ArrayList<GeographicWord>  importanceControl (ArrayList<GeographicWord> geoWordVector, ArrayList<GeographicWord> finalGeoWordVector){
+	    ArrayList<GeographicWord> newGeoWordVector = new ArrayList<GeographicWord>();
 	    boolean diverso = true;
 	    
 	    //Se è la prima volta che popolo il vettore
 	    if(finalGeoWordVector.size() == 0){
 	        for(int i = 0; i < geoWordVector.size(); i++){
-	            newGeoWordVector.add(geoWordVector.elementAt(i));
+	            newGeoWordVector.add(geoWordVector.get(i));
 	        }
 	    }else{       
 	        for(int i = 0; i < finalGeoWordVector.size(); i++){
-	            GeographicWord gw1 = finalGeoWordVector.elementAt(i);
+	            GeographicWord gw1 = finalGeoWordVector.get(i);
 	            diverso = true;
 	            
 	            for(int j = 0; j < geoWordVector.size(); j++){
-	                GeographicWord gw2 = geoWordVector.elementAt(j);
+	                GeographicWord gw2 = geoWordVector.get(j);
 	                if(gw1.getGeonameid() == gw2.getGeonameid()){                                              
 	                    
 	                    //Nuova freq
@@ -364,7 +353,7 @@ public final class GeoApplication {
 	                    GeographicWord newGW = new GeographicWord();
 	                    newGW = gw1;
 	                    newGW.setFrequency(newFreq);
-	                    newGW.setImportance(newImp);
+	                    newGW.importance = newImp;
 	                    
 	                    newGeoWordVector.add(newGW);
 	                    diverso = false;                        
@@ -377,11 +366,11 @@ public final class GeoApplication {
 	        
 	        //Inserisco le NUOVE geoWord trovate
 	        for(int i = 0; i < geoWordVector.size(); i++){
-	            GeographicWord gw3 = geoWordVector.elementAt(i);
+	            GeographicWord gw3 = geoWordVector.get(i);
 	            boolean different = true;
 	            
 	            for(int j = 0; j < newGeoWordVector.size(); j++){
-	                GeographicWord gw4 = newGeoWordVector.elementAt(j);
+	                GeographicWord gw4 = newGeoWordVector.get(j);
 	                
 	                if(gw3.getGeonameid() == gw4.getGeonameid())
 	                    different = false;
@@ -402,15 +391,15 @@ public final class GeoApplication {
 	 * @param geoWordVector : elenco delel GeoWord
 	 * @return elenco delle GeoWord ritenute valide per il documento
 	 */
-	public Vector<GeographicWord> selectGeoWords(Vector<GeographicWord> geoWordVector){
-	    Vector<GeographicWord> newGeoWordVector = new Vector<GeographicWord>();
+	public ArrayList<GeographicWord> selectGeoWords(ArrayList<GeographicWord> geoWordVector){
+	    ArrayList<GeographicWord> newGeoWordVector = new ArrayList<GeographicWord>();
 	    boolean control = false;
 	    double geoScoreBoundary;
 	    
 	    
 	    
 	    for(int j = 0; j < geoWordVector.size(); j++){
-	        GeographicWord gw = geoWordVector.elementAt(j);
+	        GeographicWord gw = geoWordVector.get(j);
 	        double geoScore = gw.getGeoScore();
 	        int frequency = gw.getFrequency();
 	        String geoName = gw.getName();
@@ -439,7 +428,7 @@ public final class GeoApplication {
 	    
 	    //Controllo se zona con peso > 0.6 è unica, in questo caso aumento di 0.1 il peso
 	    if(newGeoWordVector.size() == 1){
-	        GeographicWord gw = newGeoWordVector.elementAt(0);
+	        GeographicWord gw = newGeoWordVector.get(0);
 	        double score = gw.getGeoScore();
 	        if(score >= goodGeoScore && ((score + goodGeoScore) < 1.0)){
 	            gw.setGeoScore(score + uniqueGWScore);
@@ -451,13 +440,13 @@ public final class GeoApplication {
 	}
 
 
-    public Vector<GeoRefDoc> search(String keyWords, String location){
+    public ArrayList<GeoRefDoc> search(String keyWords, String location){
        return search(keyWords, location, 0.5);
     }
 
-    public Vector<GeoRefDoc> search(String keyWords, String location, Double weigth) {
+    public ArrayList<GeoRefDoc> search(String keyWords, String location, Double weigth) {
 
-        Vector<GeoRefDoc> results = cachedResults.get(Tuple.from(keyWords,location,weigth));
+        ArrayList<GeoRefDoc> results = cachedResults.get(Tuple.from(keyWords,location,weigth));
         if (results != null){
             return results;
         }
@@ -486,7 +475,7 @@ public final class GeoApplication {
         return results;
     }
 
-    public Vector<GeoRefDoc> search(String keyWords, double lat, double lon, double weigth){
+    public ArrayList<GeoRefDoc> search(String keyWords, double lat, double lon, double weigth){
 
         //TODO: trovare un modo per il caching dei risultati
         //usare una coppia di double come chiave non mi pare una grande idea
@@ -496,7 +485,7 @@ public final class GeoApplication {
         ArrayList<Pair<String,String>> codes = rtree.query(lat, lon);
 
         ContentSearcher content = new ContentSearcher();
-        Vector<GeoRefDoc> results = content.createTextualRanking(keyWords);
+        ArrayList<GeoRefDoc> results = content.createTextualRanking(keyWords);
 
         GeoRefLocation grLoc = new GeoRefLocation();
         results = grLoc.innerMerge(codes, results);
@@ -509,6 +498,8 @@ public final class GeoApplication {
     }
 	
     public GeoApplication(String cfgpath) {
+
+        logger = Logger.getLogger(this.getClass().getName());
 
         config = new Configuration(cfgpath);
 
@@ -541,12 +532,12 @@ public final class GeoApplication {
      * @param weigth : costante che indica il peso da attribuire fra contenuto e distanceScore
      * @return il vettore dei documenti ordinato
      */
-    public static Vector<GeoRefDoc> createRanking(Vector<GeoRefDoc> results, double weigth) {
+    public static ArrayList<GeoRefDoc> createRanking(ArrayList<GeoRefDoc> results, double weigth) {
         //Calcolo il sortScore
         //TODO: probabilmente si può migliorare inserendo direttamente i risultati in un nuovo vector mentre vengono calcolati i sortscore uno per uno
         //comunque non è di sicuro un collo di bottiglia: durante il calcolo del distanceScore a monte ci sono ottimizzazioni simili da fare (con 100000 risultati da ordinare si intaserebbe prima li che qui)
         for (int i = 0; i < results.size(); i++) {
-            GeoRefDoc doc = results.elementAt(i);
+            GeoRefDoc doc = results.get(i);
             doc.setSortScore(weigth * doc.getDistanceScore() + (1 - weigth) * doc.getTextScore());
         }
 

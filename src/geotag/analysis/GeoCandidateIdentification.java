@@ -13,7 +13,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Properties;
-import java.util.Vector;
 
 import jdbm.RecordManager;
 import jdbm.RecordManagerFactory;
@@ -22,11 +21,12 @@ import jdbm.btree.BTree;
 import bTree.Serial;
 import bTree.Serializ;
 import geotag.Configuration;
+import geotag.parser.DocumentWrapper;
 import geotag.words.StringOperation;
 import geotag.words.GeoWordsOperation;
 import geotag.words.GeographicWord;
 import geotag.words.Word;
-import jdbm.RecordManagerOptions;
+import java.util.ArrayList;
 
 /**
  * Classe fondamentale dell'applicazione.
@@ -38,11 +38,11 @@ import jdbm.RecordManagerOptions;
 public class GeoCandidateIdentification {
     BTree tinter, tgaz;
     
-    Vector<Word> filterWordVector = new Vector<Word>(); 
-    Vector<Word> allWordVector = new Vector<Word>(); 
-    Vector<Word> freqWordVector = new Vector<Word>();
-    Vector<String> countryCodeVector = new Vector<String>();
-    Vector<GeographicWord> noSearchWordVector = new Vector<GeographicWord>(); //Vettore con WORD appartenenti ad una Word multipla che quindi non devono essere più cercate nel DB
+    ArrayList<Word> filterWordVector = new ArrayList<Word>();
+    ArrayList<Word> allWordVector = new ArrayList<Word>();
+    ArrayList<Word> freqWordVector = new ArrayList<Word>();
+    ArrayList<String> countryCodeVector = new ArrayList<String>();
+    ArrayList<GeographicWord> noSearchWordVector = new ArrayList<GeographicWord>(); //Vettore con WORD appartenenti ad una Word multipla che quindi non devono essere più cercate nel DB
     
     int newPos = 0; //Nuova posizione di ricerca (usata per saltare termini formati da più parole)
     boolean isMultiWord = false;    
@@ -75,11 +75,11 @@ public class GeoCandidateIdentification {
      * @param allWordVector : vettore contenente tutte le word del documento
      * @return un vettore di GeoWord, ovvero di word che potenzialmente potrebbero rappresentare zone geografiche
      */
-    public Vector<GeographicWord> analyze (Vector<Word> filterWordVector, Vector<Word> allWordVector, String documentContent, double impValue, boolean upperDateLine){
+    public ArrayList<GeographicWord> analyze (ArrayList<Word> filterWordVector, ArrayList<Word> allWordVector, DocumentWrapper doc){
         this.filterWordVector = filterWordVector;
         this.allWordVector = allWordVector;
-        Vector<GeographicWord> finalVectorResult = new Vector<GeographicWord>();
-        Vector<GeographicWord> wordVectorResult = new Vector<GeographicWord>();
+        ArrayList<GeographicWord> finalVectorResult = new ArrayList<GeographicWord>();
+        ArrayList<GeographicWord> wordVectorResult = new ArrayList<GeographicWord>();
         Word analyzingWord = new Word();
         int p = 0;
         int pos = 0; // posizione della Word
@@ -91,19 +91,19 @@ public class GeoCandidateIdentification {
             //Condizione affinché NON esegua ricerche su parole formate da più termini
             if(isMultiWord){
                 for(int j = 0; j < filterWordVector.size(); j++){    
-                    if(filterWordVector.elementAt(j).getPosition() == p)
+                    if(filterWordVector.get(j).getPosition() == p)
                         i = j+1;
                 }
                 isMultiWord = false;
             }
             
             if(i < filterWordVector.size())
-                analyzingWord = filterWordVector.elementAt(i); //parola da analizzare
+                analyzingWord = filterWordVector.get(i); //parola da analizzare
                        
             pos = analyzingWord.getPosition();
             
             //Eseguo l'analisi della Word ed aggiorno il vettore dei risultati parziali
-            wordVectorResult = geoAnalysis(analyzingWord, allWordVector, pos, upperDateLine);
+            wordVectorResult = geoAnalysis(analyzingWord, allWordVector, pos);
  
             //Aggiorno il vettore contenente TUTTE le GeoWord trovate nel documento
             finalVectorResult = update(finalVectorResult, wordVectorResult);            
@@ -114,11 +114,11 @@ public class GeoCandidateIdentification {
         finalVectorResult = searchStreet(allWordVector, finalVectorResult); 
         
         //Elimino i nomi deguiti o preceduti da una lettera puntata
-        finalVectorResult = searchAuthors(finalVectorResult, allWordVector, documentContent);
+        finalVectorResult = searchAuthors(finalVectorResult, allWordVector, doc.content);
         
         //Elimino le parole ad inizio frase (solo nel testo del documento)
-        if(impValue == 0.0)
-            finalVectorResult = searchFirstWord(finalVectorResult, allWordVector, documentContent);
+        
+        finalVectorResult = searchFirstWord(finalVectorResult, allWordVector, doc.content);
         
         //Elimino i termini con geonameid uguale
         finalVectorResult = GeoWordsOperation.eraseEquals(finalVectorResult);  
@@ -128,15 +128,11 @@ public class GeoCandidateIdentification {
         
         //Aggiorno il vettore con tutte le country
         for(int i = 0; i < finalVectorResult.size(); i++){
-            countryCodeVector.add(finalVectorResult.elementAt(i).getCountryCode());
+            countryCodeVector.add(finalVectorResult.get(i).getCountryCode());
         }
         
         //Calcolo la FREQUENZA dei termini
         finalVectorResult = calculateFrequency(finalVectorResult, freqWordVector);
-        
-        //Calcolo l'importanza (solo se è il campo impValue è diverso da 0)
-        if(impValue != 0)
-            finalVectorResult = calculateImportanceIniz(finalVectorResult, impValue);
         
         return finalVectorResult;
     }
@@ -149,13 +145,13 @@ public class GeoCandidateIdentification {
      * @param finalVectorResult : vettore contenente le word che hanno superato la fase di geo-valutazione
      * @return il vettore con i nuovi risultati
      */
-    public Vector<GeographicWord> searchUpperCaseWords(Vector<GeographicWord> finalVectorResult){
+    public ArrayList<GeographicWord> searchUpperCaseWords(ArrayList<GeographicWord> finalVectorResult){
         boolean upperCase = true;
         boolean isCountryCode = false;
-        Vector<GeographicWord> newFinalVectorResult = new Vector<GeographicWord>();
+        ArrayList<GeographicWord> newFinalVectorResult = new ArrayList<GeographicWord>();
         
         for(int i = 0; i < finalVectorResult.size(); i++){
-            String gwZoneDocName = finalVectorResult.elementAt(i).getZoneDocName();
+            String gwZoneDocName = finalVectorResult.get(i).getZoneDocName();
             upperCase = true;
             
             //Controllo solo le GeoWord lunghe meno di 3 lettere
@@ -163,7 +159,7 @@ public class GeoCandidateIdentification {
                 
                 //Controllo che NON sia uguale ad un "countryCode" dei campi trovati
                 for (int k = 0; k < countryCodeVector.size(); k++) {
-                    if(gwZoneDocName.equals(countryCodeVector.elementAt(k)))
+                    if(gwZoneDocName.equals(countryCodeVector.get(k)))
                         isCountryCode = true;         
                 }
                 
@@ -174,13 +170,13 @@ public class GeoCandidateIdentification {
                             upperCase = false;
                     }
                     if(!upperCase) //Se c'è una lettera minuscola aggiungo la GeoWord al nuovo vettore
-                        newFinalVectorResult.add(finalVectorResult.elementAt(i));
+                        newFinalVectorResult.add(finalVectorResult.get(i));
                 }
                 else //Se è uguale ad un CountryCode aggiungo la GeoWord al nuovo vettore
-                    newFinalVectorResult.add(finalVectorResult.elementAt(i));
+                    newFinalVectorResult.add(finalVectorResult.get(i));
             }
             else //Se la parola è + lunga di 3 lettere la aggiungo al nuovo vettore
-                newFinalVectorResult.add(finalVectorResult.elementAt(i));
+                newFinalVectorResult.add(finalVectorResult.get(i));
         }
        
         return newFinalVectorResult;
@@ -194,23 +190,23 @@ public class GeoCandidateIdentification {
      * @param documentContent : testo del documento
      * @return il vettore uguale a finalVectorResult senza le parole che nel documento sono ad inizio di una frase
      */
-    public Vector<GeographicWord> searchFirstWord(Vector<GeographicWord> finalVectorResult, Vector<Word> allWordVector, String documentContent){
-        Vector<GeographicWord> newFinalVectorResult = new Vector<GeographicWord>();
+    public ArrayList<GeographicWord> searchFirstWord(ArrayList<GeographicWord> finalVectorResult, ArrayList<Word> allWordVector, String documentContent){
+        ArrayList<GeographicWord> newFinalVectorResult = new ArrayList<GeographicWord>();
         String analyzingString = "";
         
         for(int i = 0; i < finalVectorResult.size(); i++){
-            GeographicWord geoWord = finalVectorResult.elementAt(i);
+            GeographicWord geoWord = finalVectorResult.get(i);
             String n = geoWord.getName();
             int pos = geoWord.getPosition();
             
             //Seleziono la GeoWord precedente
             if((pos-2) >= 0){
-                String preWordName = allWordVector.elementAt(pos -2).getName(); 
+                String preWordName = allWordVector.get(pos -2).getName();
                 analyzingString = preWordName + ". " + geoWord.getZoneDocName();
             }
             
             //Se il documento NON contiene la stringa "preWord. geoWord" copio la geoWord nel vettore
-            if(!documentContent.contains(analyzingString)){
+            if(!documentContent.contains(analyzingString) ){//TODO controllare che la geoword rimossa fosse presente solo nel testo del documento
                 newFinalVectorResult.add(geoWord);
             }                        
         }
@@ -225,20 +221,20 @@ public class GeoCandidateIdentification {
      * @param documentContent : testo del documento
      * @return il vettore senza le parole presecute o seguite da una lettera puntata
      */
-    public Vector<GeographicWord> searchAuthors(Vector<GeographicWord> finalVectorResult, Vector<Word> allWordVector, String documentContent){
-        Vector<GeographicWord> newFinalVectorResult = new Vector<GeographicWord>();
+    public ArrayList<GeographicWord> searchAuthors(ArrayList<GeographicWord> finalVectorResult, ArrayList<Word> allWordVector, String documentContent){
+        ArrayList<GeographicWord> newFinalVectorResult = new ArrayList<GeographicWord>();
         String preWordName = "";
         String postWordName = "";
         int pos = 0;
         
         for(int i = 0; i < finalVectorResult.size(); i++){
-            GeographicWord geoWord = finalVectorResult.elementAt(i);
+            GeographicWord geoWord = finalVectorResult.get(i);
             pos = geoWord.getPosition();
             
             //Seleziono la Word che precede e che segue la GeoWord in esame
             if( (pos-2)>= 0 && pos < allWordVector.size()){
-                preWordName = allWordVector.elementAt(pos -2).getName();                
-                postWordName = allWordVector.elementAt(pos).getName(); 
+                preWordName = allWordVector.get(pos -2).getName();
+                postWordName = allWordVector.get(pos).getName();
             }
 
             if(!pointName(preWordName, documentContent) && !pointName(postWordName, documentContent)){
@@ -286,13 +282,13 @@ public class GeoCandidateIdentification {
      * @param allWordVector : vettore contenente tutte le word reperite dal documento in esame
      * @return il vettore con i nuovi risultati
      */
-    public Vector<GeographicWord> searchStreet(Vector<Word> allWordVector, Vector<GeographicWord> finalWordVector){
+    public ArrayList<GeographicWord> searchStreet(ArrayList<Word> allWordVector, ArrayList<GeographicWord> finalWordVector){
         String line = "";
         String[] terms = null;        
         String[] streetTerm = null; 
         Word preGewWord = new Word();
-        Vector<Word> wordToErase = new Vector<Word>();
-        Vector<GeographicWord> newFinalWordVector = new Vector<GeographicWord>();
+        ArrayList<Word> wordToErase = new ArrayList<Word>();
+        ArrayList<GeographicWord> newFinalWordVector = new ArrayList<GeographicWord>();
         boolean equal = false;
         
         try {
@@ -311,19 +307,19 @@ public class GeoCandidateIdentification {
                             String st = streetTerm[i];
                             for(int j = 1; j < allWordVector.size(); j++){ 
                                 
-                                if(st.equalsIgnoreCase(allWordVector.elementAt(j).getName())){
-                                    String questa = allWordVector.elementAt(j).getName();
+                                if(st.equalsIgnoreCase(allWordVector.get(j).getName())){
+                                    String questa = allWordVector.get(j).getName();
                                     Word w = new Word();
                                     if(language.equals("ENGLISH")){ //Seleziono la parola precedente
-                                        String prec = allWordVector.elementAt(j-1).getName();
-                                        int precPos = allWordVector.elementAt(j-1).getPosition();
+                                        String prec = allWordVector.get(j-1).getName();
+                                        int precPos = allWordVector.get(j-1).getPosition();
                                         w.setName(prec);
                                         w.setPosition(precPos);
                                         wordToErase.add(w);
                                     }
                                     if(language.equals("ITALIAN")){ //Seleziono la parola successiva
-                                        String post = allWordVector.elementAt(j+1).getName();
-                                        int postPos = allWordVector.elementAt(j+1).getPosition();
+                                        String post = allWordVector.get(j+1).getName();
+                                        int postPos = allWordVector.get(j+1).getPosition();
                                         w.setName(post);
                                         w.setPosition(postPos);
                                         wordToErase.add(w);
@@ -346,13 +342,13 @@ public class GeoCandidateIdentification {
          * lo elimino dal vettore di base
         */
         for(int i = 0; i < finalWordVector.size(); i++){ 
-            GeographicWord gw = finalWordVector.elementAt(i);
+            GeographicWord gw = finalWordVector.get(i);
             String gwName = gw.getZoneDocName();
             int gwPos = gw.getPosition();
             equal = false;
             
             for(int j = 0; j < wordToErase.size(); j++){
-                Word w = wordToErase.elementAt(j);
+                Word w = wordToErase.get(j);
                 String wName = w.getName();
                 int wPos = w.getPosition();
                 
@@ -386,11 +382,11 @@ public class GeoCandidateIdentification {
      * @param pos : posizione della parola in analisi
      * @return un vettore di GeoWord 
      */
-    public Vector<GeographicWord> geoAnalysis(Word analyzingWord, Vector<Word> allWordVector, int pos, boolean upperDateLine) {
-        Vector<GeographicWord> wordVectorResult = new Vector<GeographicWord>();
-        Vector<GeographicWord> wordVectorResult3 = new Vector<GeographicWord>();
-        Vector<String> geonameId = new Vector<String>();
-        Vector<GeographicWord> wordVectorResult2 = new Vector<GeographicWord>();
+    public ArrayList<GeographicWord> geoAnalysis(Word analyzingWord, ArrayList<Word> allWordVector, int pos) {
+        ArrayList<GeographicWord> wordVectorResult = new ArrayList<GeographicWord>();
+        ArrayList<GeographicWord> wordVectorResult3 = new ArrayList<GeographicWord>();
+        ArrayList<String> geonameId = new ArrayList<String>();
+        ArrayList<GeographicWord> wordVectorResult2 = new ArrayList<GeographicWord>();
         String searchingName = StringOperation.convertString(analyzingWord.getName());
         Word existingWord = analyzingWord;
         int wordPos = analyzingWord.getPosition()-1;
@@ -439,7 +435,10 @@ public class GeoCandidateIdentification {
                     			String datiGaz[];
                     			datiGaz=((String)resultsGaz).split("�#");
                     			GeographicWord newGeoWord = new GeographicWord();
-                    			
+
+                                        newGeoWord.dateline = analyzingWord.dateline;
+                                        newGeoWord.importance = analyzingWord.importance;
+
                     			newGeoWord.setGeonameid(Integer.parseInt(datiGaz[0]));
                                 newGeoWord.setName(datiGaz[1]);
                                 newGeoWord.setAsciiName(datiGaz[2]);
@@ -560,24 +559,24 @@ public class GeoCandidateIdentification {
             int maxPop = 0;
             int position = 0;
             for(int i = 0; i < wordVectorResult.size(); i++){
-                if(wordVectorResult.elementAt(i).getPopulation() > maxPop){
-                    maxPop = wordVectorResult.elementAt(i).getPopulation();
+                if(wordVectorResult.get(i).getPopulation() > maxPop){
+                    maxPop = wordVectorResult.get(i).getPopulation();
                     position = i;
                 }
             }
             if(position != 0){
-                wordVectorResult.elementAt(position).setMaxPop(true);
+                wordVectorResult.get(position).setMaxPop(true);
             }
             
             //Trovo termini formati da più parole (multi)
             if(shift1 == 0 && shift2 == 0){
                 for(int i = 0; i < wordVectorResult.size(); i++){
-                    wordVectorResult.elementAt(i).setMulti(false);                      
+                    wordVectorResult.get(i).setMulti(false);
                 }
             }
             else {
                 for(int i = 0; i < wordVectorResult.size(); i++){
-                    wordVectorResult.elementAt(i).setMulti(true);
+                    wordVectorResult.get(i).setMulti(true);
                 }
             }
             
@@ -585,10 +584,10 @@ public class GeoCandidateIdentification {
             //nella tabella "alternatename" a partire da termini singoli
             //Solo però nel caso in cui quello trovato è l'UNICO record e NON è una zona amministrativa
             for(int i = 0; i < wordVectorResult.size(); i++){
-                GeographicWord gw = wordVectorResult.elementAt(i);
+                GeographicWord gw = wordVectorResult.get(i);
                 String n = gw.getName();
                 if(gw.isMultiLow() && (gw.getFeatureClass().equals("A") || gw.getFeatureClass().equals("P")))
-                    wordVectorResult.elementAt(i).setMultiLow(true);               
+                    wordVectorResult.get(i).setMultiLow(true);
             }
             //wordVectorResult = setGeoScore(wordVectorResult, shift1, shift2, stmt);
             
@@ -610,21 +609,21 @@ public class GeoCandidateIdentification {
      * @param freqWordVector : vettore che contiene le Word per le quali è stato trovato un match nel DataBase
      * @return un nuovo vettore contenente tutte le GeoWord con la rispettiva frequenza
      */
-    public Vector<GeographicWord> calculateFrequency(Vector<GeographicWord> geoWordVector, Vector<Word> freqWordVector){       
+    public ArrayList<GeographicWord> calculateFrequency(ArrayList<GeographicWord> geoWordVector, ArrayList<Word> freqWordVector){
         //Conto le frequenze e creo un nuovo vettore con il numero di occorrenze
         for(int j = 0; j < geoWordVector.size(); j++){
             int freq = 0;
             
             for(int k = 0; k < freqWordVector.size(); k++){
-                String gwDocName = geoWordVector.elementAt(j).getZoneDocName();
-                String fwName = freqWordVector.elementAt(k).getName();
+                String gwDocName = geoWordVector.get(j).getZoneDocName();
+                String fwName = freqWordVector.get(k).getName();
         
                 //Controllo se GeoWord e termine nel doc sono uguali
                 if(gwDocName.equalsIgnoreCase(fwName)){
                     freq++;
                 }
             }            
-            geoWordVector.elementAt(j).setFrequency(freq);          
+            geoWordVector.get(j).setFrequency(freq);
         } 
     
         return geoWordVector;
@@ -638,20 +637,20 @@ public class GeoCandidateIdentification {
      * @param numTerm : numero di termini da considerare
      * @return la parola composta
      */
-    public Word composeMultiRightWord(Word word, Vector<Word> allWordVector, int wordPos, int numTerm){
+    public Word composeMultiRightWord(Word word, ArrayList<Word> allWordVector, int wordPos, int numTerm){
         Word newWord = new Word();
         int posGap = 0;       
         int posiz = wordPos+numTerm;
-        int tot = allWordVector.elementAt(allWordVector.size()-1).getPosition();
+        int tot = allWordVector.get(allWordVector.size()-1).getPosition();
         
         //CONTROLLO: wordPos+numTerm deve essere <= di allWordVector.elementAt(allWordVector.size-1).getPosition()
-        if( (wordPos+numTerm) <= allWordVector.elementAt(allWordVector.size()-1).getPosition()){
+        if( (wordPos+numTerm) <= allWordVector.get(allWordVector.size()-1).getPosition()){
             for(int i = wordPos; i < wordPos+numTerm; i++){
                 if(i == wordPos)
-                    newWord.setName(allWordVector.elementAt(i).getName());
+                    newWord.setName(allWordVector.get(i).getName());
                 else{
-                    newWord.setName(newWord.getName() + " " + allWordVector.elementAt(i).getName());
-                    newWord.setPosGap(allWordVector.elementAt(i).getPosition());
+                    newWord.setName(newWord.getName() + " " + allWordVector.get(i).getName());
+                    newWord.setPosGap(allWordVector.get(i).getPosition());
                 }
             }
         }
@@ -674,9 +673,9 @@ public class GeoCandidateIdentification {
      * @param wordVectorResult : vettore con i nuovi valori
      * @return l'insieme dei vecchi e nuovi valori
      */
-    public Vector<GeographicWord> update(Vector<GeographicWord> oldVector, Vector<GeographicWord> wordVectorResult){        
+    public ArrayList<GeographicWord> update(ArrayList<GeographicWord> oldVector, ArrayList<GeographicWord> wordVectorResult){
         for(int i = 0; i < wordVectorResult.size(); i++){
-            oldVector.add(wordVectorResult.elementAt(i));
+            oldVector.add(wordVectorResult.get(i));
         }
         
         if(oldVector.size() == 0)
@@ -695,16 +694,16 @@ public class GeoCandidateIdentification {
      * @param wordVectorResult : vettore delle Word
      * @return vettore delel Word con il campo Multi aggiornato
      */
-    public Vector<GeographicWord> multiWordControl(Vector<GeographicWord> wordVectorResult) {
+    public ArrayList<GeographicWord> multiWordControl(ArrayList<GeographicWord> wordVectorResult) {
         String geoWordName = "";
         boolean exit = false;
         
         for(int j = 0; j < wordVectorResult.size(); j++){
             StringBuffer sb = new StringBuffer();
-            geoWordName = wordVectorResult.elementAt(j).getName();
+            geoWordName = wordVectorResult.get(j).getName();
             for (int i = 0; i < geoWordName.length(); i++) {
                 if (geoWordName.charAt(i) == ' ' && !exit){ 
-                    wordVectorResult.elementAt(j).setMultiLow(true);
+                    wordVectorResult.get(j).setMultiLow(true);
                     exit = true;
                 }
             exit = false;
@@ -714,20 +713,6 @@ public class GeoCandidateIdentification {
     }
 
     
-    /**
-     * Metodo per il calcolo dell'importanza del termine
-     * @param geoWordVector : vettore delel GeoWord
-     * @param impValue : valore da settare al campo impValue
-     * @return vettore delle GeoWord con il campo impValue aggiornato
-     */
-    public Vector<GeographicWord> calculateImportanceIniz(Vector<GeographicWord> geoWordVector, double impValue){
-        
-        for(int i = 0; i < geoWordVector.size(); i++){
-            geoWordVector.elementAt(i).setImportance(impValue);
-        }
-        
-        return geoWordVector;
-    }
     public static synchronized BTree loadOrCreateBTree( RecordManager aRecordManager,String aName, Comparator aComparator ) throws IOException
 
  	{

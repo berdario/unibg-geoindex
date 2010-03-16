@@ -16,8 +16,9 @@ public class Word {
     private int position = 0;
     private int frequency = 0;
     private String alternateNames = null;
-    private int relevanceWeight = 0;
     private int posGap = 0;
+    public boolean dateline;
+    public double importance;
 
     public void Word(){    
     }
@@ -63,15 +64,6 @@ public class Word {
         this.position = position;
     }
 
-
-    public int getRelevanceWeight() {
-        return relevanceWeight;
-    }
-
-    public void setRelevanceWeight(int relevanceWeight) {
-        this.relevanceWeight = relevanceWeight;
-    }
-
     public int getPosGap() {
         return posGap;
     }
@@ -79,9 +71,4 @@ public class Word {
     public void setPosGap(int posGap) {
         this.posGap = posGap;
     }
-
-
-    
-    
-
 }

@@ -105,10 +105,10 @@ public class Score {
      * @param filterWordVector : vettore delle Word che hanno superato la fase di filtro
      * @return l'elenco delle GeoWord con il campo geoScore aggiornato
      */
-    public Vector<GeographicWord> updateGeoScore(Vector<GeographicWord> finalWordVector, Vector<Word> allWordVector, String swLanguage, Vector<Word> filterWordVector) throws IOException{        
+    public ArrayList<GeographicWord> updateGeoScore(ArrayList<GeographicWord> finalWordVector, ArrayList<Word> allWordVector, String swLanguage, ArrayList<Word> filterWordVector) throws IOException{
         myStdAnalyzer = new MyStandardAnalyzer(swLanguage);
-        Vector<GeographicWord> newFinalWordVector = new Vector<GeographicWord>();
-        Vector<Word> countryRank = new Vector<Word>();
+        ArrayList<GeographicWord> newFinalWordVector = new ArrayList<GeographicWord>();
+        ArrayList<Word> countryRank = new ArrayList<Word>();
         int countryFreqMax = 0;
         double popAvg = 0;
         String countryCodeWithMaxFreq = "";
@@ -118,9 +118,9 @@ public class Score {
         countryRank = createNationRanking(finalWordVector); 
         //Calcolo la Nazione con la freq MAX
         for(int i = 0; i < countryRank.size(); i++){ 
-            if(countryRank.elementAt(i).getFrequency() > countryFreqMax){
-                countryFreqMax = countryRank.elementAt(i).getFrequency();
-                countryCodeWithMaxFreq = countryRank.elementAt(i).getName();
+            if(countryRank.get(i).getFrequency() > countryFreqMax){
+                countryFreqMax = countryRank.get(i).getFrequency();
+                countryCodeWithMaxFreq = countryRank.get(i).getName();
             }
         }
         
@@ -129,7 +129,7 @@ public class Score {
       
         //Scorro il vetore delle GeoWord e ne analizzo una alla volta
         for(int i = 0; i < finalWordVector.size(); i++){ 
-            GeographicWord geoWord = finalWordVector.elementAt(i);
+            GeographicWord geoWord = finalWordVector.get(i);
             String nome = geoWord.getName();
             GeographicWord newGeoWord = new GeographicWord();
                  
@@ -216,7 +216,7 @@ public class Score {
      * @param allWordVector : insieme di tutte le Word reperite nel docuimento
      * @return la geoWord con il GeoScore aggiornato
      */
-    public GeographicWord searchGeoStopwords(GeographicWord geoWord, Vector<Word> allWordVector){
+    public GeographicWord searchGeoStopwords(GeographicWord geoWord, ArrayList<Word> allWordVector){
         for (int i = 0; i < geoStopwords.size(); i++) {
             if (geoStopwords.get(i).equals(geoWord.getName()) || geoStopwords.get(i).equals(geoWord.getZoneDocName())) {
                 double score = geoWord.getGeoScore();
@@ -238,7 +238,7 @@ public class Score {
      * @param filterWordVector : vettore delle Word che hanno superato la fase di filtro
      * @return la geoWord con il GeoScore aggiornato
      */
-     public GeographicWord  searchContext(GeographicWord geoWord, Vector<GeographicWord> finalWordVector, Vector<Word> allWordVector, Vector<Word> filterWordVector){
+     public GeographicWord  searchContext(GeographicWord geoWord, ArrayList<GeographicWord> finalWordVector, ArrayList<Word> allWordVector, ArrayList<Word> filterWordVector){
         String countryCode = geoWord.getCountryCode();  // IT --> Italia
         String admin1Code = geoWord.getAdmin1Code();    // 9 --> Lombardia
         String admin2Code = geoWord.getAdmin2Code();    // BG --> Bergamo
@@ -249,10 +249,10 @@ public class Score {
         double beta = 2;
         double gamma = 3;
         
-        Vector<String> countryNames = new Vector<String>();     //Vettore con i nomi della Nazione
-        Vector<String> alternateCountryNames = new Vector<String>();    //Vettore con i nomi alternativi della Nazione 
-        Vector<String> continentNames = new Vector<String>();   //Vettore con i nomi del Continente
-        Vector<String> regionNames = new Vector<String>();      //Vettore con i nomi della Regione
+        ArrayList<String> countryNames = new ArrayList<String>();     //Vettore con i nomi della Nazione
+        ArrayList<String> alternateCountryNames = new ArrayList<String>();    //Vettore con i nomi alternativi della Nazione
+        ArrayList<String> continentNames = new ArrayList<String>();   //Vettore con i nomi del Continente
+        ArrayList<String> regionNames = new ArrayList<String>();      //Vettore con i nomi della Regione
         Vector<String> admin1names = new Vector<String>();      //Vettore delle zone amministrative 1
         double score = geoWord.getGeoScore();
         
@@ -341,7 +341,7 @@ public class Score {
                 countryNames = selectGeonameIdQuery(stringResult.elementAt(3), "geoname");               
                 alternateCountryNames = selectGeonameIdQuery(stringResult.elementAt(3), "alternatename");
                 for(int i = 0; i < alternateCountryNames.size(); i++){
-                    countryNames.add(alternateCountryNames.elementAt(i));
+                    countryNames.add(alternateCountryNames.get(i));
                 }        
                 countryNames = eraseEquals(countryNames); //Elimino uguali e nulli  
             }
@@ -364,12 +364,12 @@ public class Score {
      * @return la geoWord con il GeoScore aggiornato
      * @throws java.io.IOException
      */
-    public GeographicWord  searchFeature(GeographicWord geoWord, Vector<Word> allWordVector, String countryCodeWithMaxFreq) throws IOException{
+    public GeographicWord  searchFeature(GeographicWord geoWord, ArrayList<Word> allWordVector, String countryCodeWithMaxFreq) throws IOException{
         String featureClass = geoWord.getFeatureClass();
         String featureCode = geoWord.getFeatureCode();
         String code = featureClass + "." + featureCode; // H.STMQ
         Vector<String> descriptionString = new Vector<String>();
-        Vector<String> descriptionTerm = new Vector<String>();
+        ArrayList<String> descriptionTerm = new ArrayList<String>();
         int j = 0;
         int control = 10;
         int k = 0; //numero di match tra parole testo e parole tabella
@@ -380,7 +380,7 @@ public class Score {
         // Devo selezionare solo le parole UTILI (sfrutto l'analizzatore da me creato)
         AnalyzerUtils descriptionAnalyzer = new AnalyzerUtils();
         for(int i = 0; i < descriptionString.size(); i++){
-            descriptionTerm = descriptionAnalyzer.getNameTokens(myStdAnalyzer, descriptionString.elementAt(i));
+            descriptionTerm = descriptionAnalyzer.getNameTokens(myStdAnalyzer, descriptionString.get(i));
         }
         
         // Verifico nelle vicinanze della GeoWord (shifFeature termini prima e shifFeature dopo) 
@@ -390,7 +390,7 @@ public class Score {
             j = geoWordPosition-shifFeature;
         for(int i = 0; i < descriptionTerm.size(); i++){
             while((j < geoWordPosition+10 && j < allWordVector.size()) && control > 0){ //Cerco nei termini intorno alla geoWord
-                if(descriptionTerm.elementAt(i).equals(allWordVector.elementAt(j).getName())){
+                if(descriptionTerm.get(i).equals(allWordVector.get(j).getName())){
                     k++;
                     //double score = geoWord.getGeoScore();
                     //geoWord.setGeoScore(score + incrScoreFeature);
@@ -427,13 +427,13 @@ public class Score {
      * @param countryFreqMax : frequenza della Nazione presente più volte tra le GeoWord
      * @return la GeoWord con il campo geoScore aggiornato
      */
-    public GeographicWord searchMajority(GeographicWord geoWord, Vector<Word> countryRank, int countryFreqMax){
+    public GeographicWord searchMajority(GeographicWord geoWord, ArrayList<Word> countryRank, int countryFreqMax){
         double score = geoWord.getGeoScore();
         
         //Aumento peso in base alla maggioranza
         for(int i = 0; i < countryRank.size(); i++){
-            if(geoWord.getCountryCode().equals(countryRank.elementAt(i).getName())){
-                double freqRel = (double) countryRank.elementAt(i).getFrequency() / countryFreqMax;
+            if(geoWord.getCountryCode().equals(countryRank.get(i).getName())){
+                double freqRel = (double) countryRank.get(i).getFrequency() / countryFreqMax;
                 double scoreRise = (double) freqRel * incrScoreMajority;
                 geoWord.setGeoScore(score + scoreRise);
             }
@@ -475,8 +475,8 @@ public class Score {
      * @param filterWordVector : vettore delle Word che hanno superato la fase di filtro
      * @return il vettore delel GeoWord con il GeoScore aggiornato
      */
-    public Vector<GeographicWord> searchDistance(Vector<GeographicWord> finalWordVector, Vector<Word> filterWordVector){         
-        Vector<GeographicWord> geoMaxWordVector = new Vector<GeographicWord>(); //termini con peso > 0.4
+    public ArrayList<GeographicWord> searchDistance(ArrayList<GeographicWord> finalWordVector, ArrayList<Word> filterWordVector){
+        ArrayList<GeographicWord> geoMaxWordVector = new ArrayList<GeographicWord>(); //termini con peso > 0.4
         Vector<GeographicWord> geoMinWordVector = new Vector<GeographicWord>(); //termini con peso < 0.4
         double maxDist = 0.0;   //Distanza massima all'interno della matrice
         double sumTot = 0.0;    //Somma di tutte le distanze (escluso dist = 0)
@@ -489,10 +489,10 @@ public class Score {
      
          //Considero solo i termini con peso > 0.3        
         for(int i = 0; i < finalWordVector.size(); i++){
-            if(finalWordVector.elementAt(i).getGeoScore() >= 0.2 && finalWordVector.elementAt(i).getName().length() > 1)
-                geoMaxWordVector.add(finalWordVector.elementAt(i));
+            if(finalWordVector.get(i).getGeoScore() >= 0.2 && finalWordVector.get(i).getName().length() > 1)
+                geoMaxWordVector.add(finalWordVector.get(i));
             else
-                geoMinWordVector.add(finalWordVector.elementAt(i));
+                geoMinWordVector.add(finalWordVector.get(i));
         }
         
         int numZoneTot = geoMaxWordVector.size();
@@ -511,19 +511,19 @@ public class Score {
          
          //Popolazione della matrice 
          for (int i=0; i < distMatr.length; i++) {        // scandisce righe
-            GeographicWord gw1 = geoMaxWordVector.elementAt(i);
+            GeographicWord gw1 = geoMaxWordVector.get(i);
             for (int j=0; j < distMatr.length; j++){     // scandisce colonne
-                GeographicWord gw2 = geoMaxWordVector.elementAt(j);
+                GeographicWord gw2 = geoMaxWordVector.get(j);
                 distMatr[i][j] = dist.calculateDistance(gw1.getLatitude(), gw1.getLongitude(), gw2.getLatitude(), gw2.getLongitude(), 'K');
             }
          }
          
          //Calcolo la distanza massima per ogni riga e totale
          for (int i=0; i < distMatr.length; i++) {        // scandisce righe
-            GeographicWord gw1 = geoMaxWordVector.elementAt(i);
+            GeographicWord gw1 = geoMaxWordVector.get(i);
             double max = 0.0;
             for (int j=0; j < distMatr.length; j++){     // scandisce colonne
-                GeographicWord gw2 = geoMaxWordVector.elementAt(j);
+                GeographicWord gw2 = geoMaxWordVector.get(j);
                 if(distMatr[i][j] > max)
                     max = distMatr[i][j];
                 if(distMatr[i][j] > maxDist)
@@ -541,14 +541,14 @@ public class Score {
          
          /* */
          for (int i=0; i < distMatr.length; i++) {        // scandisce righe
-            GeographicWord gw1 = geoMaxWordVector.elementAt(i);
+            GeographicWord gw1 = geoMaxWordVector.get(i);
             double sum = 0.0;
             double contr = 0.0;
             double sumContr = 0.0;
             double incr = 0.0;
         
             for (int j=0; j < distMatr.length; j++){      // scandisce colonne
-                GeographicWord gw2 = geoMaxWordVector.elementAt(j);
+                GeographicWord gw2 = geoMaxWordVector.get(j);
                 if(!gw1.getName().equals(gw2.getName())){ //Se hanno nomi diversi
                      
                     if(distMatr[i][j] <= 0.3 * mediaTot){
@@ -627,9 +627,9 @@ public class Score {
      * @param table : nome della tabella su cui eseguire la query
      * @return l'elenco dei nomi alternativi trovati
      */
-    public Vector<String> selectGeonameIdQuery(String searchingId, String table){       
+    public ArrayList<String> selectGeonameIdQuery(String searchingId, String table){
         //----------------------------------------------------------------
-   	 Vector<String> stringResult = new Vector<String>();
+   	 ArrayList<String> stringResult = new ArrayList<String>();
 
         try {
            
@@ -691,13 +691,13 @@ public class Score {
      * @param stringVector : vettore di stringhe 
      * @return il vettore senza i nomi doppi
      */
-    public Vector<String> eraseEquals(Vector<String> stringVector){
-        Vector<String> newStringVector = new Vector<String>(); 
-        Vector<String> app = stringVector; //Vettore di appoggio
-        Vector<String> equals = new Vector<String>(); //Vettore con i nomi uguali
+    public ArrayList<String> eraseEquals(ArrayList<String> stringVector){
+        ArrayList<String> newStringVector = new ArrayList<String>();
+        ArrayList<String> app = stringVector; //Vettore di appoggio
+        ArrayList<String> equals = new ArrayList<String>(); //Vettore con i nomi uguali
         
         for(int i = 0; i < stringVector.size(); i++){  
-            String name = stringVector.elementAt(i);
+            String name = stringVector.get(i);
             
             if(!name.isEmpty()){ //Se il nome NON è vuoto           
                 if(equal(name, app)){ //Se nel vettore in analisi c'è un elemento con lo stesso nome
@@ -722,12 +722,12 @@ public class Score {
      * @param stringVector : vettore con i nomi da confrontare
      * @return
      */
-    public boolean equal(String name, Vector<String> stringVector){
+    public boolean equal(String name, ArrayList<String> stringVector){
         boolean result = false;
         
         for(int k = 0; k < stringVector.size(); k++){   
             if(!name.isEmpty())
-                if(name.equalsIgnoreCase(stringVector.elementAt(k)))
+                if(name.equalsIgnoreCase(stringVector.get(k)))
                     result = true;
         }
                 
@@ -741,9 +741,9 @@ public class Score {
      * @param geonameid : id della zona di interesse
      * @return
      */
-    public Vector<String> selectGeonameQuery(String searchingName, String geonameid){
+    public ArrayList<String> selectGeonameQuery(String searchingName, String geonameid){
         //----------------------------------------------------------------
-    	 Vector<String> stringResult = new Vector<String>();
+    	 ArrayList<String> stringResult = new ArrayList<String>();
 
          try {
             
@@ -940,14 +940,14 @@ public class Score {
     }
     
     
-    public double getMaxPop(Vector<GeographicWord> finalWordVector){
+    public double getMaxPop(ArrayList<GeographicWord> finalWordVector){
         int sumPop = 0;
         int count = 0;
         double avgPop = 0;
         
         for(int i = 0; i < finalWordVector.size(); i++){
-            if(finalWordVector.elementAt(i).getPopulation() != 0){
-                sumPop = sumPop + finalWordVector.elementAt(i).getPopulation();
+            if(finalWordVector.get(i).getPopulation() != 0){
+                sumPop = sumPop + finalWordVector.get(i).getPopulation();
                 count++;
             }
         }
@@ -965,16 +965,16 @@ public class Score {
      * @param finalWordVector : vettore delle GeoWord
      * @return vettore delle Nazioni ordinate in maniera decrescente a partire da quella con maggiori GeoWord
      */
-    public Vector<Word> createNationRanking(Vector<GeographicWord> finalWordVector){
-        Vector<String> allCountryVector = new Vector<String>();
-        Vector<String> app = new Vector<String>();
-        Vector<Word> countryVector = new Vector<Word>();
+    public ArrayList<Word> createNationRanking(ArrayList<GeographicWord> finalWordVector){
+        ArrayList<String> allCountryVector = new ArrayList<String>();
+        ArrayList<String> app = new ArrayList<String>();
+        ArrayList<Word> countryVector = new ArrayList<Word>();
         String countryCode = null;
-        Vector<String> equals = new Vector<String>(); //Vettore con i nomi uguali
+        ArrayList<String> equals = new ArrayList<String>(); //Vettore con i nomi uguali
          
         //Creo un vettore formato da tutti i codici delle Country
         for(int i = 0; i < finalWordVector.size(); i++){  
-            countryCode = finalWordVector.elementAt(i).getCountryCode();
+            countryCode = finalWordVector.get(i).getCountryCode();
             
             //if(!countryCode.equals("US")){
                 allCountryVector.add(countryCode);
@@ -997,15 +997,15 @@ public class Score {
         for(int j = 0; j < app.size(); j++){
             int freq = 0;
             for(int k = 0; k < allCountryVector.size(); k++){
-                String s1 = app.elementAt(j);
-                String s2 = allCountryVector.elementAt(k);
+                String s1 = app.get(j);
+                String s2 = allCountryVector.get(k);
                 if(s1.equals(s2)){
-                    String s = allCountryVector.elementAt(k);
+                    String s = allCountryVector.get(k);
                     freq++;
                 }
             }
             Word newCountry = new Word();
-            newCountry.setName(app.elementAt(j));   //Cod Nazione
+            newCountry.setName(app.get(j));   //Cod Nazione
             newCountry.setFrequency(freq);          //Frequenza del codice
             countryVector.add(newCountry);
         }       
@@ -1023,7 +1023,7 @@ public class Score {
      * @param filterWordVector : elenco delle Word che hanno superato la fase di filtro
      * @return TRUE se la geoWordName e geoZoneDocName sono vicine nel testo
      */
-    public double isNear(String geoWordName, String geoZoneDocName, Vector<Word> filterWordVector){
+    public double isNear(String geoWordName, String geoZoneDocName, ArrayList<Word> filterWordVector){
         double result = 0;
         int start = 0;
         int stop = 0;
@@ -1032,7 +1032,7 @@ public class Score {
             result = 0;
         else{
             for(int i = 0; i < filterWordVector.size(); i++){
-                String upWord = filterWordVector.elementAt(i).getName();
+                String upWord = filterWordVector.get(i).getName();
                 if(upWord.equals(geoWordName)){
                     result = 0.5;
                                                          
@@ -1051,7 +1051,7 @@ public class Score {
                     
                     //Controllo le word vicine
                     for(int j = start; j < stop; j++){
-                        if(filterWordVector.elementAt(j).getName().equals(first))
+                        if(filterWordVector.get(j).getName().equals(first))
                             if(i != j)
                                 result = 1;
                             else
@@ -1082,13 +1082,13 @@ public class Score {
     }
     
     
-    public double isNear(Vector<String> geoWordName, String geoZoneDocName, Vector<Word> filterWordVector){
+    public double isNear(ArrayList<String> geoWordName, String geoZoneDocName, ArrayList<Word> filterWordVector){
         double part = 0.0;
         double max = 0.0;
         
         if(!geoWordName.isEmpty()){
             for(int i = 0; i < geoWordName.size(); i++){
-                String div = geoWordName.elementAt(i);
+                String div = geoWordName.get(i);
 
                 part = isNear(div, geoZoneDocName, filterWordVector);
                     
@@ -1109,7 +1109,7 @@ public class Score {
      * @param geographicName : nome della zona geografica da aggiungere al vettore
      */
     public void addZones(String geoZoneName){
-        Vector<String> geographicNames = new Vector<String>();
+        ArrayList<String> geographicNames = new ArrayList<String>();
         
         //Creo un vettore String da passare al metodo equal
         for(int i = 0; i < geoAdminZones.size(); i++){
@@ -1141,7 +1141,7 @@ public class Score {
      * @param newFinalWordVector : vettore con le GeoWords
      * @return il vettore delle GeoWord con il peso aggiornato
      */
-    public Vector<GeographicWord> increaseGeoAdminZoneScore(Vector<GeographicWord> newFinalWordVector){
+    public ArrayList<GeographicWord> increaseGeoAdminZoneScore(ArrayList<GeographicWord> newFinalWordVector){
         Vector<String> app = new Vector<String>();
         boolean find = false;
         Vector<String> nameAsciinameAlternateName = new Vector<String>();
@@ -1168,7 +1168,7 @@ public class Score {
             find = false;
             for(int i = 0; i < newFinalWordVector.size(); i++){
                 if(!find){
-                    GeographicWord gw = newFinalWordVector.elementAt(i);
+                    GeographicWord gw = newFinalWordVector.get(i);
                     String name = StringOperation.convertString(gw.getZoneDocName());
                     
                     if(name.equals(gz.getName()) && gz.getFrequency() > 1){
@@ -1207,20 +1207,20 @@ public class Score {
      * @param newFinalWordVector : vettore con le GeoWord
      * @return un vettore con le GeoWord senza zone doppie
      */
-    public Vector<GeographicWord> mergeGeoWords(Vector<GeographicWord> newFinalWordVector) {
-        Vector<String> allGeoWordName = new Vector<String>();
-        Vector<GeographicWord> newResultVector = new Vector<GeographicWord>(); 
+    public ArrayList<GeographicWord> mergeGeoWords(ArrayList<GeographicWord> newFinalWordVector) {
+        ArrayList<String> allGeoWordName = new ArrayList<String>();
+        ArrayList<GeographicWord> newResultVector = new ArrayList<GeographicWord>();
         Vector<String> app = new Vector<String>(); //Vettore di appoggio
         Vector<String> equals = new Vector<String>(); //Vettore con i nomi uguali
         double max = 0.0;
         
         for(int i = 0; i < newFinalWordVector.size(); i++){
-            allGeoWordName.add(newFinalWordVector.elementAt(i).getZoneDocName());
+            allGeoWordName.add(newFinalWordVector.get(i).getZoneDocName());
         }
         
         
         for(int i = 0; i < newFinalWordVector.size(); i++){ 
-            GeographicWord gw = newFinalWordVector.elementAt(i);
+            GeographicWord gw = newFinalWordVector.get(i);
             String name = gw.getZoneDocName(); 
                   
             if(equal(name, allGeoWordName)){ //Se nel vettore in analisi c'è un elemento con lo stesso nome
@@ -1241,20 +1241,20 @@ public class Score {
      * @param newFinalWordVector : vettore con le GeoWord
      * @return un vettore con le GeoWord senza zone doppie
      */
-    public Vector<GeographicWord> mergeGeoWords2(Vector<GeographicWord> newFinalWordVector) {
-        Vector<String> allGeoWordName = new Vector<String>();
-        Vector<GeographicWord> newResultVector = new Vector<GeographicWord>(); 
+    public ArrayList<GeographicWord> mergeGeoWords2(ArrayList<GeographicWord> newFinalWordVector) {
+        ArrayList<String> allGeoWordName = new ArrayList<String>();
+        ArrayList<GeographicWord> newResultVector = new ArrayList<GeographicWord>();
         Vector<String> app = new Vector<String>(); //Vettore di appoggio
         Vector<String> equals = new Vector<String>(); //Vettore con i nomi uguali
         double max = 0.0;
         
         for(int i = 0; i < newFinalWordVector.size(); i++){
-            allGeoWordName.add(newFinalWordVector.elementAt(i).getZoneDocName());
+            allGeoWordName.add(newFinalWordVector.get(i).getZoneDocName());
         }
         
         
         for(int i = 0; i < newFinalWordVector.size(); i++){ 
-            GeographicWord gw = newFinalWordVector.elementAt(i);
+            GeographicWord gw = newFinalWordVector.get(i);
             String name = gw.getZoneDocName(); 
                   
             if(equal(name, allGeoWordName)){ //Se nel vettore in analisi c'è un elemento con lo stesso nome
@@ -1276,15 +1276,15 @@ public class Score {
      * @param geoWordVector : vettore con le GeoWord
      * @return
      */
-    private boolean haveMaxScore(GeographicWord geoWord, Vector<GeographicWord> geoWordVector){
+    private boolean haveMaxScore(GeographicWord geoWord, ArrayList<GeographicWord> geoWordVector){
         boolean result = false;
         double max = 0.0;
         
         //Cerco il peso massimo tra le geoWord con nome uguale
         for(int i = 0; i < geoWordVector.size(); i++){
-            if(geoWord.getZoneDocName().equals(geoWordVector.elementAt(i).getZoneDocName())){
-                if(geoWordVector.elementAt(i).getGeoScore() > max)
-                    max = geoWordVector.elementAt(i).getGeoScore();
+            if(geoWord.getZoneDocName().equals(geoWordVector.get(i).getZoneDocName())){
+                if(geoWordVector.get(i).getGeoScore() > max)
+                    max = geoWordVector.get(i).getGeoScore();
             }
         }
         

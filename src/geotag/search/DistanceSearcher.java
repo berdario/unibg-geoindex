@@ -9,6 +9,7 @@ import java.util.Vector;
 import geotag.analysis.GeoDistance;
 import geotag.words.GeoRefDoc;
 import geotag.words.GeographicWord;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -33,7 +34,7 @@ public class DistanceSearcher {
      * @param results : elenco di documenti
      * @param geoLocation : entità geografica da prendere come riferimento per il calcolo della distanza spaziale
      */
-    public void createDistanceRanking(Vector<GeoRefDoc> results, GeographicWord geoLocation) {
+    public void createDistanceRanking(ArrayList<GeoRefDoc> results, GeographicWord geoLocation) {
         createDistanceRanking(results, geoLocation.getLatitude(), geoLocation.getLongitude());
     }
 
@@ -44,14 +45,14 @@ public class DistanceSearcher {
      * @param latitude : latitudine dell' entità geografica da prendere come riferimento per il calcolo della distanza spaziale
      * @param longitude : longitudine dell' entità geografica da prendere come riferimento per il calcolo della distanza spaziale
      */
-    public void createDistanceRanking(Vector<GeoRefDoc> results, double latitude, double longitude ) {
+    public void createDistanceRanking(ArrayList<GeoRefDoc> results, double latitude, double longitude ) {
         
         GeoDistance deoDist = new GeoDistance();
         double distMin = 0.1; //Non posso usare 0 km come distanza minima, perciò metto 0.1 km come minimo
         
         
         for(int k = 0; k < results.size(); k++){
-            GeoRefDoc doc = results.elementAt(k);
+            GeoRefDoc doc = results.get(k);
             
             if(doc.isGeoRef()){
                 double[] dist = new double[doc.getScores().size()];
@@ -82,7 +83,7 @@ public class DistanceSearcher {
         
         
         for(int i = 0; i < results.size(); i++){
-            GeoRefDoc doc = results.elementAt(i);
+            GeoRefDoc doc = results.get(i);
             if(doc.isGeoRef()){
                 double[] distNorm = new double[doc.getScores().size()];
                 double[] refAndDistScore = new double[doc.getScores().size()];

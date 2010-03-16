@@ -125,9 +125,9 @@ public class AnalyzerUtils {
      * @return i token reperiti
      * @throws java.io.IOException
      */
-    public Vector<String> getNameTokens(Analyzer analyzer, String text) throws IOException{
+    public ArrayList<String> getNameTokens(Analyzer analyzer, String text) throws IOException{
         Token[] tokens = tokensFromAnalysis(analyzer, text);
-        Vector<String> tokensName = new Vector<String>();
+        ArrayList<String> tokensName = new ArrayList<String>();
         
         for(int i = 0; i < tokens.length; i++){
             Token token = tokens[i];

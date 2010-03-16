@@ -13,6 +13,7 @@ import java.util.Vector;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import geotag.words.GeoRefDoc;
+import java.util.ArrayList;
 
 /**
  *
@@ -37,7 +38,7 @@ public class ResultsTable {
      */
     public void createTable(JTable table, Vector<GeoRefDoc> results, int constLocationImportance){     
         //Creo il ranking dei documenti in base alla costante
-        results = GeoApplication.createRanking(results, constLocationImportance*0.01);
+        results = new Vector(GeoApplication.createRanking(new ArrayList(results), constLocationImportance*0.01));
         
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         Vector<String> row = null;

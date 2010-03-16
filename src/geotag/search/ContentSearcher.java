@@ -8,10 +8,10 @@ package geotag.search;
 import geotag.Configuration;
 import java.io.File;
 import java.io.IOException;
-import java.util.Vector;
 
 import geotag.words.GeoRefDoc;
 import geotag.words.GeographicWord;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.lucene.analysis.KeywordAnalyzer;
@@ -63,9 +63,9 @@ public class ContentSearcher {
      * @throws java.io.IOException
      * @throws org.apache.lucene.queryParser.ParseException
      */
-    public Vector<GeoRefDoc> createTextualRanking(String keyWords){
+    public ArrayList<GeoRefDoc> createTextualRanking(String keyWords){
         String text;
-        Vector<GeoRefDoc> docs = new Vector<GeoRefDoc>();
+        ArrayList<GeoRefDoc> docs = new ArrayList<GeoRefDoc>();
 
         try {
             IndexSearcher searcher = new IndexSearcher(contentIndexPath);

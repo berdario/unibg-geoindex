@@ -6,9 +6,9 @@
 package geotag.analysis;
 
 
-import java.util.Vector;
 import geotag.words.StringOperation;
 import geotag.words.Word;
+import java.util.ArrayList;
 
 /**
  * Classe che ha il compito di gestire l'intera fase di filtro:
@@ -32,16 +32,17 @@ public class Filter {
      * @param wordVector : insieme di tutti i token reperiti dal testo del documento
      * @return l'insieme di tutte le nuove Word che superano la fase di filtro
      */
-    public Vector<Word> filtering(Vector<Word> wordVector, String documentContent, boolean correct){      
-        Vector<Word> newWordVector = new Vector<Word>();
+    public ArrayList<Word> filter(ArrayList<Word> wordVector ){
+        ArrayList<Word> newWordVector = new ArrayList<Word>();
       
  
         for(int i = 0; i < wordVector.size(); i++){
-            Word analyzingWord = wordVector.elementAt(i);            
+            Word analyzingWord = wordVector.get(i);
             
-            //Se correct is TRUE correggo tutte le parole come se fossero parole da analizzare, ovvero iniziano con maiuscola
-            if(correct)
+            //Se TRUE correggo tutte le parole come se fossero parole da analizzare, ovvero iniziano con maiuscola
+            if(analyzingWord.dateline){
                 analyzingWord.setName(StringOperation.correctString(analyzingWord.getName()));
+            }
             
             // Seleziono parole che iniziano con la lettera maiuscola
             if(upperCaseControl(analyzingWord)){

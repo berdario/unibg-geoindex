@@ -7,7 +7,7 @@ package geotag.indices;
 
 import geotag.Configuration;
 
-import geotag.words.GeoRefDoc;
+import geotag.parser.DocumentWrapper;
 import java.io.File;
 import java.io.IOException;
 import org.apache.lucene.analysis.KeywordAnalyzer;
@@ -100,29 +100,29 @@ public class ContentIndexer {
      * @param geoDoc : documento contente altri valori da indicizzare (titolo, descrizione, keyword...)
      * @param fileName: nome del file in esame
      */
-    public void indexing(String docContent, GeoRefDoc geoDoc, String hash){
+    public void indexing(DocumentWrapper document, String hash){
         
         try {
 			index.setUseCompoundFile(true);
 
 
 			Document doc = new Document(); 
-			doc.add(new Field("content", docContent, Field.Store.YES, Field.Index.TOKENIZED));
+			doc.add(new Field("content", document.content, Field.Store.YES, Field.Index.TOKENIZED));
 			doc.add(new Field("id", hash, Field.Store.YES, Field.Index.UN_TOKENIZED));
-                        if (geoDoc.title != null){
-                            doc.add(new Field("title", geoDoc.title, Field.Store.YES, Field.Index.UN_TOKENIZED));
+                        if (document.title != null){
+                            doc.add(new Field("title", document.title, Field.Store.YES, Field.Index.UN_TOKENIZED));
                         }
-                        if (geoDoc.description!= null){
-                            doc.add(new Field("description", geoDoc.description, Field.Store.YES, Field.Index.UN_TOKENIZED));
+                        if (document.description!= null){
+                            doc.add(new Field("description", document.description, Field.Store.YES, Field.Index.UN_TOKENIZED));
                         }
-                        if (geoDoc.dateline != null){
-                            doc.add(new Field("dateline", geoDoc.dateline, Field.Store.YES, Field.Index.UN_TOKENIZED));
+                        if (document.dateline != null){
+                            doc.add(new Field("dateline", document.dateline, Field.Store.YES, Field.Index.UN_TOKENIZED));
                         }
-                        if (geoDoc.keywords != null){
-                            doc.add(new Field("keywords", geoDoc.keywords, Field.Store.YES, Field.Index.UN_TOKENIZED));
+                        if (document.keywords != null){
+                            doc.add(new Field("keywords", document.keywords, Field.Store.YES, Field.Index.UN_TOKENIZED));
                         }
-                        doc.add(new Field("url", geoDoc.url, Field.Store.YES, Field.Index.UN_TOKENIZED));
-                        doc.add(new Field("extension", geoDoc.extension, Field.Store.YES, Field.Index.UN_TOKENIZED));
+                        doc.add(new Field("url", document.url, Field.Store.YES, Field.Index.UN_TOKENIZED));
+                        doc.add(new Field("extension", document.extension, Field.Store.YES, Field.Index.UN_TOKENIZED));
 
 			index.addDocument(doc);
 		} catch (IOException e) {

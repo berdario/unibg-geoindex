@@ -91,7 +91,7 @@ public class GeoRefLocation {
 
         GeographicWord geoLocation = new GeographicWord();
         try {
-            Vector<GeographicWord> locationWordVector = new Vector<GeographicWord>();
+            ArrayList<GeographicWord> locationWordVector = new ArrayList<GeographicWord>();
             Vector<GeographicWord> locationWordVector2 = new Vector<GeographicWord>();
             Vector<GeographicWord> locationWordVector3 = new Vector<GeographicWord>();
             int locationId = 0;
@@ -219,14 +219,14 @@ public class GeoRefLocation {
      * @param locationWordVector : vettore con le GeoWord trovate
      * @return la GeoWord relativa alla locazione
      */
-    public GeographicWord valuation(Vector<GeographicWord> locationWordVector){
+    public GeographicWord valuation(ArrayList<GeographicWord> locationWordVector){
         GeographicWord geoLocation = new GeographicWord();
         int popMax = 0;
         
         if(locationWordVector.size() > 1){
             //Tra tutti i risultati ottenuti, ne estraggo solo uno
             for(int i = 0; i < locationWordVector.size(); i++){
-                GeographicWord gw = locationWordVector.elementAt(i);
+                GeographicWord gw = locationWordVector.get(i);
 
                 //Seleziono quello con la popolazione maggiore
                 if(gw.getPopulation() > popMax){
@@ -237,7 +237,7 @@ public class GeoRefLocation {
             
             if(popMax == 0){ //La zona non ha popolazione
                 for(int i = 0; i < locationWordVector.size(); i++){
-                    GeographicWord gw = locationWordVector.elementAt(i);
+                    GeographicWord gw = locationWordVector.get(i);
 
                     if(gw.getFeatureClass().equals("P"))
                         geoLocation = gw;
@@ -246,7 +246,7 @@ public class GeoRefLocation {
                 }
             }
         }else{
-            geoLocation = locationWordVector.elementAt(0);
+            geoLocation = locationWordVector.get(0);
         }
         
         return geoLocation;
@@ -259,7 +259,7 @@ public class GeoRefLocation {
      * @param location   luogo in base al quale filtrare
      * @return vettore di GeoRefDoc
      */
-    public Vector<GeoRefDoc> mergeLocation(Vector<GeoRefDoc> results, String location) {
+    public ArrayList<GeoRefDoc> mergeLocation(ArrayList<GeoRefDoc> results, String location) {
             GeographicWord geoLocation;
             geoLocation = getGeoLocation(location);
 
@@ -275,8 +275,8 @@ public class GeoRefLocation {
 
     }
         
-    public Vector<GeoRefDoc> innerMerge(ArrayList<Pair<String,String>> codici, Vector<GeoRefDoc> results){
-        Vector<GeoRefDoc> newresults = new Vector<GeoRefDoc>();
+    public ArrayList<GeoRefDoc> innerMerge(ArrayList<Pair<String,String>> codici, ArrayList<GeoRefDoc> results){
+        ArrayList<GeoRefDoc> newresults = new ArrayList<GeoRefDoc>();
         boolean paeselocalizzato = false;
         boolean documentotrovato = false;
         int numeroresults = 0;
@@ -311,8 +311,8 @@ public class GeoRefLocation {
                     numeroresults = 0;
                     //for(int numeroresults=0;numeroresults<results.size();numeroresults++)
                     while (numeroresults < results.size() && documentotrovato == false) {
-                        if (results.elementAt(numeroresults).id.equalsIgnoreCase(data[0])) {
-                            documentoref = results.elementAt(numeroresults);
+                        if (results.get(numeroresults).id.equalsIgnoreCase(data[0])) {
+                            documentoref = results.get(numeroresults);
                             if (paeselocalizzato == false) {
                                 try {
                                     geoLocation = getGeoLocation(Tuple.get2(codici.get(trovati)));
@@ -325,9 +325,9 @@ public class GeoRefLocation {
                             cerca = 0;
                             //for(int cerca=0;cerca<resultsmerge.size();cerca++)
                             while (cerca < newresults.size() && trova == false) {
-                                if (newresults.elementAt(cerca).id.equalsIgnoreCase(data[0])) {
-                                    newresults.elementAt(cerca).addGeoWord(geoLocation,new Double(data[2]));
-                                    newresults.elementAt(cerca).setHaveGeoRef(true);
+                                if (newresults.get(cerca).id.equalsIgnoreCase(data[0])) {
+                                    newresults.get(cerca).addGeoWord(geoLocation,new Double(data[2]));
+                                    newresults.get(cerca).setHaveGeoRef(true);
                                     trova = true;
                                 }
                                 cerca++;
