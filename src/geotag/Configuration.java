@@ -7,6 +7,7 @@ package geotag;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -35,6 +36,8 @@ public class Configuration {
 
     static File requiredFiles[];
     static String neededFiles[];
+
+    final public static int osmArrayFilePosition = 10;
 
     private static Properties defaultRecordManagerOptions = new Properties();
 
@@ -103,16 +106,7 @@ public class Configuration {
         if (!cfgpath.exists()) {
             cfgpath.mkdirs();
         }
-
-        String filenames[] = {"datiscritti.dat", "datiscritti.idx", "albero_Btree_osm.db",
-            "albero_Btree_population.db", "albero_Btree_population2.db",
-            "albero_Btree_Gazetteer.db", "albero_Btree_Intermedio.db",
-            "albero_alternatenames.db", "albero_alternatenamesId.db",
-            "albero_admin1codeascii.db", "albero_countryInfo.db",
-            "albero_featurecodes.db"};
-        String neededFiles[] = {"stopWords", "stopWords" + slash + "englishSW.txt", "admin1CodesASCII.txt",
-        "allCountries.zip", "alternateNames.txt", "iso-languagecodes.txt", "countryInfo.txt",
-        "featureCodes.txt", "geoStopwords.txt", "IT.txt", "italy.osm.bz2", "street.txt"};
+        
         try {
             System.out.println("Missing configuration file, do you want to create one? [Y/n]");
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -135,23 +129,69 @@ public class Configuration {
             cfgfile.createNewFile();
 
             PropertiesConfiguration config = new PropertiesConfiguration(cfgfile);
-            if (input.equals("")) {
-                config.setProperty("basepath", path);
-                config.setProperty("cachepath", cachepath);
-            } else {
-                config.setProperty("basepath", input);
-                if (inputCachepath.equals("")) {
-                    config.setProperty("cachepath", cachepath);
-                } else {
-                    config.setProperty("cachepath", inputCachepath);
+            
+            if (!input.equals("")) {
+                path = input;
+                if (!inputCachepath.equals("")){
+                    cachepath = inputCachepath;
                 }
             }
+
+            File basedir = new File(path);
+            File[] basedirFiles = basedir.listFiles();
+
+            ArrayList<File> maps = new ArrayList<File>();
+            for (File f : basedirFiles){
+                if (f.getName().endsWith(".osm.bz2")){
+                    maps.add(f);
+                }
+            }
+
+            File map = new File("dfjsbjsdhvkjnbsjhcajkdfnvhakfjgnvfhjb"); //mi serve un oggetto file "valido", non posso usare null
+
+            if (maps.size() == 0) {
+                System.out.println("manca un file OpenStreetMap, inserirne uno in " + path);
+                System.exit(1);
+            } else if (maps.size() > 1) {
+                input = null;
+                while (!map.exists() || !map.getName().endsWith(".osm.bz2")) {
+                    if (input != null) {
+                        System.out.println("-nome file fornito non valido-");
+                    }
+                    System.out.println("trovati i seguenti file OpenStreetMap, sceglierne uno [" + maps.get(0).getName() + "]:");
+                    input = in.readLine();
+                    if (!input.equals("")) {
+                        map = new File(path + input);
+                    } else {
+                        map = maps.get(0);
+                    }
+                }
+            } else {
+                map = maps.get(0);
+            }
+
+            String fileNames[] = {"datiscritti.dat", "datiscritti.idx", "albero_Btree_osm.db",
+            "albero_Btree_population.db", "albero_Btree_population2.db",
+            "albero_Btree_Gazetteer.db", "albero_Btree_Intermedio.db",
+            "albero_alternatenames.db", "albero_alternatenamesId.db",
+            "albero_admin1codeascii.db", "albero_countryInfo.db",
+            "albero_featurecodes.db"};
+
+            String neededFileNames[] = {"stopWords", "stopWords" + slash + "englishSW.txt", "admin1CodesASCII.txt",
+        "allCountries.zip", "alternateNames.txt", "iso-languagecodes.txt", "countryInfo.txt",
+        "featureCodes.txt", "geoStopwords.txt", "IT.txt", map.getName(), "street.txt"};
+            //Attenzione: la posizione di map.getName() dev'essere rispecchiata in osmArrayFilePosition
+
+
+            config.setProperty("basepath", path);
+            config.setProperty("cachepath", cachepath);
+
             config.setProperty("dbdirectory", "db");
             config.setProperty("luceneindex_directory", path + "index" + slash + "contentIndex" + slash);
             config.setProperty("geoindex_directory", path + "index" + slash);
             config.setProperty("requiredfiles", "coordinate.txt");
-            config.setProperty("requireddbfiles", filenames);
-            config.setProperty("neededfiles", neededFiles);
+            config.setProperty("requireddbfiles", fileNames);
+            config.setProperty("neededfiles", neededFileNames);
             config.setProperty("languagefile", "englishSW.txt");
             config.setProperty("outputdir", "output");
 

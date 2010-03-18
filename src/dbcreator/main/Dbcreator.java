@@ -144,14 +144,7 @@ public class Dbcreator {
 
 	private void caricaOSM(){
 		
-			String osmpath=path+"italy.osm.bz2"; //TODO
-			/*
-			 * prima era OBBLIGATORIO passarlo come parametro, ora è meglio: usa
-			 * autonomamente il file, ma bisognerebbe migliorarlo (se esiste un
-			 * solo osm.bz2 scegliere quello? presentare una scelta all'utente?
-			 * metterlo fisso nel file di config è troppo limitante, ma
-			 * chiederlo ogni volta non va bene comunque imho)
-			 */
+			String osmpath=path+Configuration.getNeededFiles()[Configuration.osmArrayFilePosition];
 			//long Tempo1=System.currentTimeMillis();
 			//System.out.println(path[0].substring(path[0].length()-3,path[0].length() ));
 	    	if(osmpath.substring(osmpath.lastIndexOf('.')+1, osmpath.length()).equalsIgnoreCase("bz2")){

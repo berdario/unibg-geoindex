@@ -32,6 +32,7 @@ import geotag.words.GeoRefDoc;
 import geotag.words.StringOperation;
 import geotag.words.GeoWordsOperation;
 import geotag.words.GeographicWord;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
@@ -267,10 +268,12 @@ public class GeoRefLocation {
             // più risultati bisogna allargare l'mbr.
 
             double allarga = 0;
-            
-            ArrayList<Pair<String,String>> codici = rtree.query(geoLocation.getmbr_x1() + allarga, geoLocation.getmbr_y1() + allarga, geoLocation.getmbr_x2() - allarga, geoLocation.getmbr_y2() - allarga);
-            //TODO: anche quando la geolocation non è valida (tutto a null e coordinate 0.0,0.0) ritrova migliaia di codici
 
+            if (!geoLocation.isLocation()){
+                return new ArrayList<GeoRefDoc>();
+            }
+
+            ArrayList<Pair<String,String>> codici = rtree.query(geoLocation.getmbr_x1() + allarga, geoLocation.getmbr_y1() + allarga, geoLocation.getmbr_x2() - allarga, geoLocation.getmbr_y2() - allarga);
 
             return innerMerge(codici, results);
             
@@ -287,7 +290,7 @@ public class GeoRefLocation {
         try{
         for (int trovati = 0; trovati < codici.size(); trovati++) {
 
-                //TODO estrarre questi pezzi in una funzione di query sull'indice geografico apposta
+                //TODO estrarre questo codice in una funzione di query sull'indice geografico apposta
                 String line = null;
                 FileReader fileletto = null;
                 LineNumberReader lr = null;
@@ -295,11 +298,12 @@ public class GeoRefLocation {
                 try {
                     String codice = Tuple.get1(codici.get(trovati));
                     fileletto = new FileReader(indexpath + (Integer.parseInt(codice) / 1000) + slash + codice);
-                    // file.write(nameFiles[i].getName()+"£#"+gw.getGeoScore()+"\r\n");
                     lr = new LineNumberReader(fileletto);
                     line = lr.readLine();
+                } catch (FileNotFoundException e){
+
                 } catch (IOException e) {
-                    //è normale che se ricerco un luogo non indicizzato, il file possa non esserci, per questo ignoro l'eccezione
+                    e.printStackTrace();
                 }
 
                 paeselocalizzato = false;
