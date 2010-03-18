@@ -224,7 +224,7 @@ public final class GeoApplication {
                                         		String data[];
                                         		while (line != null)
                                         		{
-                                        			data=line.split("�#");
+                                        			data=line.split("£#");
                                         			if(data[0].equalsIgnoreCase(hash))
                                         				trovato=true;
                                         			line = lr.readLine();
@@ -238,7 +238,7 @@ public final class GeoApplication {
                                                         dir.mkdir();
 
                                         		FileWriter file2=new FileWriter(dir.getAbsolutePath()+slash+codice,true);
-                                        		file2.write(hash+"�#"+gw.getGeoScore()+"�#"+scores.get(gw)+"\r\n");
+                                        		file2.write(hash+"£#"+gw.getGeoScore()+"£#"+scores.get(gw)+"\r\n");
                                         		file2.close();
                                         	}
                                         }

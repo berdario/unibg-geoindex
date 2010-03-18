@@ -114,13 +114,13 @@ public class GeoRefLocation {
             Object results = tinter.find(searchingName);
             String[] dati;
             if (results != null) {
-                dati = ((String) results).split("�#");
+                dati = ((String) results).split("£#");
                 int i = 0;
                 for (i = 0; i < dati.length; i++) {
                     Object resultsGaz = tgaz.find(dati[i]);
                     if (resultsGaz != null) {
                         //Popolo wordVectorResult3
-                        String[] datiGaz = ((String) resultsGaz).split("�#");
+                        String[] datiGaz = ((String) resultsGaz).split("£#");
                         GeographicWord newGeoWord = populateGeoWord(datiGaz);
                         
                         //newGeoWord = population(result);
@@ -295,7 +295,7 @@ public class GeoRefLocation {
                 try {
                     String codice = Tuple.get1(codici.get(trovati));
                     fileletto = new FileReader(indexpath + (Integer.parseInt(codice) / 1000) + slash + codice);
-                    // file.write(nameFiles[i].getName()+"�#"+gw.getGeoScore()+"\r\n");
+                    // file.write(nameFiles[i].getName()+"£#"+gw.getGeoScore()+"\r\n");
                     lr = new LineNumberReader(fileletto);
                     line = lr.readLine();
                 } catch (IOException e) {
@@ -307,7 +307,7 @@ public class GeoRefLocation {
 
                 while (line != null) {
                     String data[];
-                    data = line.split("�#");
+                    data = line.split("£#");
                     GeoRefDoc documentoref = new GeoRefDoc();
                     documentotrovato = false;
                     numeroresults = 0;

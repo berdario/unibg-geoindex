@@ -598,7 +598,7 @@ public class Score {
             tContryInfo=loadOrCreateBTree(mydbCountryInfo, "country", a);
             Object results=tContryInfo.find(searchingName);
             if(results!=null){
-            	dati=((String)results).split("�#");
+            	dati=((String)results).split("£#");
            
                 stringResult.add(dati[0]); //name
                 stringResult.add(dati[1]); //capital
@@ -644,7 +644,7 @@ public class Score {
             Object results=talternatenamesId.find(searchingId);
             
             if(results!=null){
-            	dati=((String)results).split("�#");
+            	dati=((String)results).split("£#");
             	int i=0;
             	for(i=0;i<dati.length;i++){
             		stringResult.add(dati[i]);// AlternateName OR Name
@@ -760,7 +760,7 @@ public class Score {
              Object results=talternatenamesId.find(geonameid);
              
              if(results!=null){
-             	dati=((String)results).split("�#");
+             	dati=((String)results).split("£#");
              	int i=0;
              	for(i=0;i<dati.length;i++){
              		stringResult.add(dati[i]);
@@ -846,7 +846,7 @@ public class Score {
                 tadmin1=loadOrCreateBTree(mydbadmin1, "admin1", a);
                 Object results=tadmin1.find(searchingName);
                 if(results!=null){
-                	dati=((String)results).split("�#");
+                	dati=((String)results).split("£#");
                
                     stringResult.add(dati[0]); //name
                     stringResult.add(dati[1]); //asciiname
@@ -888,7 +888,7 @@ public class Score {
             Object results = featureCodes.find(code);
             String[] dati;
             if (results != null) {
-                dati = ((String) results).split("�#");
+                dati = ((String) results).split("£#");
                 stringResult.add(dati[0]); //name
                 stringResult.add(dati[1]); //description
             }

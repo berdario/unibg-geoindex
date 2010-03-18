@@ -424,7 +424,7 @@ public class GeoCandidateIdentification {
             		String dati[];
             		
                     if(results!=null){
-                    	dati=((String)results).split("�#");
+                    	dati=((String)results).split("£#");
                     	int i=0;
                     	for(i=0;i<dati.length;i++){
                     		
@@ -432,7 +432,7 @@ public class GeoCandidateIdentification {
                     		if(resultsGaz!=null){
                     			//Popolo wordVectorResult3
                     			String datiGaz[];
-                    			datiGaz=((String)resultsGaz).split("�#");
+                    			datiGaz=((String)resultsGaz).split("£#");
                     			GeographicWord newGeoWord = new GeographicWord();
 
                                         newGeoWord.dateline = analyzingWord.dateline;

@@ -33,7 +33,7 @@ public class admin1codeascii {
 		while (line != null)
 		{
 			data=line.split("\t");
-			tadmin1.insert(data[0],data[1]+"�#"+data[2]+"�#"+data[3], true);
+			tadmin1.insert(data[0],data[1]+"£#"+data[2]+"£#"+data[3], true);
 			//System.out.println(data[0]+" "+data[1]+" "+data[2]+" "+data[3]);
 			line = lr.readLine();	
 		}

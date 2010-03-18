@@ -207,11 +207,11 @@ public class readgazetteer {
 							ritrovati++;
 							mbr_gazzetter=dati_rtreeprescelto.getShape().toString();
 							punti=mbr_gazzetter.split(":");
-							mbr_gazzetter=punti[1].split(" ")[0]+"�#"+punti[1].split(" ")[1]+"�#"+punti[0].split(" ")[0]+"�#"+punti[0].split(" ")[1];
+							mbr_gazzetter=punti[1].split(" ")[0]+"£#"+punti[1].split(" ")[1]+"£#"+punti[0].split(" ")[0]+"£#"+punti[0].split(" ")[1];
 						}
 						else if(prescelto!=0){
 							file_di_log1.addElement(paesename+" "+prescelto+"  "+(new String(dati_rtreeprescelto.getData()))+" "+dati_rtreeprescelto.getShape());
-							mbr_gazzetter="0�#0�#0�#0";
+							mbr_gazzetter="0£#0£#0£#0";
 						}
 						r=null;
 						vis.visitati.removeAllElements();
@@ -233,7 +233,7 @@ public class readgazetteer {
 					if(x3<x1 && x3>x2 && y3<y1 && y3>y2){
 						confermati++;
 						//mbr_gazzetter=mbr;
-						mbr_gazzetter=mbr.split(" ")[0]+"�#"+mbr.split(" ")[1]+"�#"+mbr.split(" ")[2]+"�#"+mbr.split(" ")[3];
+						mbr_gazzetter=mbr.split(" ")[0]+"£#"+mbr.split(" ")[1]+"£#"+mbr.split(" ")[2]+"£#"+mbr.split(" ")[3];
 					}
 					else{
 						// SE IL CENTROIDE NON � NELL'MBR SIGNIFICA CHE NON � QUESTO IL PAESE CERCATO 
@@ -258,11 +258,11 @@ public class readgazetteer {
 							confermati++;
 							mbr_gazzetter=dati_rtreeprescelto.getShape().toString();
 							punti=mbr_gazzetter.split(":");
-							mbr_gazzetter=punti[1].split(" ")[0]+"�#"+punti[1].split(" ")[1]+"�#"+punti[0].split(" ")[0]+"�#"+punti[0].split(" ")[1];
+							mbr_gazzetter=punti[1].split(" ")[0]+"£#"+punti[1].split(" ")[1]+"£#"+punti[0].split(" ")[0]+"£#"+punti[0].split(" ")[1];
 						}
 						else if(prescelto!=0){
 							file_di_log2.addElement(paesename+" "+parola[4]+" "+parola[5]+" "+mbr+" distanza longitudine="+(distx<0?0:distx)+" distanza latitudine="+(disty<0?0:disty));
-							mbr_gazzetter="0�#0�#0�#0";//non confermato
+							mbr_gazzetter="0£#0£#0£#0";//non confermato
 						}
 						r=null;
 						vis.visitati.removeAllElements();
@@ -327,12 +327,12 @@ public class readgazetteer {
 					if(numeroparole!=14){
 						
 						if(numeroparole==15 && parola[15].equalsIgnoreCase(""))
-							scrittura=scrittura+"0�#";
+							scrittura=scrittura+"0£#";
 						else
 							if(numeroparole==16 && parola[16].equalsIgnoreCase(""))
-								scrittura=scrittura+"0�#";
+								scrittura=scrittura+"0£#";
 							else
-								scrittura=scrittura+parola[numeroparole]+"�#";		
+								scrittura=scrittura+parola[numeroparole]+"£#";
 					}
 					else
 					{
@@ -345,15 +345,15 @@ public class readgazetteer {
 							}	
 						if(popolazione!=null)
 							if(popolazione.equalsIgnoreCase(""))
-								scrittura=scrittura+"0"+"�#";
+								scrittura=scrittura+"0"+"£#";
 							else
-								scrittura=scrittura+popolazione+"�#";
+								scrittura=scrittura+popolazione+"£#";
 						else
-							scrittura=scrittura+"0"+"�#";
+							scrittura=scrittura+"0"+"£#";
 					}
 				}
 				
-				tgaz.insert(parola[0], scrittura+mbr_gazzetter+"�#"+nazione+"�#"+regione+"�#"+multiplo, true);
+				tgaz.insert(parola[0], scrittura+mbr_gazzetter+"£#"+nazione+"£#"+regione+"£#"+multiplo, true);
 				
 				// OLTRE AL NUOVO GAZETTEER CREO ANCHE UN B-TREE INTERMEDIO 
 				
@@ -365,13 +365,13 @@ public class readgazetteer {
 				for(int volte=0;volte<2;volte++)
 				{
 					if(trovato!=null){
-						indici=trovato.split("�#");
+						indici=trovato.split("£#");
 						indice_trovato=false;
 						for(int in=0;in<indici.length;in++)
 							if(indici[in].equalsIgnoreCase(parola[0]))
 								indice_trovato=true;
 						if(indice_trovato==false)
-							tinter.insert(parola[1+volte], trovato+"�#"+parola[0], true);
+							tinter.insert(parola[1+volte], trovato+"£#"+parola[0], true);
 					}
 					else
 						tinter.insert(parola[1+volte], parola[0], true);

@@ -36,7 +36,7 @@ public class featurecodes {
 			else
 				datoextra=data[2];
 			
-			tfeaturecodes.insert(data[0],data[1]+"�#"+datoextra, true);
+			tfeaturecodes.insert(data[0],data[1]+"£#"+datoextra, true);
 			
 			line = lr.readLine();	
 		}

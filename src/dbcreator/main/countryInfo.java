@@ -39,7 +39,7 @@ public class countryInfo {
 		{
 			if (line.charAt(0)!='#'){
 				data=line.split("\t");
-				tcountryInfo.insert(data[0],data[4]+"�#"+data[5]+"�#"+data[8]+"�#"+data[16], true);
+				tcountryInfo.insert(data[0],data[4]+"£#"+data[5]+"£#"+data[8]+"£#"+data[16], true);
 				//System.out.println(data[0]+" "+data[4]+" "+data[5]+" "+data[8]+" "+data[16]);
 				
 				
