@@ -49,19 +49,18 @@ public class Main {
             if (cmd.hasOption("config")) {
                 cfgpath = cmd.getOptionValue("config");
             }
-            if (cmd.hasOption("forceinit")) {
-                Dbcreator creator = new Dbcreator(cfgpath);
-                creator.createDB(interactive);
-                /*TODO: aggiungere rimozione automatica del vecchio db
-                 jdbm conserva nelle prime righe dei db le classi usate per crearli e serializzare i dati
-                 in caso di refactoring saltano fuori dei ClassNotFoundException terribili da debuggare*/
-            }
             try {
                 if (cmd.hasOption("help")) {
                     usagehelp.printHelp(usage, options);
                 } else if (cmd.hasOption("gui")) {
                     new menu();
                     java.awt.EventQueue.invokeLater(new GeoApplicationGui());
+                } else if (cmd.hasOption("forceinit")) {
+                    Dbcreator creator = new Dbcreator(cfgpath);
+                    creator.createDB(interactive);
+                    /*TODO: aggiungere rimozione automatica del vecchio db
+                    jdbm conserva nelle prime righe dei db le classi usate per crearli e serializzare i dati
+                    in caso di refactoring saltano fuori dei ClassNotFoundException terribili da debuggare*/
                 } else {
 
                     mainApp = new GeoApplication(cfgpath);
