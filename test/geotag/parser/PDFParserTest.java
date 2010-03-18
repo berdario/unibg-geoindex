@@ -5,6 +5,7 @@
 
 package geotag.parser;
 
+import geotag.Configuration;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,10 +28,13 @@ public class PDFParserTest {
     public PDFParserTest() {
     }
 
-    /*@BeforeClass
+    @BeforeClass
     public static void setUpClass() throws Exception {
+        //TODO inserire il path del file di configurazione solo in una test suite
+        new Configuration("res/config");
     }
 
+    /*
     @AfterClass
     public static void tearDownClass() throws Exception {
     }
@@ -46,7 +50,7 @@ public class PDFParserTest {
     @Test
     public void testGetTitle() {
         try {
-            PDFParser instance = new PDFParser("/home/dario/Scrivania/prova/Professional Oracle Programming (2005).pdf");
+            PDFParser instance = new PDFParser(Configuration.getIndexedDirsNames()[0]+"Professional Oracle Programming (2005).pdf");
             String expResult = "Professional Oracle Programming";
             String result = instance.getTitle();
             assertEquals(expResult, result);

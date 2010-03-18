@@ -52,6 +52,7 @@ public class WordAnalyzer {
         words.addAll(skim(doc.keywords, 1, false));
         words.addAll(skim(doc.description, 0.5, false));
         words.addAll(skim(doc.dateline, 0.5, true));
+        words.addAll(skim(doc.content,0,false));
 
         return words;
     }

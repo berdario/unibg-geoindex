@@ -15,7 +15,6 @@ import dbcreator.ricercapernome.Serializ;
 
 public class featurecodes {
 	public static void carica(String path) throws IOException {
-		// TODO Auto-generated method stub
 		Serial a=new Serial();
 		RecordManager mydbfeaturecodes;
 		BTree tfeaturecodes=new BTree();

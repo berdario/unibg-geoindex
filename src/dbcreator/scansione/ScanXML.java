@@ -201,11 +201,9 @@ public class ScanXML implements ContentHandler {
 	    	  System.out.println("Lancio scansione");
 			parser.parse(xml);
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			e.getLocalizedMessage();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	      	        System.out.println("Finito scansione");

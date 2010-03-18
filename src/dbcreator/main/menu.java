@@ -131,7 +131,6 @@ public class menu extends JFrame {
 	}
 
 	private void carica_osmActionPerformed(ActionEvent e) {
-		// TODO add your code here
 		String paths[]=new String[1];
 		paths[0]=cartellafile.getText();
 		
@@ -157,7 +156,6 @@ public class menu extends JFrame {
      }
 
 	private void caricafileActionPerformed(ActionEvent e) {
-		// TODO add your code here
 		dialogo frame = new dialogo(this);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension frameSize2 = frame.getSize();
@@ -177,7 +175,6 @@ public class menu extends JFrame {
 	
 	
 	private void carica_gazActionPerformed(ActionEvent e) {
-		// TODO add your code here
 		try{
 			//avvio2.setpath(path);
 			
@@ -192,7 +189,6 @@ public class menu extends JFrame {
 	}
 
 	private void carica_alterActionPerformed(ActionEvent e) {
-		// TODO add your code here
 		try{
 			//avvio2.setpath(path);
 			
@@ -208,7 +204,6 @@ public class menu extends JFrame {
 
 	
 	private void caricadbActionPerformed(ActionEvent e) {
-		// TODO add your code here
 		try{
 		admin1codeascii.carica(path);
 		countryInfo.carica(path);
@@ -221,7 +216,6 @@ public class menu extends JFrame {
 	}
 
 	private void gazpopActionPerformed(ActionEvent e) {
-		// TODO add your code here
 		try{
 			//avvio2.setpath(path);
 			

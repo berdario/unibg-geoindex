@@ -11,7 +11,6 @@ import dbcreator.scansione.ScanXML;
 public class avviocaricamento_osm extends Thread{
 	String path[]=null;
 	public void run() {
-		// TODO Auto-generated method stub
         formdicaricamento frame2 = new formdicaricamento();
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension frameSize2 = frame2.getSize();

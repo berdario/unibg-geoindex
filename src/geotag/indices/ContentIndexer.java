@@ -41,8 +41,7 @@ public class ContentIndexer {
      * @throws IOException 
      */
     public ContentIndexer() {   
-		indexDir = new File(Configuration.getPath() + File.separator
-				+ "contentIndex");
+		indexDir = new File(Configuration.getLucenePath());
 
 		try {
 			index = new IndexWriter(indexDir, new StandardAnalyzer(), IndexWriter.MaxFieldLength.UNLIMITED);

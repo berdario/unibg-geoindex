@@ -23,7 +23,7 @@ public class GeoRefDoc implements Comparable {
     private double textScore = 0.0;
     private double distanceScore = 0.0;
     private HashMap<GeographicWord, Double> scores = null;//il secondo campo è il vecchio geoRefScore normalizzato
-    private boolean geoRef = false;//TODO probabilmente inutile: basta controllare se geoWord è null
+    private boolean geoRef = false;//TODO probabilmente inutile: basta controllare se scores è null
     private Double sortScore = 0.0;
     public String title, description, dateline, keywords, htmlSnippet, url, extension;
     

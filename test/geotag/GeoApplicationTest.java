@@ -6,14 +6,11 @@
 package geotag;
 
 import geotag.words.GeoRefDoc;
-import geotag.words.GeographicWord;
-import geotag.words.Word;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Vector;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
+import java.util.ArrayList;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -24,51 +21,41 @@ import static org.junit.Assert.*;
 
 /**
  *
- * @author dario
+ * @author Dario Bertini
  */
 public class GeoApplicationTest {
 
     String basepath,dbpath,slash,cachepath,indexpath;
-    final String configfile="/home/dario/.config/geosearch/config";
+    final String configfile = "res/config";
     File index;
     private final ByteArrayOutputStream outContent=new ByteArrayOutputStream();
+
+    GeoApplication app;
 
 
     @Before
     public void setUp() throws Exception {
         System.setOut(new PrintStream(outContent));
-        slash = File.separator;
+
         File cfgfile = new File(configfile);
-        assertTrue("il file di configurazione non esiste!", cfgfile.exists());
+        
+        assertTrue("il file di configurazione " + cfgfile.getCanonicalPath() + " non esiste!", cfgfile.exists());
+        //TODO inserire il path del file di configurazione solo in una test suite
 
-        PropertiesConfiguration config;
-        try {
-            config = new PropertiesConfiguration(configfile);
-            basepath = config.getString("basepath");
-            dbpath = basepath + config.getString("dbdirectory") + slash;
-            cachepath = config.getString("cachepath");
-            String[] indexDirs = config.getStringArray("indexdirs");
-            boolean testDirExists = false;
-            for (String i : indexDirs) {
-                if (i.equals("/home/dario/Scrivania/prova")) {
-                    testDirExists = true;
-                    break;
-                }
-            }
-            assertTrue("nel file di configurazione non è specificata la directory dei file di prova da indicizzare!", testDirExists);
+        app = new GeoApplication(configfile);
 
+        String indexDir = Configuration.getIndexedDirsNames()[0];
+        assertTrue("nel file di configurazione non è specificata la directory dei file di prova da indicizzare!", (new File(indexDir)).exists());
 
-        } catch (ConfigurationException e) {
-            e.printStackTrace();
-        }
+        indexpath = Configuration.getLucenePath();
 
-        //TODO trovare un modo per selezionare il path giusto (e magari leggere il file di configurazione) senza replicare il codice
-        indexpath = basepath + "contentIndex";
-        assertTrue("non c'è la directory dei dati del programma!", (new File(basepath)).exists());
+        //assertTrue("non c'è la directory dei dati del programma!", (new File(basepath)).exists());
 
         index = new File(indexpath);
         if (index.exists()) {
-            FileUtils.moveDirectory(index, new File(indexpath + "2"));
+            if (!FileUtils.deleteQuietly(index)){
+                fail("Impossibile eliminare l'indice di prova preesistente");
+            }
         }
 
         testCreateIndex();
@@ -77,24 +64,19 @@ public class GeoApplicationTest {
     @After
     public void tearDown() throws Exception {
         System.setOut(null);
-        File oldindex = new File(indexpath + "2");
-        if (oldindex.exists()) {
-            FileUtils.deleteDirectory(index);
-            FileUtils.moveDirectory(oldindex, index);
-        }
     }
 
     @Test
-    public void testCreateIndex() {
-        GeoApplication app = new GeoApplication(configfile);
-        app.updateIndexConfig(null);
+    public void testCreateIndex() throws IOException {
+        
         app.createIndex();
-        assertTrue("L'indice non è stato creato!", index.exists());
+        assertTrue("L'indice " + index.getCanonicalPath() + " non è stato creato!", index.exists());
     }
 
     @Test
     public void testQuery() {
 
+        fail("test obsoleto, considerare di eliminarlo");
         /*TODO: fixare, questi for/println non hanno molto senso
          *prima veniva fatto il test sul main, l'idea sarebbe quella di portare il test sul metodo search interno
          *(come testsearch), a meno che testare il main() non abbia effettivamente un'utilità
@@ -134,19 +116,30 @@ public class GeoApplicationTest {
      */
     @Test
     public void testSearch(){
-        GeoApplication app=new GeoApplication(configfile);
-        Vector<GeoRefDoc> result=app.search("kcnjsdakhvb","nkadjnzlbd");
+        ArrayList<GeoRefDoc> result=app.search("kcnjsdakhvb","nkadjnzlbd");
         assertTrue("trovati risultati inaspettati!", result.size()==0);
-        result=app.search("SQL","Milano");
+
+        result=app.search("SQL","Torino");
         boolean flag=false;
         for (GeoRefDoc doc : result){
-            if (doc.id.equals("7cb05c1a428df429a30e549c3a45d30d")){
+            if (doc.url.endsWith("10.1.1.95.5729-8.pdf")){
                 flag=true;
                 break;
             }
         }
         assertTrue("risultato atteso non trovato!", flag);
+
         result=app.search("kcnjsdakhvb","nkadjnzlbd");
         assertTrue("trovati risultati inaspettati!", result.size()==0);
+
+        result=app.search("SQL","Milano");
+        flag=false;
+        for (GeoRefDoc doc : result){
+            if (doc.url.endsWith("10.1.1.95.5729-8.pdf")){
+                flag=true;
+                break;
+            }
+        }
+        assertTrue("risultato atteso non trovato!", flag);
     }
 }

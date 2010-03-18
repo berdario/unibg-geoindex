@@ -30,7 +30,6 @@ public class formdicaricamento extends JFrame {
 	}
 
 	private void thisWindowClosing(WindowEvent e) {
-		// TODO add your code here
 	}
 
 	

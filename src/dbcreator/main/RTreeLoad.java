@@ -45,7 +45,6 @@ public class RTreeLoad
 		try {
 			mydbn = RecordManagerFactory.createRecordManager(dbpath+"albero_Btree_osm", Configuration.getDefaultRecordManagerOptions());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -216,7 +215,6 @@ public class RTreeLoad
 			try {
 				Dbcreator.listOpenFiles();
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		}

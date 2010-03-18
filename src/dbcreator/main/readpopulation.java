@@ -37,8 +37,7 @@ public class readpopulation {
             this.frame=frame;
 	}
 	public void carica(String path) throws IOException {
-		// TODO Auto-generated method stub
-	// TODO Auto-generated method stub		
+		
 		LineNumberReader lr = null;
 		//File file =new File(path+"allCountries.txt");
 		File file =new File(path+"IT.txt");//il file dev'essere scompattato manualmente, TODO sistemare?

@@ -29,6 +29,8 @@ public class Configuration {
     private static String indexpath = null;
     private static String outputpath = null;
 
+    private static String[] indexDirPaths = null;
+
     private ArrayList<File> indexDirs;
 
     static File requiredFiles[];
@@ -53,10 +55,17 @@ public class Configuration {
         
         try {
             config = new PropertiesConfiguration(configfile);
+
+            //TODO usare dei valori di default quando è assente la chiave...
+            //in tal modo sarà possibile avere un file di configurazione per i test
+            //che non debba venire adattato ad ogni ambiente di sviluppo
+
             path = config.getString("basepath");
             dbpath = path + config.getString("dbdirectory") + slash;
             cachepath = config.getString("cachepath");
             language = path + "stopWords" + slash + config.getString("languagefile");
+
+            indexDirPaths = config.getStringArray("indexdirs");
 
             String[] requiredFileNames = config.getStringArray("requiredfiles");
             String[] requiredDbFileNames = config.getStringArray("requireddbfiles");
@@ -225,7 +234,6 @@ public class Configuration {
 
     private ArrayList<File> getIndexedDirs() {
 
-        String[] indexDirPaths = config.getStringArray("indexdirs");
         ArrayList<File> innerIndexDirs = new ArrayList<File>();
 
         for (String indf : indexDirPaths) {
@@ -268,6 +276,10 @@ public class Configuration {
 
     public static String getIndexPath(){
         return indexpath;
+    }
+
+    public static String[] getIndexedDirsNames(){
+        return indexDirPaths;
     }
 
     public static String getOutputPath(){

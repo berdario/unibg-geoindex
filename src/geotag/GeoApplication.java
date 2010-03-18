@@ -234,12 +234,14 @@ public final class GeoApplication {
                                         	}
                                         	
                                         	if(trovato==false){
-                                        		FileWriter file2=new FileWriter(indexpath+(Integer.parseInt(codice)/1000)+slash+codice,true);
+                                                        File dir = new File(indexpath+(Integer.parseInt(codice)/1000));
+                                                        dir.mkdir();
+
+                                        		FileWriter file2=new FileWriter(dir.getAbsolutePath()+slash+codice,true);
                                         		file2.write(hash+"�#"+gw.getGeoScore()+"�#"+scores.get(gw)+"\r\n");
                                         		file2.close();
                                         	}
                                         }
-                                        System.out.println();
                                     }
                                     //FINE MODIFICA
                                     
@@ -463,7 +465,11 @@ public final class GeoApplication {
 
             DistanceSearcher distanceSorter = new DistanceSearcher();
             distanceSorter.createDistanceRanking(results, grLoc.getGeoLocation(location));
-            
+
+            if (results.size() == 0){
+                return results;
+            }
+
             cachedUnsortedResults.put(Tuple.from(keyWords, location), results);
         }
 

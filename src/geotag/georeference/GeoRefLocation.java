@@ -269,6 +269,8 @@ public class GeoRefLocation {
             double allarga = 0;
             
             ArrayList<Pair<String,String>> codici = rtree.query(geoLocation.getmbr_x1() + allarga, geoLocation.getmbr_y1() + allarga, geoLocation.getmbr_x2() - allarga, geoLocation.getmbr_y2() - allarga);
+            //TODO: anche quando la geolocation non è valida (tutto a null e coordinate 0.0,0.0) ritrova migliaia di codici
+
 
             return innerMerge(codici, results);
             
@@ -297,7 +299,7 @@ public class GeoRefLocation {
                     lr = new LineNumberReader(fileletto);
                     line = lr.readLine();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    //è normale che se ricerco un luogo non indicizzato, il file possa non esserci, per questo ignoro l'eccezione
                 }
 
                 paeselocalizzato = false;

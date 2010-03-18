@@ -231,7 +231,6 @@ public class Dbcreator {
 			countryInfo.carica(path);
 			featurecodes.carica(path);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

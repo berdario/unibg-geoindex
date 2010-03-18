@@ -885,11 +885,9 @@ public class GeoApplicationGui extends javax.swing.JFrame implements Runnable{
 	    }//GEN-LAST:event_gMapsButtonMouseClicked
 
 	    private void searchButton1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_searchButton1MousePressed
-	        // TODO add your handling code here:
 	    }//GEN-LAST:event_searchButton1MousePressed
 
 	    private void searchButton2MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_searchButton2MousePressed
-	        // TODO add your handling code here:
 	    }//GEN-LAST:event_searchButton2MousePressed
 
 	    private void resultsTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_resultsTableMouseClicked
@@ -938,7 +936,6 @@ public class GeoApplicationGui extends javax.swing.JFrame implements Runnable{
 	    }//GEN-LAST:event_locationTextFieldFocusGained
 
 	    private void openDocButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_openDocButtonMousePressed
-	        // TODO add your handling code here:
 	    }//GEN-LAST:event_openDocButtonMousePressed
 
 	    private void openDocButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_openDocButtonMouseClicked

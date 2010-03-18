@@ -99,14 +99,14 @@ public class GeoCandidateIdentification {
             
             if(i < filterWordVector.size())
                 analyzingWord = filterWordVector.get(i); //parola da analizzare
-                       
+
             pos = analyzingWord.getPosition();
-            
+
             //Eseguo l'analisi della Word ed aggiorno il vettore dei risultati parziali
             wordVectorResult = geoAnalysis(analyzingWord, allWordVector, pos);
  
             //Aggiorno il vettore contenente TUTTE le GeoWord trovate nel documento
-            finalVectorResult = update(finalVectorResult, wordVectorResult);            
+            finalVectorResult.addAll(wordVectorResult);
         }
         
                              
@@ -389,12 +389,11 @@ public class GeoCandidateIdentification {
         ArrayList<GeographicWord> wordVectorResult2 = new ArrayList<GeographicWord>();
         String searchingName = StringOperation.convertString(analyzingWord.getName());
         Word existingWord = analyzingWord;
-        int wordPos = analyzingWord.getPosition()-1;
+        int wordPos = analyzingWord.getPosition();
         int shift1 = 4;
         int shift2 = 4;
         double val = 0.0;
-        
-        
+
         try {
             /* 
              Per ogni parola maiuscola creo una parola composta da max 4 termini
@@ -404,7 +403,7 @@ public class GeoCandidateIdentification {
              Quando trovo un match nel DB mi fermo e restituisco il risultato.
             */
         	//DO While finisce al primo gruppo di termini trovati !wordVectorResult.isEmpty()
-            while(wordVectorResult.isEmpty() && shift1 > 0 && shift2 > 0){
+            while(wordVectorResult.isEmpty() && shift1 >= 0 && shift2 >= 0){
                 //Creo Word formata da + termini            
                 analyzingWord = composeMultiRightWord(analyzingWord, allWordVector, wordPos, shift1);
                 
@@ -421,7 +420,7 @@ public class GeoCandidateIdentification {
                     //OUTPUT : ID
                     //Istanzio i 2 BTREE
                     
-                    Object results=tinter.find(searchingName);
+                    Object results=tinter.find(searchingName.trim());
             		String dati[];
             		
                     if(results!=null){
@@ -637,57 +636,44 @@ public class GeoCandidateIdentification {
      * @param numTerm : numero di termini da considerare
      * @return la parola composta
      */
-    public Word composeMultiRightWord(Word word, ArrayList<Word> allWordVector, int wordPos, int numTerm){
-        Word newWord = new Word();
-        int posGap = 0;       
-        int posiz = wordPos+numTerm;
-        int tot = allWordVector.get(allWordVector.size()-1).getPosition();
-        
-        //CONTROLLO: wordPos+numTerm deve essere <= di allWordVector.elementAt(allWordVector.size-1).getPosition()
-        if( (wordPos+numTerm) <= allWordVector.get(allWordVector.size()-1).getPosition()){
-            for(int i = wordPos; i < wordPos+numTerm; i++){
-                if(i == wordPos)
-                    newWord.setName(allWordVector.get(i).getName());
-                else{
-                    newWord.setName(newWord.getName() + " " + allWordVector.get(i).getName());
-                    newWord.setPosGap(allWordVector.get(i).getPosition());
-                }
-            }
-        }
-        
-        newWord.setPosition(wordPos);
-        newWord.setFrequency(1);                 
-        
-        return newWord;    
-    }
-     
-   
-    
-    
-    
+    public Word composeMultiRightWord(Word word, ArrayList<Word> allWordVector, int position, int shift) {
+        Word composedWord = new Word();
+        composedWord.setPosition(position);
+        composedWord.setFrequency(1);
+        composedWord.setName("");
 
-    /**
-     * Metodo che riceve in input il vettore con i vecchi valori e i nuovi risultati,
-     * ai vecchi valori aggiunge i nuovi e restituisce un nuovo vettore con i risultati finali
-     * @param oldVector : vettore con i vechci valori
-     * @param wordVectorResult : vettore con i nuovi valori
-     * @return l'insieme dei vecchi e nuovi valori
-     */
-    public ArrayList<GeographicWord> update(ArrayList<GeographicWord> oldVector, ArrayList<GeographicWord> wordVectorResult){
-        for(int i = 0; i < wordVectorResult.size(); i++){
-            oldVector.add(wordVectorResult.get(i));
+        int finalPosition = position + shift;
+        int maxPosition = allWordVector.get(allWordVector.size() - 1).getPosition();
+
+        Word currentWord = allWordVector.get(position);
+
+        //CONTROLLO: finalPosition deve essere <= di maxPosition
+        if ( finalPosition > maxPosition ) {
+            finalPosition = maxPosition;
+        }
+
+        //TODO: sarebbe molto meglio usare un hashmap con la posizione come chiave
+
+        //parto da position invece che da zero per risparmiare step
+        for (int i = position; currentWord.getPosition() <= finalPosition; i++) {
+
+            if (currentWord.getPosition() == position) {
+                composedWord.setName(composedWord.getName() + currentWord.getName() + " ");
+                composedWord.setPosGap(position);
+                
+                if (position == finalPosition){
+                    break;
+                }
+
+                position++;
+            }
+
+            currentWord = allWordVector.get(i + 1);
         }
         
-        if(oldVector.size() == 0)
-            oldVector = wordVectorResult;
-        
-        return oldVector;
+        return composedWord;
     }
     
-    
-    
-       
-        
     /**
      * Cerco nel vettore dei risultati se la Word è formata da più termini,
      * in questo caso setto il campo "multi" a true

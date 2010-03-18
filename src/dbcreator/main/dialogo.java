@@ -26,7 +26,6 @@ public class dialogo extends JFrame {
 	}
 
 	private void fileChooser1ActionPerformed(ActionEvent e) {
-		// TODO add your code here
 		//Object source=e.getSource();
 		//if (source==apri) this.apri();
 	    if(e.getActionCommand()=="ApproveSelection"){

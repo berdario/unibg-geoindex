@@ -38,7 +38,6 @@ public class read_alternateNames {
             this.frame=frame;
 	}
 	public void carica(String path) throws IOException {
-		// TODO Auto-generated method stub
 		
 		LineNumberReader lr = null;
 		File file =new File(path+"alternateNames.txt");//il file dev'essere scompattato manualmente, TODO sistemare?
