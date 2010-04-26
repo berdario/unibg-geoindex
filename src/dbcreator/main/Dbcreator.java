@@ -127,17 +127,25 @@ public class Dbcreator {
 			}
 
 		} else {
+                        System.out.println("Caricamento OSM");
 			caricaOSM();
 
+                        System.out.println("Fine caricamento OSM, inizio caricamento Rtree");
 			CaricaRtree();
 
+                        System.out.println("Fine caricamento Rtree, inizio caricamento dati popolazione");
 			CaricaPopulation();
 
+                        System.out.println("Fine caricamento dati popolazione, inizio caricamento Gazetteer");
 			CaricaGazetteer();
 
+                        System.out.println("Fine caricamento Gsazetteer, inizio caricamento Alternames");
 			CaricaAlternames();
 
+                        System.out.println("Fine caricamento Alternames, inizio caricamento dati restanti");
 			caricaAltro();
+
+                        System.out.println("Caricamento terminato con successo");
 		}
 		
 	}	
