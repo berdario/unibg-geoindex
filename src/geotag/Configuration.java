@@ -7,7 +7,6 @@ package geotag;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -15,6 +14,7 @@ import java.util.Properties;
 import jdbm.RecordManagerOptions;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -151,6 +151,7 @@ public class Configuration {
 
             if (maps.size() == 0) {
                 System.out.println("manca un file OpenStreetMap, inserirne uno in " + path);
+                FileUtils.forceDelete(cfgfile);
                 System.exit(1);
             } else if (maps.size() > 1) {
                 input = null;
