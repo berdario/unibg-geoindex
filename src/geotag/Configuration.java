@@ -45,10 +45,11 @@ public class Configuration {
 
     public Configuration(String configfile) {
         slash = System.getProperty("file.separator");
+        String[] defaultPaths = getDefaultPaths();
 
         if (configfile == null) {
             // set default config path
-            configfile = getDefaultPaths()[0];
+            configfile = defaultPaths[0];
         }
 
         File cfgfile = new File(configfile);
@@ -59,13 +60,9 @@ public class Configuration {
         try {
             config = new PropertiesConfiguration(configfile);
 
-            //TODO usare dei valori di default quando è assente la chiave...
-            //in tal modo sarà possibile avere un file di configurazione per i test
-            //che non debba venire adattato ad ogni ambiente di sviluppo
-
-            path = config.getString("basepath");
+            path = config.getString("basepath",defaultPaths[1]);
             dbpath = path + config.getString("dbdirectory") + slash;
-            cachepath = config.getString("cachepath");
+            cachepath = config.getString("cachepath",defaultPaths[3]);
             language = path + "stopWords" + slash + config.getString("languagefile");
 
             indexDirPaths = config.getStringArray("indexdirs");

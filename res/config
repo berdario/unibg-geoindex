@@ -1,5 +1,3 @@
-basepath = \/home\/dario\/.local\/share\/geosearch\/
-cachepath = \/home\/dario\/.cache\/geosearch\/
 dbdirectory = db
 luceneindex_directory = res\/index\/contentIndex\/
 geoindex_directory = res\/index\/
