@@ -12,9 +12,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -25,16 +23,17 @@ import static org.junit.Assert.*;
  */
 public class GeoApplicationTest {
 
-    String basepath,dbpath,slash,cachepath,indexpath;
-    final String configfile = "res/config";
-    File index;
-    private final ByteArrayOutputStream outContent=new ByteArrayOutputStream();
+    String basepath,dbpath,slash,cachepath;
+    static String indexpath;
+    final static String configfile = "res/config";
+    static File index;
+    private final static ByteArrayOutputStream outContent=new ByteArrayOutputStream();
 
-    GeoApplication app;
+    static GeoApplication app;
 
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUp() throws Exception {
         System.setOut(new PrintStream(outContent));
 
         File cfgfile = new File(configfile);
@@ -58,11 +57,10 @@ public class GeoApplicationTest {
             }
         }
 
-        testCreateIndex();
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterClass
+    public static void tearDown() throws Exception {
         System.setOut(null);
     }
 
