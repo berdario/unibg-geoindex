@@ -4,7 +4,6 @@ import dbcreator.main.Dbcreator;
 import dbcreator.main.menu;
 import geotag.words.GeoRefDoc;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -58,8 +57,7 @@ public class Main {
                 } else if (cmd.hasOption("forceinit")) {
                     Dbcreator creator = new Dbcreator(cfgpath);
                     creator.createDB(interactive);
-                    /*TODO: aggiungere rimozione automatica del vecchio db
-                    jdbm conserva nelle prime righe dei db le classi usate per crearli e serializzare i dati
+                    /* Attenzione: jdbm conserva nelle prime righe dei db le classi usate per crearli e serializzare i dati
                     in caso di refactoring saltano fuori dei ClassNotFoundException terribili da debuggare*/
                 } else {
 

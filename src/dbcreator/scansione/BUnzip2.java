@@ -197,50 +197,9 @@ public class BUnzip2 extends Thread {
    
 	if (frm!=null){
         frm.put(100);
-        //eliminafile(f.getParent());
         frm.finito();
 	}
 
-    }
-    public void eliminafile(String p){
-     File fs1=new File(p+"node.db");
-     fs1.delete();
-   	 File fs2=new File(p+"node.lg");
-   	 fs2.delete();
-   	 
-   	 File fs3=new File(p+"way.db");
-   	 fs3.delete();
-   	 File fs4=new File(p+"way.lg");
-   	 fs4.delete();
-   	File fs5=new File(p+"Way-LonMax.lg");
-	fs5.delete();
-	File fs6=new File(p+"Way-LonMax.db");
-	fs6.delete();
-	
-	File fs7=new File(p+"Way-LonMin.lg");
-	fs7.delete();
-	File fs8=new File(p+"Way-LonMin.db");
-	fs8.delete();
-	
-	File fs9=new File(p+"Way-LatMin.lg");
-	fs9.delete();
-	File fs10=new File(p+"Way-LatMin.db");
-	fs10.delete();
-	
-	File fs11=new File(p+"Way-LatMax.lg");
-	fs11.delete();
-	File fs12=new File(p+"Way-LatMax.db");
-	fs12.delete();
-   	 
-	File fs13=new File(p+"node-lon.lg");
-	fs13.delete();
-	File fs14=new File(p+"node-lon.db");
-	fs14.delete();
-	File fs15=new File(p+"node-lat.lg");
-	fs15.delete();
-	File fs16=new File(p+"node-lat.db");
-	fs16.delete(); 
-   	 
     }
     
     public void start(){
