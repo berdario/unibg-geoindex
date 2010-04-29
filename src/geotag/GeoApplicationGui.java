@@ -1100,7 +1100,6 @@ public class GeoApplicationGui extends javax.swing.JFrame implements Runnable{
     private javax.swing.JSplitPane visualizationSplitPane;
     // End of variables declaration//GEN-END:variables
 
-    @Override
     public void run() {
         setVisible(true);
     }

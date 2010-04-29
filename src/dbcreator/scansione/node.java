@@ -40,19 +40,20 @@ public class node {
     	File fs22=new File(relativePath+"/node-lat.db");
     	fs22.delete();
 	}
-	public node(String relativePath){
-		Serial a=new Serial();
-		try
- 	{	
-		this.relativePath=relativePath;
-		Properties options = Configuration.getDefaultRecordManagerOptions();
-                options.put( RecordManagerOptions.CACHE_SIZE, "1000" );
 
-		mydb = RecordManagerFactory.createRecordManager(relativePath+"/node", options);
- 		tn = ScanXML.loadOrCreateBTree(mydb, "Node", a );
- 	}
- 	catch (java.io.IOException e)
- 	{	}
+	public node(String relativePath) {
+		Serial a = new Serial();
+		try {
+			this.relativePath = relativePath;
+			Properties options = Configuration.getDefaultRecordManagerOptions();
+			options.put(RecordManagerOptions.CACHE_SIZE, "1000");
+
+			mydb = RecordManagerFactory.createRecordManager(relativePath
+					+ "/node", options);
+			tn = ScanXML.loadOrCreateBTree(mydb, "Node", a);
+		} catch (java.io.IOException e) {
+			e.printStackTrace();
+		}
 // 	try
 // 	{	
 //		Properties props = new Properties();

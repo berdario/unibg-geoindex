@@ -37,3 +37,12 @@ nbproject/coverage.properties
 nbproject/genfiles.properties
 nbproject/private
 nbproject/project.xml
+.settings
+build/.DS_Store
+dist/.DS_Store
+res/.DS_Store
+test/.DS_Store
+res/index/.DS_Store
+test/dbcreator/.DS_Store
+.DS_Store
+test/geotag/.DS_Store

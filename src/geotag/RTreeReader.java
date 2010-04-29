@@ -77,15 +77,13 @@ class MyVisitor implements IVisitor
 	public int m_indexIO = 0;
 	public int m_leafIO = 0;
 	public Vector<IData> visited=new Vector<IData>();
-    @Override
-	public void visitNode(final INode n)
+    public void visitNode(final INode n)
 	{
 		if (n.isLeaf()) m_leafIO++;
 		else m_indexIO++;
 	}
 
-    @Override
-	public void visitData(final IData d)
+    public void visitData(final IData d)
 	{   /*
 		String a=new String(d.getData());
 		System.out.print(d.getIdentifier());
