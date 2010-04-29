@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
 
 
 import dbcreator.scansione.BUnzip2;
@@ -102,45 +103,55 @@ public class Dbcreator {
 			break;
 		}
 	}
-	
-	public void createDB(boolean interactive){
-            checkNeededFiles();
-		if (interactive){
-			BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
-			String[] step={"OSM","Rtree","dati popolazione","gazetteer","alternames","file restanti"};
-			String input=null;
-			for (int i=0;i<step.length;i++){
-				while (true) {
-					System.out.println("caricare " + step[i] + "? [Y/n]");
-					try {
-						input = in.readLine();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					if (input.equalsIgnoreCase("y") || input.equals("")) {
-						createDB(i);
-						break;
-					} else if (input.equalsIgnoreCase("n")) {
-						break;
-					}
-				}
-			}
 
-		} else {
-			caricaOSM();
+    public void createDB(boolean interactive) {
+        checkNeededFiles();
+        if (interactive) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+            String[] step = {"OSM", "Rtree", "dati popolazione", "gazetteer", "alternames", "file restanti"};
+            String input = null;
+            for (int i = 0; i < step.length; i++) {
+                while (true) {
+                    System.out.println("caricare " + step[i] + "? [Y/n]");
+                    try {
+                        input = in.readLine();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    if (input.equalsIgnoreCase("y") || input.equals("")) {
+                        createDB(i);
+                        break;
+                    } else if (input.equalsIgnoreCase("n")) {
+                        break;
+                    }
+                }
+            }
 
-			CaricaRtree();
+        } else {
+            System.out.println("Caricamento OSM");
+            caricaOSM();
 
-			CaricaPopulation();
+            System.out.println("Fine caricamento OSM, inizio caricamento Rtree");
+            CaricaRtree();
 
-			CaricaGazetteer();
+            System.out.println("Fine caricamento Rtree, inizio caricamento dati popolazione");
+            CaricaPopulation();
 
-			CaricaAlternames();
+            System.out.println("Fine caricamento dati popolazione, inizio caricamento Gazetteer");
+            CaricaGazetteer();
 
-			caricaAltro();
-		}
-		
-	}	
+            System.out.println("Fine caricamento Gsazetteer, inizio caricamento Alternames");
+            CaricaAlternames();
+
+            System.out.println("Fine caricamento Alternames, inizio caricamento dati restanti e ripulitura file temporanei");
+            caricaAltro();
+
+        }
+        cleanUp();
+
+        System.out.println("Caricamento terminato con successo");
+
+    }
 
 	private void caricaOSM(){
 		
@@ -227,6 +238,17 @@ public class Dbcreator {
 			e.printStackTrace();
 		}
 	}
+
+        private void cleanUp(){
+            boolean outcome = FileUtils.deleteQuietly(new File(path+"node.db"));
+            outcome &= FileUtils.deleteQuietly(new File(path+"node.lg"));
+            outcome &= FileUtils.deleteQuietly(new File(path+"Way.db"));
+            outcome &= FileUtils.deleteQuietly(new File(path+"Way.lg"));
+
+            if (!outcome){
+                System.err.println("errore nell'eliminare i file non necessari");
+            }
+        }
 	
 	public static int pid() {
 		String id = ManagementFactory.getRuntimeMXBean().getName();
