@@ -156,7 +156,11 @@ public class Configuration {
                     if (input != null) {
                         System.out.println("-nome file fornito non valido-");
                     }
-                    System.out.println("trovati i seguenti file OpenStreetMap, sceglierne uno [" + maps.get(0).getName() + "]:");
+                    System.out.println("trovati i seguenti file OpenStreetMap:");
+                    for (File m : maps){
+                        System.out.println(m.getName());
+                    }
+                    System.out.println("\nsceglierne uno [" + maps.get(0).getName() + "]:");
                     input = in.readLine();
                     if (!input.equals("")) {
                         map = new File(path + input);
